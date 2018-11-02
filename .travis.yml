@@ -11,3 +11,5 @@ before_install:
   
 install:
   - R -e 'devtools::install_deps(dep = T, type = "source")'
+
+warnings_are_errors: false
