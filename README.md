@@ -1,6 +1,6 @@
 
-**cytoRSuite**
---------------
+**cytoRSuite** [![Travis build status](https://travis-ci.org/DillonHammill/cytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/cytoRSuite) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/cytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/cytoRSuite)
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
 
