@@ -114,8 +114,8 @@ extractGate <- function(parent, alias, gtfile){
 #' @return an object of calss \code{GatingSet} with edited gate applied, as well
 #'   as gatingTemplate file with editied gate saved.
 #'
-#' @importFrom flowWorkspace getData getTransformations GatingSet
-#' @importFrom flowCore parameters
+#' @importFrom flowWorkspace getData getTransformations GatingSet getGate setGate
+#' @importFrom flowCore parameters filterList
 #' @importFrom openCyto gatingTemplate
 #' @importFrom data.table as.data.table fread fwrite :=
 #' @importFrom methods as
@@ -136,19 +136,19 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     if(class(overlay) == "character"){
       
       overlay <- lapply(overlay, function(overlay){getData(gs, overlay)})
-        
+      
       overlay <- lapply(overlay, function(x){
-          
+        
         fr <- as(x,"flowFrame")
-          
+        
         if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
-            
+          
           fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
-            
+          
         }
-          
+        
         return(fr)
-          
+        
       })
       
     }
@@ -190,8 +190,8 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     
   }
   
-  # Extract gate(s) from gtfile gating_args
-  gates <- extractGate(gtfile = gtfile, parent = parent, alias = alias)  
+  # Extract gate(s) from GatingSet
+  gates <- filters(lapply(alias, function(x){getGate(gs[[1]],x)}))
   
   # If no type supplied determine using getGateType
   if(is.null(type)){
@@ -238,7 +238,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   
   # Find and Edit gatingTemplate entries - each alias and gate separate
   gt <- data.table::fread(gtfile)
-
+  
   for(i in 1:length(alias)){
     
     gt[parent == prnt & alias == als[i], gating_args := .argDeparser(list(gate = new[[i]]))]
@@ -247,27 +247,21 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   
   data.table::fwrite(gt, gtfile)
   
-  # Apply entire gatingTemplate to GatingSet
-  gt <- gatingTemplate(gtfile)
-  rt <- suppressMessages(getData(gs, "root"))   # Remove all nodes - extract root
-  
-  # Inverse transformations
-  if(length(getTransformations(gs[[1]])) != 0){
+  # Apply new gate(s) to GatingSet
+  gate.lst <- lapply(new, function(x){
     
-    inv <- transformList(names(trnsfrmrLst), lapply(trnsfrmrLst, `[[`, "inverse"))
-    rt <- transform(rt,inv)
+    gts <- rep(list(x), length(gs))
+    names(gts) <- sampleNames(gs)
+    filterList(gts)
     
-  }
+  })
   
-  gs <- suppressMessages(GatingSet(rt))         # Add root to GatingSet
-  
-  if(trans == TRUE){
+  lapply(seq_along(alias), function(x){
     
-    gs <- transform(gs, trnsfrmrLst)
+    suppressMessages(setGate(gs, alias[x], gate.lst[[x]]))
+    suppressMessages(recompute(gs, alias[x]))
     
-  }
-  
-  suppressMessages(gating(gt,gs))
+  })
   
   assign(deparse(substitute(x)), gs, envir=globalenv())
   
