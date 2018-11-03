@@ -2,13 +2,18 @@
 
 language: R
 
+os:
+  - linux
+  - OSX
+
 sudo: false
 
 cache: packages
 
 before_install:
   - R -e 'install.packages("devtools")'
-  
+  - tlmgr install index
+
 install:
   - R -e 'devtools::install_deps(dep = T, type = "source")'
 
