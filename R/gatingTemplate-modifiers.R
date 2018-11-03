@@ -235,12 +235,14 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   # Re-name parent and pop to be data.table friendly
   prnt <- parent
   als <- alias
+  gtmd <- "manualGate"
   
   # Find and Edit gatingTemplate entries - each alias and gate separate
   gt <- data.table::fread(gtfile)
   
   for(i in 1:length(alias)){
     
+    gt[parent == prnt & alias == als[i], gating_method := gtmd]
     gt[parent == prnt & alias == als[i], gating_args := .argDeparser(list(gate = new[[i]]))]
     
   }
