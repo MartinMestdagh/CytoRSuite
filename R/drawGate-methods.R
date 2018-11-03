@@ -509,6 +509,6 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, select = N
     
   }
   
-  return(pops)
+  invisible(pops)
   
 })
