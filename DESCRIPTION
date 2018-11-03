@@ -6,9 +6,10 @@ Author: Dillon Hammill <Dillon.Hammill@anu.edu.au>
 Maintainer: Dillon Hammill <Dillon.Hammill@anu.edu.au>
 Description: Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
 Depends: 
-   openCyto(>= 1.19.1),
-   flowWorkspace (>= 3.28.2),
-   flowCore (>= 1.46.2)
+  R (>= 2.10),
+  openCyto(>= 1.19.1),
+  flowWorkspace (>= 3.28.2),
+  flowCore (>= 1.46.2)
 Imports: 
   data.table(>= 1.11.4),
   BiocGenerics,
