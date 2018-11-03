@@ -114,7 +114,7 @@ extractGate <- function(parent, alias, gtfile){
 #' @return an object of calss \code{GatingSet} with edited gate applied, as well
 #'   as gatingTemplate file with editied gate saved.
 #'
-#' @importFrom flowWorkspace getData getTransformations GatingSet getGate setGate
+#' @importFrom flowWorkspace getData getTransformations GatingSet getGate setGate recompute
 #' @importFrom flowCore parameters filterList
 #' @importFrom openCyto gatingTemplate
 #' @importFrom data.table as.data.table fread fwrite :=
@@ -254,7 +254,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     
     gts <- rep(list(x), length(gs))
     names(gts) <- sampleNames(gs)
-    filterList(gts)
+    flowCore::filterList(gts)
     
   })
   
