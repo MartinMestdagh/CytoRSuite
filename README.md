@@ -131,7 +131,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
 
 Here we will gate a population "Single Cells" within the parent population "Cells" in FSC-A and FSC-H channels using a polygon gate. Notice how this gate is added as a row to the gatingTemplate csv file.
 
@@ -145,7 +145,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
 
 Here we will gate a population "Live Cells" within the parent population "Single Cells" in Alexa Fluor 405-A and Alexa Fluor 430-A channels using a polygon gate. Notice how the axes have been transformed appropriately on the plot as these are fluorescent channels which were transformed with the logicle transformation earlier.
 
@@ -159,7 +159,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-14-1.png" style="display: block; margin: auto;" />
 
 Next we will demonstrate the ability to draw multiple gates (of the same or different type) onto the same plot. Here we will gate both the "Dendritic Cells" and "T Cells" populations within the parent population "Live Cells" in APC-Cy7-A and PE-A channels using a rectangle and an ellipsoid gate. To gate multiple populations on the same plot simply suppply multiple names to the alias argument wrapped inside c(). Notice how we can use the marker names rather than the channel names if they are supplied in the original flowSet.
 
@@ -173,7 +173,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-16-1.png" style="display: block; margin: auto;" />
 
 Here we will gate both the "CD4 T Cells" and "CD8 T Cells" populations within the parent population "T Cells" in Alexa Fluor 700-A and Alexa Fluor 488-A channels using a rectangle gates. Notice how gate\_type can also be abbreviated as the first letter of the gate type (e.g. "r" for "rectangle"). Be sure to draw the gates in the order that they are listed in the alias argument.
 
@@ -187,7 +187,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-18-1.png" style="display: block; margin: auto;" />
 
 Here we will demonstrate the use of a different gate\_type called "interval" which gates populations based on a defined lower and upper bound. Interval gates are traditionally used in a single dimension, but interval gates are fully supported for 2-dimensional plots on either the x or y axis. Notice how we have indicated which axis we would like to gate using the axis argument. In this case we will be gating the population based on a lower and upper y axis bounds. We will also add some contour lines to aid in gating.
 
@@ -203,7 +203,7 @@ drawGate(gs,
          contours = 15)
 ```
 
-<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-20-1.png" style="display: block; margin: auto;" />
 
 To finish things off lets make a similar gate on the CD8 T Cells as well. This time we will overlay the unactivated control in black and use it to determine where gate should be drawn.
 
@@ -222,7 +222,7 @@ drawGate(gs,
          overlay = CD8)
 ```
 
-<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-22-1.png" style="display: block; margin: auto;" />
 
 ### Apply Saved Gates to Samples (Future Analyses)
 
@@ -291,13 +291,13 @@ getNodes(gs)
 plotCytoGates(gs[[2]])
 ```
 
-<img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />
+![](man/figures/README-unnamed-chunk-25-1.png)
 
 ``` r
 # plotCytoGates Back-Gating Support
 plotCytoGates(gs[[2]], overlay = c("CD4 T Cells","CD8 T Cells","Dendritic Cells"), col = "black")
 ```
 
-<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
+![](man/figures/README-unnamed-chunk-26-1.png)
 
 Dillon Hammill, BMedSci (Hons) <br /> Ph.D. Scholar <br /> The Parish Group Cancer & Vascular Biology <br /> ACRF Department of Cancer Biology and Therapeutics <br /> The John Curtin School of Medical Research <br /> ANU College of Medicine, Biology and the Environment <br /> The Australian National University <br /> Acton ACT 2601 <br /> <Dillon.Hammill@anu.edu.au>
