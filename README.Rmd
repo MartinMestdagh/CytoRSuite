@@ -147,7 +147,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6}
+```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6, fig.align = "center"}
 plotCyto(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"), merge = TRUE, xlim = c(0,270000), ylim = c(0,270000), cex.labels = 1, alpha.labels = 0.7)
 ```
 
@@ -163,7 +163,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6}
+```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6, fig.align = "center"}
 plotCyto(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A","FSC-H"), merge = TRUE, xlim = c(0,270000), ylim = c(0,270000), cex.labels = 1, alpha.labels = 0.7)
 ```
 
@@ -179,7 +179,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6}
+```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6, fig.align = "center"}
 plotCyto(gs, parent = "Single Cells", alias = "Live Cells", channels = c("Alexa Fluor 405-A","Alexa Fluor 430-A"), merge = TRUE, xlim = c(-0.5,4.5), ylim = c(-0.5,4.5), cex.labels = 1, alpha.labels = 0.7)
 ```
 
@@ -195,7 +195,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6}
+```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6, fig.align = "center"}
 plotCyto(gs, parent = "Live Cells", alias = c("Dendritic Cells","T Cells"), channels = c("CD11c","Va2"), merge = TRUE, xlim = c(-0.5,4.5), ylim = c(-0.5,4.5), cex.labels = 1, alpha.labels = 0.7)
 ```
 
@@ -211,7 +211,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6}
+```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6, fig.align = "center"}
 plotCyto(gs, parent = "T Cells", alias = c("CD4 T Cells", "CD8 T Cells"), channels = c("CD4","CD8"), merge = TRUE, xlim = c(-0.5,4.5), ylim = c(-0.5,4.5), cex.labels = 1, alpha.labels = 0.7)
 ```
 
@@ -229,7 +229,7 @@ drawGate(gs,
          contours = 15)
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6}
+```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6, fig.align = "center"}
 plotCyto(gs, parent = "CD4 T Cells", alias = "CD69+ CD4 T Cells", channels = c("CD44","CD69"), merge = TRUE, xlim = c(-0.5,4.5), ylim = c(-0.5,4.5), cex.labels = 1, alpha.labels = 0.7, contours = 15)
 ```
 
@@ -250,7 +250,7 @@ drawGate(gs,
          overlay = CD8)
 ```
 
-```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6}
+```{r, echo = FALSE, eval = TRUE, fig.height = 6, fig.width = 6, fig.align = "center"}
 CD8 <- getData(gs, "CD8 T Cells")[[1]]
 
 plotCyto(gs, parent = "CD8 T Cells", alias = "CD69+ CD8 T Cells", channels = c("CD44","CD69"), overlay = CD8,  merge = TRUE, xlim = c(-0.5,4.5), ylim = c(-0.5,4.5), cex.labels = 1, alpha.labels = 0.7)
