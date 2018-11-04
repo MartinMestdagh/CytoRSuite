@@ -1,4 +1,5 @@
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 **cytoRSuite** [![Travis build status](https://travis-ci.org/DillonHammill/cytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/cytoRSuite) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/cytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/cytoRSuite)
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -130,7 +131,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
 Here we will gate a population "Single Cells" within the parent population "Cells" in FSC-A and FSC-H channels using a polygon gate. Notice how this gate is added as a row to the gatingTemplate csv file.
 
@@ -144,7 +145,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 Here we will gate a population "Live Cells" within the parent population "Single Cells" in Alexa Fluor 405-A and Alexa Fluor 430-A channels using a polygon gate. Notice how the axes have been transformed appropriately on the plot as these are fluorescent channels which were transformed with the logicle transformation earlier.
 
@@ -158,7 +159,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-14-1.png)
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
 
 Next we will demonstrate the ability to draw multiple gates (of the same or different type) onto the same plot. Here we will gate both the "Dendritic Cells" and "T Cells" populations within the parent population "Live Cells" in APC-Cy7-A and PE-A channels using a rectangle and an ellipsoid gate. To gate multiple populations on the same plot simply suppply multiple names to the alias argument wrapped inside c(). Notice how we can use the marker names rather than the channel names if they are supplied in the original flowSet.
 
@@ -172,7 +173,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-16-1.png)
+<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
 
 Here we will gate both the "CD4 T Cells" and "CD8 T Cells" populations within the parent population "T Cells" in Alexa Fluor 700-A and Alexa Fluor 488-A channels using a rectangle gates. Notice how gate\_type can also be abbreviated as the first letter of the gate type (e.g. "r" for "rectangle"). Be sure to draw the gates in the order that they are listed in the alias argument.
 
@@ -186,7 +187,7 @@ drawGate(gs,
          gtfile = "Example-gatingTemplate.csv")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-18-1.png)
+<img src="man/figures/README-unnamed-chunk-18-1.png" width="100%" />
 
 Here we will demonstrate the use of a different gate\_type called "interval" which gates populations based on a defined lower and upper bound. Interval gates are traditionally used in a single dimension, but interval gates are fully supported for 2-dimensional plots on either the x or y axis. Notice how we have indicated which axis we would like to gate using the axis argument. In this case we will be gating the population based on a lower and upper y axis bounds. We will also add some contour lines to aid in gating.
 
@@ -202,7 +203,7 @@ drawGate(gs,
          contours = 15)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-20-1.png)
+<img src="man/figures/README-unnamed-chunk-20-1.png" width="100%" />
 
 To finish things off lets make a similar gate on the CD8 T Cells as well. This time we will overlay the unactivated control in black and use it to determine where gate should be drawn.
 
@@ -221,7 +222,7 @@ drawGate(gs,
          overlay = CD8)
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-22-1.png)
+<img src="man/figures/README-unnamed-chunk-22-1.png" width="100%" />
 
 ### Apply Saved Gates to Samples (Future Analyses)
 
@@ -230,11 +231,7 @@ Since all the drawn gates have been saved to the gatingTemplate, next time you v
 ``` r
 # Add samples to GatingSet
 gs <- GatingSet(fs)
-```
 
-    ## ..done!
-
-``` r
 # Apply compensation
 gs <- compensate(gs, spill)
 
@@ -243,70 +240,64 @@ gs <- transform(gs, trans)
 
 # Apply saved gates to GatingSet
 gt <- gatingTemplate("Example-gatingTemplate.csv")
-```
-
-    ## Adding population:Cells
-    ## Adding population:Single Cells
-    ## Adding population:Live Cells
-    ## Adding population:Dendritic Cells
-    ## Adding population:T Cells
-    ## Adding population:CD4 T Cells
-    ## Adding population:CD8 T Cells
-    ## Adding population:CD69+ CD4 T Cells
-    ## Adding population:CD69+ CD8 T Cells
-
-``` r
 gating(gt, gs)
-```
 
-    ## Gating for 'Cells'
-    ## done.
-    ## Gating for 'Single Cells'
-    ## done.
-    ## Gating for 'Live Cells'
-    ## done.
-    ## Gating for 'T Cells'
-    ## done.
-    ## Gating for 'CD8 T Cells'
-    ## done.
-    ## Gating for 'CD69+ CD8 T Cells'
-    ## done.
-    ## Gating for 'CD4 T Cells'
-    ## done.
-    ## Gating for 'CD69+ CD4 T Cells'
-    ## done.
-    ## Gating for 'Dendritic Cells'
-    ## done.
-    ## finished.
-
-``` r
 # Check gates have been applied
 getNodes(gs)
 ```
 
-    ##  [1] "root"                                                                
-    ##  [2] "/Cells"                                                              
-    ##  [3] "/Cells/Single Cells"                                                 
-    ##  [4] "/Cells/Single Cells/Live Cells"                                      
-    ##  [5] "/Cells/Single Cells/Live Cells/T Cells"                              
-    ##  [6] "/Cells/Single Cells/Live Cells/T Cells/CD8 T Cells"                  
-    ##  [7] "/Cells/Single Cells/Live Cells/T Cells/CD8 T Cells/CD69+ CD8 T Cells"
-    ##  [8] "/Cells/Single Cells/Live Cells/T Cells/CD4 T Cells"                  
-    ##  [9] "/Cells/Single Cells/Live Cells/T Cells/CD4 T Cells/CD69+ CD4 T Cells"
-    ## [10] "/Cells/Single Cells/Live Cells/Dendritic Cells"
+    #> ..done!
+    #> Adding population:Cells
+    #> Adding population:Single Cells
+    #> Adding population:Live Cells
+    #> Adding population:Dendritic Cells
+    #> Adding population:T Cells
+    #> Adding population:CD4 T Cells
+    #> Adding population:CD8 T Cells
+    #> Adding population:CD69+ CD4 T Cells
+    #> Adding population:CD69+ CD8 T Cells
+    #> Gating for 'Cells'
+    #> done.
+    #> Gating for 'Single Cells'
+    #> done.
+    #> Gating for 'Live Cells'
+    #> done.
+    #> Gating for 'T Cells'
+    #> done.
+    #> Gating for 'CD8 T Cells'
+    #> done.
+    #> Gating for 'CD69+ CD8 T Cells'
+    #> done.
+    #> Gating for 'CD4 T Cells'
+    #> done.
+    #> Gating for 'CD69+ CD4 T Cells'
+    #> done.
+    #> Gating for 'Dendritic Cells'
+    #> done.
+    #> finished.
+    #>  [1] "root"                                                                
+    #>  [2] "/Cells"                                                              
+    #>  [3] "/Cells/Single Cells"                                                 
+    #>  [4] "/Cells/Single Cells/Live Cells"                                      
+    #>  [5] "/Cells/Single Cells/Live Cells/T Cells"                              
+    #>  [6] "/Cells/Single Cells/Live Cells/T Cells/CD8 T Cells"                  
+    #>  [7] "/Cells/Single Cells/Live Cells/T Cells/CD8 T Cells/CD69+ CD8 T Cells"
+    #>  [8] "/Cells/Single Cells/Live Cells/T Cells/CD4 T Cells"                  
+    #>  [9] "/Cells/Single Cells/Live Cells/T Cells/CD4 T Cells/CD69+ CD4 T Cells"
+    #> [10] "/Cells/Single Cells/Live Cells/Dendritic Cells"
 
 ``` r
 # Plot gating strategy using plotCytoGates
 plotCytoGates(gs[[2]])
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-24-1.png)
+<img src="man/figures/README-unnamed-chunk-25-1.png" width="100%" />
 
 ``` r
 # plotCytoGates Back-Gating Support
 plotCytoGates(gs[[2]], overlay = c("CD4 T Cells","CD8 T Cells","Dendritic Cells"), col = "black")
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-25-1.png)
+<img src="man/figures/README-unnamed-chunk-26-1.png" width="100%" />
 
 Dillon Hammill, BMedSci (Hons) <br /> Ph.D. Scholar <br /> The Parish Group Cancer & Vascular Biology <br /> ACRF Department of Cancer Biology and Therapeutics <br /> The John Curtin School of Medical Research <br /> ANU College of Medicine, Biology and the Environment <br /> The Australian National University <br /> Acton ACT 2601 <br /> <Dillon.Hammill@anu.edu.au>

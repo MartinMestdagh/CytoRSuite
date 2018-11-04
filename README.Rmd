@@ -2,6 +2,17 @@
 output: github_document
 ---
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
 ## **cytoRSuite** [![Travis build status](https://travis-ci.org/DillonHammill/cytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/cytoRSuite) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/cytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/cytoRSuite)
 
 Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
@@ -119,7 +130,8 @@ gs <- transform(gs, trans)
 **drawGate** is a convenient wrapper for the gating functions in cytoRSuite which constructs drawn gates, applies the gate(s) directly to the **GatingSet** and saves the gate(s) to an **openCyto gatingTemplate** csv file for future use. **drawGate** will pool the data and plot it in an interactive plotting window which will allow the user to draw gates around the population of interest. The type of gate is determined by the **gate_type** argument. Below we will demonstrate some of the key features of drawGate, for details on specific gate types please refer to the gating functions vignette.
 
 ```{r, echo = FALSE, eval = TRUE, message = FALSE}
-gt <- gatingTemplate("Example-gatingTemplate.csv")
+gt <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
+gt <- gatingTemplate(gt)
 gating(gt,gs)
 ```
 
@@ -249,7 +261,7 @@ plotCyto(gs, parent = "CD8 T Cells", alias = "CD69+ CD8 T Cells", channels = c("
 
 Since all the drawn gates have been saved to the gatingTemplate, next time you visit the data there is no need to re-draw gates! Simply apply the existing gatingTemplate to the data and you are right where you left off!
 
-```{r, fig.keep = 'none'}
+```{r, eval = FALSE, fig.keep = 'none'}
 # Add samples to GatingSet
 gs <- GatingSet(fs)
 
@@ -261,6 +273,25 @@ gs <- transform(gs, trans)
 
 # Apply saved gates to GatingSet
 gt <- gatingTemplate("Example-gatingTemplate.csv")
+gating(gt, gs)
+
+# Check gates have been applied
+getNodes(gs)
+```
+
+```{r, eval = TRUE,, echo = FALSE, fig.keep = 'none'}
+# Add samples to GatingSet
+gs <- GatingSet(fs)
+
+# Apply compensation
+gs <- compensate(gs, spill)
+
+# Transform fluorescent channels
+gs <- transform(gs, trans)
+
+# Apply saved gates to GatingSet
+gt <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
+gt <- gatingTemplate(gt)
 gating(gt, gs)
 
 # Check gates have been applied

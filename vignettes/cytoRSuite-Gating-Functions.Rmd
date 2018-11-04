@@ -1,10 +1,10 @@
 ---
-title: "cytoSuite: Gating Functions"
+title: "cytoRSuite: Gating Functions"
 author: "Dillon Hammill"
-date: "27 August 2018"
+date: "4 November 2018"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{cytoSuite Gating Functions}
+  %\VignetteIndexEntry{cytoRSuite: Gating Functions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 1. **Introduction**
 
-**cytoSuite** provides a variety of useful gating functions to interactively draw gates around populations for the analysis of flow cytometry data. Here we will demonstarte the use of these functions to return **flowCore** gate objects for downstream analyses. Below we outline the gating functions currently supported by **cytoSuite** as well as their required inputs:
+**cytoRSuite** provides a variety of useful gating functions to interactively draw gates around populations for the analysis of flow cytometry data. Here we will demonstarte the use of these functions to return **flowCore** gate objects for downstream analyses. Below we outline the gating functions currently supported by **cytoRSuite** as well as their required inputs:
 
 * **drawPolygon** - constructs **polygonGate(s)** based on selection of a minimum of 3 points. Polygon gates are sealed by right clicking and selecting "stop".
 * **drawRectangle** - constructs **rectangleGate(s)** based on selection of 2 diagonal points defining the limits of the gate.
@@ -30,29 +30,29 @@ knitr::opts_chunk$set(echo = TRUE)
 
 All gating functions have the same format with minor variations as detailed below:
 
-draw___(fr, channels, alias = NULL, subSample = 250000, plot = TRUE, labs = TRUE,...)
+draw___(fr, channels, alias = NULL, subSample = 250000, plot = TRUE, labels = TRUE,...)
 
-* ___ type of gate to be drawn, possible options include Rectangle, Polygon, Threshold, Boundary, Interval, Ellipse, Quadrants and Web.
+* **type** of gate to be drawn, possible options include Rectangle, Polygon, Threshold, Boundary, Interval, Ellipse, Quadrants and Web.
 * **fr** an object of class flowFrame to be gated. For objects of classes **flowSet** and **GatingSet** refer to the more versatile **drawGate** function.
 * **channels** vector indicating the name(s) of the channel(s) to be used for gating.
 * **alias** vector indicating the names of the population(s) to be gated. The length of the alias argument dictates the number of gates to construct. This argument **MUST** be supplied in order to construct the gates.
 * **axis** used by drawInterval to specify whether the "x" or "y" axis should be used when constructing 2-D interval gates.
 * **subSample** numeric indicating the number of events to display when plotting, set to 250000 events by default. If the supplied value is greater than the total number of events in the flowFrame, all events will be plotted.
 * **plot** logical indicating whether a plot should be constructed, set to **TRUE** by default. This argument can be used to turn off plotting when mixing gating functions as detailed later.
-* **labs** logical indicating whether population names and statistics should be added to the plot after gating, set to **TRUE** by default.
+* **labels** logical indicating whether population names and statistics should be added to the plot after gating, set to **TRUE** by default.
 * **...** additional arguments passed to plotDens for plotting.
 
 ## 2. **Demonstration of Gating Functions**
 
-To demonstrate the use of cytoSuite's gating functions we will use the "Activation" flowSet shipped with **cytoSuite**. This flowSet contains two samples from an *in vitro* activation assay where activated dendritic cells pulsed with ovalbumin were used to stimulate OT-I (CD8+) and OT-II (CD4+) transgenic T cells. For more information about this flowSet see **?Activation**.
+To demonstrate the use of cytoRSuite's gating functions we will use the "Activation" flowSet shipped with **cytoRSuite**. This flowSet contains two samples from an *in vitro* activation assay where activated dendritic cells pulsed with ovalbumin were used to stimulate OT-I (CD8+) and OT-II (CD4+) transgenic T cells. For more information about this flowSet see **?Activation**.
 
 ## 2.1 Prepare Samples for Gating
 ```{r, eval = FALSE}
 # Load in required packages
-library(cytoSuite)
+library(cytoRSuite)
 
 # Load in Activation dataset
-data("Activation", package = "cytoSuite")
+data("Activation", package = "cytoRSuite")
 
 # Extract spillover matrix from flowFrame description slot - see ?computeSpillover ?editSpillover
 spill <- Activation[[1]]@description$SPILL
@@ -73,7 +73,11 @@ fr <- as(fs, "flowFrame")
 # Gate cells based on FSC-A & SSC-A - close gate by right click & "stop" - save gate to gts
 gts <- drawPolygon(fr, alias = "Cells", channels = c("FSC-A","SSC-A"))
 ```
-![](drawPolygon.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawPolygon.gif')
+```
+
 ```{r echo = TRUE, eval = FALSE}
 # gts is a filters list containing the constructed gates that can be easily applied to samples
 Cells <- Subset(fr, gts[[1]])
@@ -84,7 +88,11 @@ Cells <- Subset(fr, gts[[1]])
 # Gate single cells by selecting 2 diagonal points of rectangle - add gate to gts
 gts <- drawRectangle(Cells, alias = "Single Cells", channels = c("SSC-W","SSC-H"))
 ```
-![](drawRectangle.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawRectangle.gif')
+```
+
 ```{r echo = TRUE, eval = FALSE}
 # gts is a filters list containing the constructed gates that can be easily applied to samples
 Singlets <- Subset(Cells, gts[[1]])
@@ -96,14 +104,21 @@ Singlets <- Subset(Cells, gts[[1]])
 # Gate live cells as Hoechst- Alexa Fluor 405-A - gate not applied to demonstrate 2-D boundary gates
 drawBoundary(Singlets, alias = "Cells", channels = "Alexa Fluor 405-A")
 ```
-![](drawBoundary1D.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawBoundary1D.gif')
+```
 
 ### 2-Dimensional Boundary Gate
 ```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate live cells using 2-D boundary gate
 gts <- drawBoundary(Singlets, alias = "Live Cells", channels = c("Alexa Fluor 405-A","Alexa Fluor 430-A"))
 ```
-![](drawBoundary2D.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawBoundary2D.gif')
+```
+
 ```{r echo = TRUE, eval = FALSE}
 # gts is a filters list containing the constructed gates that can be easily applied to samples
 Live <- Subset(Singlets, gts[[1]])
@@ -115,14 +130,21 @@ Live <- Subset(Singlets, gts[[1]])
 # Gate T cells as Va2-PE+ - gate not applied to demonstrate 2-D threshold gates
 drawThreshold(Live, alias = "T Cells", channels = "PE-A")
 ```
-![](drawThreshold1D.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawThreshold1D.gif')
+```
 
 ### 2-Dimensional Threshold Gate
 ```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate T cells as Va2-PE+ using 2-D threshold gate
 gts <- drawThreshold(Live, alias = "T Cells", channels = c("APC-Cy7-A","PE-A"))
 ```
-![](drawThreshold2D.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawThreshold2D.gif')
+```
+
 ```{r echo = TRUE, eval = FALSE}
 # gts is a filters list containing the constructed gates that can be easily applied to samples
 Va2 <- Subset(Live, gts[[1]])
@@ -134,14 +156,21 @@ Va2 <- Subset(Live, gts[[1]])
 # Gate Dendritic cells CD11c+ APC cy7 using 1D interval gate - gate not applied to demonstrate 2D interval gates
 drawInterval(Live, alias = "Dendritic Cells", channels = "APC-Cy7-A")
 ```
-![](drawInterval1D.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawInterval1D.gif')
+```
 
 ### 2-Dimensional Interval Gate
 ```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
 # Gate dendritic cells CD11c+ APC Cy7 using 2D interval gate
 gts <- drawInterval(Live, alias = "Dendritic Cells", channels = c("Qdot 605-A", "APC-Cy7-A"), axis = "y")
 ```
-![](drawInterval2D.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawInterval2D.gif')
+```
+
 ```{r echo = TRUE, eval = FALSE}
 # gts is a filters list containing the constructed gates that can be easily applied to samples
 DC <- Subset(Live, gts[[1]])
@@ -152,7 +181,10 @@ DC <- Subset(Live, gts[[1]])
 # Gate CD8+ T cells using ellipsoid gate - gate not applied to demonstrate quadrant and web gates
 drawEllipse(Va2, alias = "CD8 T Cells", channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"))
 ```
-![](drawEllipse.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawEllipse.gif')
+```
 
 ## drawQuadrants
 ```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
@@ -160,7 +192,10 @@ drawEllipse(Va2, alias = "CD8 T Cells", channels = c("Alexa Fluor 700-A","Alexa 
 # Quadrant gates are named from bottom left anticlockwise to top left
 drawQuadrants(Va2, alias = c("CD4- CD8-","CD4+ CD8-","CD4+ CD8+","CD4+ CD8+"), channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"))
 ```
-![](drawQuadrants.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawQuadrants.gif')
+```
 
 ## drawWeb
 ```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
@@ -168,7 +203,11 @@ drawQuadrants(Va2, alias = c("CD4- CD8-","CD4+ CD8-","CD4+ CD8+","CD4+ CD8+"), c
 # Gates are named from bottom left anticlockwise to top left
 gts <- drawWeb(Va2, alias = c("DN","CD4 T Cells","CD8 T Cells"), channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"))
 ```
-![](drawWeb.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/drawWeb.gif')
+```
+
 ```{r echo = TRUE, eval = FALSE}
 # gts is a filters list containing the constructed gates that can be easily applied to samples
 CD4 <- Subset(Va2, gts[[2]])
@@ -181,7 +220,10 @@ CD8 <- Subset(Va2, gts[[3]])
 # Number of gates is determined based on how many populations are specified in "alias"
 drawRectangle(Va2, alias = c("CD4 T Cells","CD8 T Cells"), channels = c("Alexa Fluor 700-A", "Alexa Fluor 488-A"))
 ```
-![](MultiGates.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/MultiGates.gif')
+```
 
 ## Mixed Gates
 ```{r echo = TRUE, eval = FALSE, fig.keep = 'none'}
@@ -190,11 +232,18 @@ drawRectangle(Va2, alias = c("CD4 T Cells","CD8 T Cells"), channels = c("Alexa F
 drawRectangle(Va2, alias = "CD4 T Cells", channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"))
 drawEllipse(Va2, alias = "CD8 T Cells", channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"), plot = FALSE)
 ```
-![](MixedGates.gif)
+
+```{r echo=FALSE, out.width='85%', out.height='85%',fig.align="center"}
+knitr::include_graphics('Gating-functions/MixedGates.gif')
+```
+
+## 3. More information
+
+For more information refer to the cytoRSuite vignettes and help documentation for each of the described functions.
 
 Dillon Hammill, BMedSci (Hons)
 <br /> Ph.D. Scholar
-<br /> The Parish Group – Cancer & Vascular Biology
+<br /> The Parish Group Cancer & Vascular Biology
 <br /> ACRF Department of Cancer Biology and Therapeutics
 <br /> The John Curtin School of Medical Research
 <br /> ANU College of Medicine, Biology and the Environment
