@@ -16,6 +16,13 @@ selected channel associated with the supplied flowFrame.
 \description{
 Select Fluorescent Channel for Compensation Controls - flowFrame Method
 }
+\examples{
+\dontrun{
+fs <- Activation
+selectChannels(fs[[1]])
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

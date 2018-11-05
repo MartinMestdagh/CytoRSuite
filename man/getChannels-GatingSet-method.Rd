@@ -16,6 +16,14 @@ vector of fluorescent channels.
 \description{
 Extract Fluorescent Channels - GatingSet Method
 }
+\examples{
+\dontrun{
+fs <- Activation
+gs <- GatingSet(fs)
+getChannels(gs)
+}
+
+}
 \seealso{
 \code{\link{getChannels,flowFrame-method}}
 

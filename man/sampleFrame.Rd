@@ -19,6 +19,13 @@ nrow(fr)}, size is set to \code{nrow(fr)}.}
 \description{
 Sample a flowFrame
 }
+\examples{
+\dontrun{
+fs <- Activation
+sampleFrame(fs[[1]], 50000)
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

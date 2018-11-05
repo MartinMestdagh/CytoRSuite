@@ -18,6 +18,13 @@ vector of channels in order of flowSet.
 \description{
 Select Fluorescent Channel for Compensation Controls - flowSet Method
 }
+\examples{
+\dontrun{
+fs <- Activation
+selectChannels(fs)
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

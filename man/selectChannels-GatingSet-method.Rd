@@ -18,6 +18,14 @@ vector of channels in order of GatingSet.
 \description{
 Select Fluorescent Channel for Compensation Controls - GatingSet Method
 }
+\examples{
+\dontrun{
+fs <- Activation
+gs <- GatingSet(fs)
+selectChannels(gs)
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

@@ -16,6 +16,13 @@ vector of fluorescent channels.
 \description{
 Extract Fluorescent Channels - flowSet Method
 }
+\examples{
+\dontrun{
+fs <- Activation
+getChannels(fs)
+}
+
+}
 \seealso{
 \code{\link{getChannels,flowFrame-method}}
 

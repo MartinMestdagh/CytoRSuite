@@ -20,6 +20,14 @@ an object of calss \code{\link[flowCore:flowSet-class]{flowSet}}
 \description{
 Select flowFrames Based on pData
 }
+\examples{
+\dontrun{
+fs <- Activation
+pData(fs)$Treatment <- c("Control","Activated")
+frs <- selectFrames(fs, c("Treatment","Activated"))
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

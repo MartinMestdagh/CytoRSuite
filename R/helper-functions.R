@@ -26,6 +26,12 @@ setGeneric(name="getChannels",
 #' @seealso \code{\link{getChannels,flowSet-method}}
 #' @seealso \code{\link{getChannels,GatingSet-method}}
 #' 
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' getChannels(fs[[1]])
+#' }
+#' 
 #' @export
 setMethod(getChannels, signature = "flowFrame", definition = function(x){
   
@@ -44,6 +50,12 @@ setMethod(getChannels, signature = "flowFrame", definition = function(x){
 #' @seealso \code{\link{getChannels,flowFrame-method}}
 #' @seealso \code{\link{getChannels,GatingSet-method}}
 #' 
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' getChannels(fs)
+#' }
+#' 
 #' @export
 setMethod(getChannels, signature = "flowSet", definition = function(x){
   
@@ -61,6 +73,13 @@ setMethod(getChannels, signature = "flowSet", definition = function(x){
 #' 
 #' @seealso \code{\link{getChannels,flowFrame-method}}
 #' @seealso \code{\link{getChannels,flowSet-method}}
+#' 
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' gs <- GatingSet(fs)
+#' getChannels(gs)
+#' }
 #' 
 #' @export
 setMethod(getChannels, signature = "GatingSet", definition = function(x){
@@ -95,6 +114,12 @@ setGeneric(name="selectChannels",
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' selectChannels(fs[[1]])
+#' }
+#'
 #' @export
 setMethod(selectChannels, signature = "flowFrame", definition = function(x){
   
@@ -122,6 +147,12 @@ setMethod(selectChannels, signature = "flowFrame", definition = function(x){
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom utils menu
+#'
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' selectChannels(fs)
+#' }
 #'
 #' @export
 setMethod(selectChannels, signature = "flowSet", definition = function(x){
@@ -157,6 +188,13 @@ setMethod(selectChannels, signature = "flowSet", definition = function(x){
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @importFrom utils menu
+#'
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' gs <- GatingSet(fs)
+#' selectChannels(gs)
+#' }
 #'
 #' @export
 setMethod(selectChannels, signature = "GatingSet", definition = function(x){
@@ -196,6 +234,12 @@ setMethod(selectChannels, signature = "GatingSet", definition = function(x){
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' sampleFrame(fs[[1]], 50000)
+#' }
+#'
 #' @export
 sampleFrame <- function(fr, size = 250000){
   
@@ -227,6 +271,13 @@ sampleFrame <- function(fr, size = 250000){
 #'   objects.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' pData(fs)$Treatment <- c("Control","Activated")
+#' frs <- selectFrames(fs, c("Treatment","Activated"))
+#' }
 #'
 #' @export
 selectFrames <- function(fs, pData){
