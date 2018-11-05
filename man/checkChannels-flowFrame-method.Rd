@@ -24,6 +24,19 @@ vector of valid channel names.
 \code{checkChannels} will check whether the supplied channels are valid for
 the supplied \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 }
+\examples{
+\dontrun{
+fs <- Activation
+chnls <- c( "PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A") 
+markers <- c("Va2", "CD8", "CD4", "CD44", "CD69")
+names(markers) <- chnls
+markernames(fs) <- markers
+
+checkChannels(fs[[1]], channels = c("CD4","CD8"), plot = TRUE)
+checkChannels(fs[[1]], channels = c("CD4","CD8","CD44","CD69"), plot = TRUE)
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

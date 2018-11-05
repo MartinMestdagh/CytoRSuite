@@ -1,5 +1,8 @@
 context("gatingTemplate Modifiers")
 
+## -------------------------------------------------------------
+# removeGate single alias -
+
 fs <- Activation
 
 gs <- GatingSet(fs)
@@ -17,14 +20,17 @@ test_that("removeGate properly removes alias and descendants from GatingSet and 
   
   removeGate(gs, alias = "T Cells", gtfile = "Example-gatingTemplate.csv")
   expect_equal(basename(getNodes(gs)),c("root","Cells","Single Cells", "Live Cells", "Dendritic Cells"))
-
+  
   gtn <- read.csv("Example-gatingTemplate.csv", header = TRUE)
   expect_equal(length(c("root",gtn$alias)),length(getNodes(gs)))
   expect_equal(c("root", as.character(gtn$alias)),basename(getNodes(gs)))
   
-  })
+})
 
 write.csv(gtf, "Example-gatingTemplate.csv", row.names = FALSE)
+
+## ---------------------------------------------------------------
+# removeGate multiple alias -
 
 gt <- gatingTemplate("Example-gatingTemplate.csv")
 
@@ -39,9 +45,12 @@ test_that("removeGate properly removes muyltiple aliases and descendants from Ga
   expect_equal(length(c("root",gtn$alias)),length(getNodes(gs)))
   expect_equal(c("root", as.character(gtn$alias)),basename(getNodes(gs)))
   
-  })
+})
 
 write.csv(gtf, "Example-gatingTemplate.csv", row.names = FALSE)
+
+## ----------------------------------------------------------------
+# extractGate -
 
 gt <- gatingTemplate("Example-gatingTemplate.csv")
 
@@ -59,7 +68,10 @@ test_that("extractGate successfully extracts multiple alias from gatingTemplate"
   expect_error(extractGate(parent = "Live Cells", alias = "T Cells"), "Please supply the name of the gtfile to extract gates from.", fixed = TRUE)
   expect_error(extractGate(parent = "Live Cells", alias = "T Cells", gtfile = "Example.csv"), "Supplied gtfile does not exist in the current working directory.", fixed = TRUE)
   
-  })
+})
+
+## -----------------------------------------------------------------
+# getGateType -
 
 test_that("getGateType returns correct gate types for drawGate", {
   
@@ -93,8 +105,8 @@ test_that("getGateType returns correct gate types for drawGate", {
   mean <- c("FSC-A"=430, "SSC-A"=175)
   e1 <- ellipsoidGate(.gate=cov, mean=mean)
   expect_equal(getGateType(filters(list(e1))), "ellipse")
-    
+  
   gts <- filters(list(e1,p1))
   expect_equal(getGateType(gts), c("ellipse","polygon"))
   
-  })
+})

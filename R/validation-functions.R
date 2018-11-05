@@ -41,6 +41,18 @@ def = function(x, channels, plot){standardGeneric("checkChannels")}
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' chnls <- c( "PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A") 
+#' markers <- c("Va2", "CD8", "CD4", "CD44", "CD69")
+#' names(markers) <- chnls
+#' markernames(fs) <- markers
+#' 
+#' checkChannels(fs[[1]], channels = c("CD4","CD8"), plot = TRUE)
+#' checkChannels(fs[[1]], channels = c("CD4","CD8","CD44","CD69"), plot = TRUE)
+#' }
+#'
 #' @export
 setMethod(checkChannels, signature = "flowFrame", definition = function(x, channels, plot = TRUE){
  
@@ -112,6 +124,18 @@ setMethod(checkChannels, signature = "flowFrame", definition = function(x, chann
 #' @importFrom flowCore parameters
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' chnls <- c( "PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A") 
+#' markers <- c( "Va2", "CD8", "CD4", "CD44", "CD69")
+#' names(markers) <- chnls
+#' markernames(fs) <- markers
+#' 
+#' checkChannels(fs, channels = c("CD4","CD8"), plot = TRUE)
+#' checkChannels(fs, channels = c("CD4","CD8","CD44","CD69"), plot = TRUE)
+#' }
 #'
 #' @export
 setMethod(checkChannels, signature = "flowSet", definition = function(x, channels, plot = TRUE){
@@ -189,6 +213,19 @@ setMethod(checkChannels, signature = "flowSet", definition = function(x, channel
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' chnls <- c( "PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A") 
+#' markers <- c( "Va2", "CD8", "CD4", "CD44", "CD69")
+#' names(markers) <- chnls
+#' markernames(fs) <- markers
+#' gs <- GatingSet(fs)
+#' 
+#' checkChannels(fs, channels = c("CD4","CD8"), plot = TRUE)
+#' checkChannels(fs, channels = c("CD4","CD8","CD44","CD69"), plot = TRUE)
+#' }
+#'
 #' @export
 setMethod(checkChannels, signature = "GatingSet", definition = function(x, channels, plot = TRUE){
   
@@ -263,22 +300,33 @@ setMethod(checkChannels, signature = "GatingSet", definition = function(x, chann
 #' @seealso \code{\link{drawGate,flowSet-method}}
 #' @seealso \code{\link{drawGate,GatingSet-method}}
 #'
+#' @examples
+#' \dontrun{
+#' checkGateType(type = "r", alias = c("A","B","C"))
+#' }
+#'
 #' @noRd
 checkGateType <- function(type, alias){
+  
+  if(type %in% c("q","Q","quadrant","Quadrant") & length(alias) != 4){
+    
+    stop("Supply the names of 4 poulations to alias for quadrant gates.")
+    
+  }
   
   gts <- c("polygon", "Polygon", "p", "P","rectangle", "Rectangle", "r", "R","interval", "Interval", "i", "I","threshold", "Threshold", "t", "T", "boundary", "Boundary", "b", "B","ellipse", "Ellipse", "e", "E","quadrant", "Quadrant", "q", "Q", "web", "Web", "w","W")
   
   if(!all(type %in% gts)){
     
-  if(length(type[type %in% gts == FALSE]) >= 2){
+    if(length(type[type %in% gts == FALSE]) >= 2){
       
-    stop(paste(paste(type[type %in% gts == FALSE], collapse = " & "), "are not valid gate_types for drawGate!"))
+      stop(paste(paste(type[type %in% gts == FALSE], collapse = " & "), "are not valid gate types for drawGate!"))
       
-  }else{
+    }else{
       
-    stop(paste(type[type %in% gts == FALSE],"is not a valid type for drawGate!"))
+      stop(paste(type[type %in% gts == FALSE],"is not a valid type for drawGate!"))
       
-  }
+    }
     
   }
   
@@ -319,6 +367,11 @@ checkGateType <- function(type, alias){
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #' 
 #' @seealso \code{\link{checkGateType}}
+#'
+#' @examples
+#' \dontrun{
+#' checkAlias(alias = c("A","B","C","D"), type = "q")
+#' }
 #'
 #' @noRd
 checkAlias <- function(alias, type){
@@ -388,6 +441,11 @@ checkOSGD <- function(){
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @examples 
+#' \dontrun{
+#' checkFile("gatingTemplate.csv")
+#' }
+#'
 #' @noRd
 checkFile <- function(name){
   
@@ -416,6 +474,12 @@ checkFile <- function(name){
 #'
 #' @importFrom utils read.csv
 #'
+#' @examples
+#' \dontrun{
+#' gt <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
+#' checkTemplate(parent = "T Cells", alias = "CD4 T Cells", gtfile = gt)
+#' }
+#' 
 #' @export
 checkTemplate <- function(parent, alias, gtfile){
   
@@ -515,7 +579,7 @@ setMethod(checkOverlay, signature = "flowFrame", definition = function(x, overla
     
   }else{
     
-    stop("Overlay should be either a flowFrame, flowSet, list of flowFrames or a list of flowSets.")
+    stop("Overlay should be either a flowFrame, flowSet, list of flowFrames or a list containing a flowSet.")
     
   }
   

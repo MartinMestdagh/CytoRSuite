@@ -20,6 +20,13 @@ stops the gating process if an entry already exists in the gtfile for
 \description{
 Check gatingTemplate for Existing Entry
 }
+\examples{
+\dontrun{
+gt <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
+checkTemplate(parent = "T Cells", alias = "CD4 T Cells", gtfile = gt)
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }
