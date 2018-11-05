@@ -43,7 +43,15 @@ removeGate <- function(gs, alias = NULL, gtfile = NULL){
   gt <- gt[!gt$alias %in% chldrn, ]
   
   # Remove nodes from GatingSet
-  suppressMessages(Rm(alias, gs))
+  for(i in 1:length(alias)){
+    
+    if(alias[i] %in% basename(getNodes(gs))){
+      
+      suppressMessages(Rm(alias[i], gs))
+      
+    }
+    
+  }
   
   write.csv(gt, gtfile, row.names = FALSE)
   
@@ -66,6 +74,31 @@ removeGate <- function(gs, alias = NULL, gtfile = NULL){
 #'
 #' @export
 extractGate <- function(parent, alias, gtfile){
+  
+  # Parent
+  if(missing(parent)){
+    
+    stop("Please supply the name of the parent population.")
+    
+  }
+  
+  # Alias
+  if(missing(alias)){
+    
+    stop("Please supply the name(s) of the alias to extract.")
+    
+  }
+  
+  # gtfile
+  if(missing(gtfile)){
+    
+    stop("Please supply the name of the gtfile to extract gates from.")
+    
+  }else if(checkFile(gtfile) == FALSE){
+    
+    stop("Supplied gtfile does not exist in the current working directory.")
+    
+  }
   
   # Load gtfile into gatingTemplate
   gt <- suppressMessages(gatingTemplate(gtfile))
@@ -121,6 +154,27 @@ extractGate <- function(parent, alias, gtfile){
 #' @importFrom methods as
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @examples
+#' \dontrun{
+#' fs <- Activation
+#' 
+#' gs <- GatingSet(fs)
+#' gs <- compensate(gs, fs[[1]]@description$SPILL)
+#' 
+#' trans <- estimateLogicle(gs[[2]], getChannels(gs))
+#' gs <- transform(gs, trans)
+#' 
+#' gtfile <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
+#' gt <- gatingTemplate(gtfile)
+#' 
+#' gating(gt,gs)
+#' 
+#' # Edit T Cells gate
+#' editGate(gs, parent = "Live Cells", alias = "T Cells", gtfile = gtfile)
+#' 
+#' plotCytoGates(gs[[2]])
+#' }
 #'
 #' @export
 editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NULL, type = NULL, gtfile = NULL, ...){
@@ -278,6 +332,17 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
+#' @examples 
+#' \dontrun{
+#' fs <- Activation
+#' 
+#' # Draw some gates
+#' gates <- drawGate(fs, alias = c("A","B"), channels = c("FSC-A","SSC-A"), type = c("e","r"))
+#' 
+#' # Get gate types used to construct the gates
+#' getGateType(gates)
+#' }
+#'
 #' @export
 getGateType <- function(gates){
   
@@ -424,7 +489,50 @@ getGateType <- function(gates){
           
         }else{
           
-          types <- rep("rectangle", length(gates))
+          types <- sapply(gates, function(x){
+            
+            # Includes rectangle, interval, threshold and boundary gate_types
+            if(length(parameters(x)) == 1){
+              
+              # Gate in One Dimension
+              if(is.infinite(x@min)){
+                
+                types <- "boundary"
+                
+              }else if(is.infinite(x@max)){
+                
+                types <- "threshold"
+                
+              }else if(is.finite(x@min) & is.finite(x@max)){
+                
+                types <- "interval"
+                
+              }
+              
+            }else if(length(parameters(x)) == 2){
+              
+              # Gate in 2 Dimensions
+              if(is.infinite(x@min[1]) & is.infinite(x@min[2])){
+                
+                types <- "boundary"
+                
+              }else if(is.infinite(x@max[1]) & is.infinite(x@max[2])){
+                
+                types <- "threshold"
+                
+              }else if(all(is.infinite(c(x@min[1], x@max[1]))) | all(is.infinite(c(x@min[2], x@max[2])))){
+                
+                types <- "interval"
+                
+              }else{
+                
+                types <- "rectangle"
+                
+              }
+              
+            }
+            
+          })
           
         }
         

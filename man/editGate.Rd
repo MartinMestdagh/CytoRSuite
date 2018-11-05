@@ -40,6 +40,28 @@ an object of calss \code{GatingSet} with edited gate applied, as well
 \description{
 Edit Existing Gate(s).
 }
+\examples{
+\dontrun{
+fs <- Activation
+
+gs <- GatingSet(fs)
+gs <- compensate(gs, fs[[1]]@description$SPILL)
+
+trans <- estimateLogicle(gs[[2]], getChannels(gs))
+gs <- transform(gs, trans)
+
+gtfile <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
+gt <- gatingTemplate(gtfile)
+
+gating(gt,gs)
+
+# Edit T Cells gate
+editGate(gs, parent = "Live Cells", alias = "T Cells", gtfile = gtfile)
+
+plotCytoGates(gs[[2]])
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }

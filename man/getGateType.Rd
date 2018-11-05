@@ -16,6 +16,18 @@ vector of gate type names for supplied gates.
 \description{
 Get Gate Type from Saved Gate.
 }
+\examples{
+\dontrun{
+fs <- Activation
+
+# Draw some gates
+gates <- drawGate(fs, alias = c("A","B"), channels = c("FSC-A","SSC-A"), type = c("e","r"))
+
+# Get gate types used to construct the gates
+getGateType(gates)
+}
+
+}
 \author{
 Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 }
