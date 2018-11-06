@@ -59,10 +59,12 @@ gt <- gatingTemplate(gt)
 
 gating(gt,gs)
 
-computeStats(gs, alias = "T Cells", channels = c("Alexa Fluor 488-A","PE-A"), stat = "median")
+computeStats(gs, alias = "T Cells", channels = c("Alexa Fluor 488-A","PE-A"), 
+             stat = "median")
 computeStats(gs, alias = "T Cells", stat = "geo mean")
 computeStats(gs, alias = c("CD4 T Cells","CD8 T Cells"), stat = "count")
-computeStats(gs, alias = c("CD4 T Cells","CD8 T Cells"), parent = c("Live Cells","T Cells"), stat = "freq")
+computeStats(gs, alias = c("CD4 T Cells","CD8 T Cells"), 
+             parent = c("Live Cells","T Cells"), stat = "freq")
 }
 
 }

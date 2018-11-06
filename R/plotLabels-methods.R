@@ -89,7 +89,7 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
     
   }else if(is.null(alias) & !is.null(format.text)){
     
-    if(format.text == c("alias","percent") | format.text == c("alias","count")){
+    if(all(c("alias","percent") %in% format.text) | all(c("alias","count") %in% format.text)){
       
       message(paste("No population named supplied to alias - labels will show", format.text[2], "only."))
       format.text <- format.text[2]
@@ -352,7 +352,7 @@ setMethod(plotLabels, signature = c("flowFrame", "polygonGate"),
               
   }else if(is.null(alias) & !is.null(format.text)){
               
-    if(format.text == c("alias","percent") | format.text == c("alias","count")){
+    if(all(c("alias","percent") %in% format.text) | all(c("alias","count") %in% format.text)){
                 
       message(paste("No population named supplied to alias - labels will show", format.text[2], "only."))
       format.text <- format.text[2]
@@ -481,7 +481,7 @@ setMethod(plotLabels, signature = c("flowFrame", "ellipsoidGate"),
               
   }else if(is.null(alias) & !is.null(format.text)){
               
-    if(format.text == c("alias","percent") | format.text == c("alias","count")){
+    if(all(c("alias","percent") %in% format.text) | all(c("alias","count") %in% format.text)){
                 
       message(paste("No population named supplied to alias - labels will show", format.text[2], "only."))
       format.text <- format.text[2]

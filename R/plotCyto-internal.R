@@ -543,22 +543,10 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
   # Labels
   if(!is.null(gates) & labels == TRUE){
     
-    if(class(gates) %in% c("rectangleGate","polygonGate","ellipsoidGate")){
-     
-      gates <- filters(list(gates))
-       
-    }else if(class(gates) == "list"){
-      
-      gates <- filters(gates)
-      
-    }else if(class(gates) == "filters"){
-      
-    }
-    
     # Population names missing - show percantage only
     if(missing(text.labels)){
     
-      plotLabels(x = fr, channels = channel, alias = NULL, gates = gates, format.text = "percent", cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
+      plotLabels(x = fr, channels = channel, alias = NULL, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
     
     }else if(!missing(text.labels)){
       

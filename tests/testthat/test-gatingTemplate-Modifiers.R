@@ -3,14 +3,6 @@ context("gatingTemplate Modifiers")
 ## -------------------------------------------------------------
 # removeGate single alias -
 
-fs <- Activation
-
-gs <- GatingSet(fs)
-gs <- compensate(gs, fs[[1]]@description$SPILL)
-
-trans <- estimateLogicle(gs[[2]], getChannels(fs))
-gs <- transform(gs, trans)
-
 gtf <- read.csv("Example-gatingTemplate.csv", header = TRUE)
 gt <- gatingTemplate("Example-gatingTemplate.csv")
 
