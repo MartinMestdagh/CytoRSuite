@@ -45,6 +45,27 @@ a csv file.}
 \description{
 Calculate and export flow cytometry statistics for a GatingSet.
 }
+\examples{
+\dontrun{
+fs <- Activation
+gs <- GatingSet(fs)
+
+gs <- compensate(gs, fs[[1]]@description$SPILL)
+trans <- estimatelogicle(gs[[2]], getChannels(gs))
+gs <- transform(gs, trans)
+
+gt <- system.file("extdata", "Example gatingTemplate.csv", package = "cytoRSuite")
+gt <- gatingTemplate(gt)
+
+gating(gt,gs)
+
+computeStats(gs, alias = "T Cells", channels = c("Alexa Fluor 488-A","PE-A"), stat = "median")
+computeStats(gs, alias = "T Cells", stat = "geo mean")
+computeStats(gs, alias = c("CD4 T Cells","CD8 T Cells"), stat = "count")
+computeStats(gs, alias = c("CD4 T Cells","CD8 T Cells"), parent = c("Live Cells","T Cells"), stat = "freq")
+}
+
+}
 \seealso{
 \code{\link{computeStats,flowFrame-method}}
 
