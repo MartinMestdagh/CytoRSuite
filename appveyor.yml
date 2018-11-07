@@ -20,6 +20,7 @@ build_script:
 
 test_script:
   - travis-tool.sh run_tests
+  - travis-tool.sh install_bioc_deps
 
 on_failure:
   - 7z a failure.zip *.Rcheck\*
@@ -43,3 +44,6 @@ artifacts:
 
   - path: '\*_*.zip'
     name: Bits
+
+environment:
+  USE_RTOOLS: true
