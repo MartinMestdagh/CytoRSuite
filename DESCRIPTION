@@ -11,12 +11,12 @@ Depends:
   flowWorkspace (>= 3.28.2),
   flowCore (>= 1.46.2)
 Imports: 
-  data.table(>= 1.11.4),
-  BiocGenerics,
-  shiny(>= 1.1.0), 
-  shinythemes(>= 1.1.1), 
-  rhandsontable(>= 0.3.6.1), 
-  MASS (>= 7.3-50),
+  data.table,
+  BiocGenerics (>= 0.29),
+  shiny, 
+  shinythemes, 
+  rhandsontable, 
+  MASS,
   methods,
   stats,
   utils,
@@ -32,4 +32,9 @@ Suggests:
     rmarkdown,
     testthat,
     vdiffr
+Remotes: 
+  Bioconductor/BiocGenerics@a2de4dd,
+  RGLab/openCyto@trunk,
+  RGLab/flowWorkspace@trunk,
+  RGLab/flowCore@trunk
 VignetteBuilder: knitr

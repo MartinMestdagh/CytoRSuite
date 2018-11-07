@@ -13,8 +13,6 @@ cache: packages
 before_install:
   - R -e 'install.packages("devtools")'
   - tlmgr install index
-  - R -e 'devtools::install_github("Bioconductor/BiocGenerics")'
-  - R -e 'devtools::install_github("RGLab/openCyto", ref = "trunk")'
   
 install:
   - R -e 'devtools::install_deps(dep = T, type = "source")'
