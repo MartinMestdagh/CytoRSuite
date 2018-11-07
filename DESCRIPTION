@@ -31,6 +31,8 @@ Suggests:
 Remotes: 
   Bioconductor/BiocGenerics@a2de4dd,
   RGLab/RProtoBufLib@trunk,
+  RGLab/flowCore@trunk,
+  RGLab/flowWorkspace@trunk,
   RGLab/openCyto@trunk
 License: GPL-2
 Encoding: UTF-8
