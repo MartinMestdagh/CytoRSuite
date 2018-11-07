@@ -1,5 +1,4 @@
 library(vdiffr)
-library(grDevices)
 
 fs <- Activation
 

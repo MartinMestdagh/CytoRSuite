@@ -1,8 +1,5 @@
 context("plotCyto1d")
 
-library(vdiffr)
-library(grDevices)
-
 gt <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
 gt <- gatingTemplate(gt)
 gating(gt,gs)
@@ -18,28 +15,22 @@ intGate <- rectangleGate("PE-A"=c(2.6,4.2))
 
 test_that("plotCyto1d flowFrame method return appropriate plots",{
   
-  plotCyto1d(Va2[[1]], channel = "FSC-A", main = "Control")
-  p1 <- recordPlot()
+  p1 <- function() plotCyto1d(Va2[[1]], channel = "FSC-A", main = "Control")
   expect_doppelganger("plotCyto1d fr", p1)
   
-  plotCyto1d(Va2[[1]], channel = "PE-A")
-  p2 <- recordPlot()
+  p2 <- function() plotCyto1d(Va2[[1]], channel = "PE-A")
   expect_doppelganger("plotCyto1d fluor", p2)
   
-  plotCyto1d(Va2[[1]], channel = "PE-A", transList = trans, xlab = "Va2", ylab = "Density")
-  p3 <- recordPlot()
+  p3 <- function() plotCyto1d(Va2[[1]], channel = "PE-A", transList = trans, xlab = "Va2", ylab = "Density")
   expect_doppelganger("plotCyto1d trans", p3)
   
-  plotCyto1d(Va2[[1]], channel = "PE-A", overlay = Va2[[2]], transList = trans, offset = 0.6)
-  p4 <- recordPlot()
+  p4 <- function() plotCyto1d(Va2[[1]], channel = "PE-A", overlay = Va2[[2]], transList = trans, offset = 0.6)
   expect_doppelganger("plotCyto1d fr overlay fr", p4)
   
-  plotCyto1d(Va2[[1]], channel = "PE-A", overlay = Va2, transList = trans, fill = c("green","red","blue"), gates = intGate, col.gate = "black")
-  p5 <- recordPlot()
+  p5 <- function() plotCyto1d(Va2[[1]], channel = "PE-A", overlay = Va2, transList = trans, fill = c("green","red","blue"), gates = intGate, col.gate = "black")
   expect_doppelganger("plotCyto1d fr overlay fs", p5)
   
-  plotCyto1d(Va2[[1]], channel = "PE-A", overlay = Va2, transList = trans, fill = c("green","red","blue"), gates = intGate, col.gate = "black", text.labels = "T Cells")
-  p6 <- recordPlot()
+  p6 <- function() plotCyto1d(Va2[[1]], channel = "PE-A", overlay = Va2, transList = trans, fill = c("green","red","blue"), gates = intGate, col.gate = "black", text.labels = "T Cells")
   expect_doppelganger("plotCyto1d labels", p6)
   
   })
@@ -49,32 +40,25 @@ test_that("plotCyto1d flowFrame method return appropriate plots",{
 
 test_that("",{
   
-  plotCyto1d(Va2, channel = "FSC-A", main = c("Control","Activated"), fill = "red", ylab = "Density")
-  p7 <- recordPlot()
+  p7 <- function() plotCyto1d(Va2, channel = "FSC-A", main = c("Control","Activated"), fill = "red", ylab = "Density")
   expect_doppelganger("plotCyto1d fs", p7)
   
-  plotCyto1d(Va2, channel = "FSC-A", main = "Control", merge = TRUE)
-  p8 <- recordPlot()
+  p8 <- function() plotCyto1d(Va2, channel = "FSC-A", main = "Control", merge = TRUE)
   expect_doppelganger("plotCyto1d fs merge", p8)
   
-  plotCyto1d(Va2, channel = "FSC-A", main = "Control", overlay = Va2[[1]])
-  p9 <- recordPlot()
+  p9 <- function() plotCyto1d(Va2, channel = "FSC-A", main = "Control", overlay = Va2[[1]])
   expect_doppelganger("plotCyto1d fs overlay fr", p9)
   
-  plotCyto1d(Va2, channel = "CD4", main = "Control", overlay = Va2, transList = trans)
-  p10 <- recordPlot()
+  p10 <- function() plotCyto1d(Va2, channel = "CD4", main = "Control", overlay = Va2, transList = trans)
   expect_doppelganger("plotCyto1d fs overlay fs", p10)
   
-  plotCyto1d(Va2, channel = "FSC-A", main = "Control", overlay = Va2[[1]], merge = TRUE, col = c("blue","red"))
-  p11 <- recordPlot()
+  p11 <- function() plotCyto1d(Va2, channel = "FSC-A", main = "Control", overlay = Va2[[1]], merge = TRUE, col = c("blue","red"))
   expect_doppelganger("plotCyto1d merge overlay fr", p11)
   
-  plotCyto1d(Va2, channel = "FSC-A", main = "Control", overlay = Va2, merge = TRUE, fill = c("blue","purple"))
-  p12 <- recordPlot()
+  p12 <- function() plotCyto1d(Va2, channel = "FSC-A", main = "Control", overlay = Va2, merge = TRUE, fill = c("blue","purple"))
   expect_doppelganger("plotCyto1d merge overlay fs", p12)
   
-  plotCyto1d(Va2, channel = "PE-A", main = "Control", stack = 0.5, transList = trans)
-  p13 <- recordPlot()
+  p13 <- function() plotCyto1d(Va2, channel = "PE-A", main = "Control", stack = 0.5, transList = trans)
   expect_doppelganger("plotCyto1d fs stack", p13)
   
   })
