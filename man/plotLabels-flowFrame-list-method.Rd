@@ -5,7 +5,7 @@
 \alias{plotLabels,flowFrame,list-method}
 \title{Plot Labels for Gated Populations - list Method}
 \usage{
-\S4method{plotLabels}{flowFrame,list}(x, gates, channels, alias = NULL,
+\S4method{plotLabels}{flowFrame,list}(x, gates, channels, alias = NA,
   format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2,
   col.text = "black", cex.text = 0.8, alpha = 0.6)
 }
@@ -21,7 +21,8 @@ existing plot.}
 \item{channels}{a vector indicating the fluorescent channel(s) to be used for
 gating.}
 
-\item{alias}{the name of the gated population.}
+\item{alias}{the name of the gated population, set to NA by default to only
+include percent in labels.}
 
 \item{format.text}{indicates the type of text to include in the label, can be
 either \code{"alias"}, \code{"percent"}, \code{"count"},

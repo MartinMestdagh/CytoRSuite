@@ -33,10 +33,12 @@ setGeneric(name = "plotLabels",
 #'
 #' @param x a \code{\link[flowCore:flowFrame-class]{flowFrame}} gated in the
 #'   existing plot.
-#' @param gates an object of class \code{\link[flowCore:rectangleGate]{rectangleGate}}.
+#' @param gates an object of class
+#'   \code{\link[flowCore:rectangleGate]{rectangleGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
-#' @param alias the name of the gated population.
+#' @param alias the name of the gated population, set to NA by default to only
+#'   include percent in labels.
 #' @param format.text indicates the type of text to include in the label, can be
 #'   either \code{"alias"}, \code{"percent"}, \code{"count"},
 #'   \code{c("alias","percent")} or \code{c("alias","count")}. Set to
@@ -69,7 +71,7 @@ setGeneric(name = "plotLabels",
 #'
 #' @export
 setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"), 
-          definition = function(x, gates, channels, alias = NULL, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
+          definition = function(x, gates, channels, alias = NA, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
  
   # Assign x to fr
   fr <- x
@@ -82,12 +84,12 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
   }
   
   # Alias
-  if(is.null(alias) & is.null(format.text)){
+  if(is.na(alias) & is.null(format.text)){
     
     # No population name supplied only show percent on label
     format.text <- "percent"
     
-  }else if(is.null(alias) & !is.null(format.text)){
+  }else if(is.na(alias) & !is.null(format.text)){
     
     if(all(c("alias","percent") %in% format.text) | all(c("alias","count") %in% format.text)){
       
@@ -300,7 +302,8 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
 #'   \code{\link[flowCore:polygonGate]{polygonGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
-#' @param alias the name of the gated population.
+#' @param alias the name of the gated population, set to NA by default to only
+#'   include percent in labels.
 #' @param format.text indicates the type of text to include in the label, can be
 #'   either \code{"alias"}, \code{"percent"}, \code{"count"},
 #'   \code{c("alias","percent")} or \code{c("alias","count")}. Set to
@@ -332,7 +335,7 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
 #'
 #' @export
 setMethod(plotLabels, signature = c("flowFrame", "polygonGate"), 
-          definition = function(x, gates, channels, alias = NULL, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
+          definition = function(x, gates, channels, alias = NA, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
             
   # Assign x to fr
   fr <- x
@@ -345,12 +348,12 @@ setMethod(plotLabels, signature = c("flowFrame", "polygonGate"),
   }
             
   # Alias
-  if(is.null(alias) & is.null(format.text)){
+  if(is.na(alias) & is.null(format.text)){
               
     # No population name supplied only show percent on label
     format.text <- "percent"
               
-  }else if(is.null(alias) & !is.null(format.text)){
+  }else if(is.na(alias) & !is.null(format.text)){
               
     if(all(c("alias","percent") %in% format.text) | all(c("alias","count") %in% format.text)){
                 
@@ -429,7 +432,8 @@ setMethod(plotLabels, signature = c("flowFrame", "polygonGate"),
 #'   \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
-#' @param alias the name of the gated population.
+#' @param alias the name of the gated population, set to NA by default to only
+#'   include percent in labels.
 #' @param format.text indicates the type of text to include in the label, can be
 #'   either \code{"alias"}, \code{"percent"}, \code{"count"},
 #'   \code{c("alias","percent")} or \code{c("alias","count")}. Set to
@@ -461,7 +465,7 @@ setMethod(plotLabels, signature = c("flowFrame", "polygonGate"),
 #'
 #' @export
 setMethod(plotLabels, signature = c("flowFrame", "ellipsoidGate"), 
-          definition = function(x, gates, channels, alias = NULL, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
+          definition = function(x, gates, channels, alias = NA, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
             
   # Assign x to fr
   fr <- x
@@ -474,12 +478,12 @@ setMethod(plotLabels, signature = c("flowFrame", "ellipsoidGate"),
   }
             
   # Alias
-  if(is.null(alias) & is.null(format.text)){
+  if(is.na(alias) & is.null(format.text)){
               
     # No population name supplied only show percent on label
     format.text <- "percent"
               
-  }else if(is.null(alias) & !is.null(format.text)){
+  }else if(is.na(alias) & !is.null(format.text)){
               
     if(all(c("alias","percent") %in% format.text) | all(c("alias","count") %in% format.text)){
                 
@@ -560,7 +564,8 @@ setMethod(plotLabels, signature = c("flowFrame", "ellipsoidGate"),
 #'   \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
-#' @param alias the name of the gated population.
+#' @param alias the name of the gated population, set to NA by default to only
+#'   include percent in labels.
 #' @param format.text indicates the type of text to include in the label, can be
 #'   either \code{"alias"}, \code{"percent"}, \code{"count"},
 #'   \code{c("alias","percent")} or \code{c("alias","count")}. Set to
@@ -592,7 +597,7 @@ setMethod(plotLabels, signature = c("flowFrame", "ellipsoidGate"),
 #'
 #' @export
 setMethod(plotLabels, signature = c("flowFrame", "list"), 
-          definition = function(x, gates, channels, alias = NULL, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
+          definition = function(x, gates, channels, alias = NA, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
             
             
   # Make calls to plotLabels
@@ -619,7 +624,8 @@ setMethod(plotLabels, signature = c("flowFrame", "list"),
 #'   \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
-#' @param alias the name of the gated population.
+#' @param alias the name of the gated population, set to NA by default to only
+#'   include percent in labels.
 #' @param format.text indicates the type of text to include in the label, can be
 #'   either \code{"alias"}, \code{"percent"}, \code{"count"},
 #'   \code{c("alias","percent")} or \code{c("alias","count")}. Set to
@@ -651,8 +657,7 @@ setMethod(plotLabels, signature = c("flowFrame", "list"),
 #'
 #' @export
 setMethod(plotLabels, signature = c("flowFrame", "filters"), 
-          definition = function(x, gates, channels, alias = NULL, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
-            
+          definition = function(x, gates, channels, alias = NA, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
             
   # Make calls to plotLabels
   mapply(function(gate, alias, font.text, col.text, cex.text, alpha){

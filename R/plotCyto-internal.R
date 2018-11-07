@@ -546,7 +546,7 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
     # Population names missing - show percantage only
     if(missing(text.labels)){
     
-      plotLabels(x = fr, channels = channel, alias = NULL, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
+      plotLabels(x = fr, channels = channel, alias = NA, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
     
     }else if(!missing(text.labels)){
       
@@ -1399,7 +1399,7 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
     # Population names missing - show percantage only
     if(missing(text.labels)){
       
-      plotLabels(x = fr, channels = channels, alias = NULL, gates = gates, format.text = "percent", cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
+      plotLabels(x = fr, channels = channels, alias = NA, gates = gates, format.text = "percent", cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
       
     }else if(!missing(text.labels)){
       
