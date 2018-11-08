@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-**cytoRSuite** [![Travis build status](https://travis-ci.org/DillonHammill/cytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/cytoRSuite) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/cytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/cytoRSuite)
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+**cytoRSuite** [![Travis build status](https://travis-ci.org/DillonHammill/cytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/cytoRSuite) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/cytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/cytoRSuite) [![Coverage status](https://codecov.io/gh/DillonHammill/cytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/cytoRSuite?branch=master)
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
 

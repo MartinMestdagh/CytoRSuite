@@ -24,10 +24,11 @@ Imports:
   grDevices,
   magrittr
 Suggests: 
-  knitr,
-  rmarkdown,
-  testthat,
-  vdiffr
+    knitr,
+    rmarkdown,
+    testthat,
+    vdiffr,
+    covr
 Remotes: 
   Bioconductor/BiocGenerics@a2de4dd,
   RGLab/RProtoBufLib@trunk,
