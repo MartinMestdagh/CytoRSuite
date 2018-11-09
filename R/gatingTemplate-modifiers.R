@@ -298,6 +298,10 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     
     gt[parent == prnt & alias == als[i], gating_method := gtmd]
     gt[parent == prnt & alias == als[i], gating_args := .argDeparser(list(gate = new[[i]]))]
+    gt[parent == prnt & alias == als[i], collapseDataForGating := NA]
+    gt[parent == prnt & alias == als[i], groupBy := NA]
+    gt[parent == prnt & alias == als[i], preprocessing_method := NA]
+    gt[parent == prnt & alias == als[i], preprocessing_args := NA]
     
   }
   
