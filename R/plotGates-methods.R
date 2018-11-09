@@ -55,8 +55,19 @@ setMethod(plotGates, signature = "rectangleGate", definition = function(x, chann
   # Assign x to gt
   gt <- x
   
-  # Check Channels
-  if(missing(channels)){
+  # Allow 1D gate plotted in 2D
+  if(!missing(channels)){
+    
+    if(length(channels) == 2 & length(parameters(gt)) == 1){
+    
+      gt <- matrix(c(as.numeric(gt@min),as.numeric(gt@max), -Inf, Inf), ncol = 2, nrow = 2)
+      colnames(gt) <- channels
+      rownames(gt) <- c("min","max")
+      gt <- rectangleGate(.gate = gt)
+    
+    }
+    
+  }else{
     
     channels <- as.vector(parameters(gt))
     
