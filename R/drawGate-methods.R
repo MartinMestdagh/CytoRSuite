@@ -25,14 +25,17 @@
 #' @param ... additional method-specific arguments.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @seealso \code{\link{drawGate,flowFrame-method}}
 #' @seealso \code{\link{drawGate,flowSet-method}}
 #' @seealso \code{\link{drawGate,GatingSet-method}}
 #'
 #' @export
-setGeneric(name = "drawGate",
-           def = function(x, ...){standardGeneric("drawGate")}
+setGeneric(
+  name = "drawGate",
+  def = function(x, ...) {
+    standardGeneric("drawGate")
+  }
 )
 
 #' drawGate flowFrame Method.
@@ -80,79 +83,59 @@ setGeneric(name = "drawGate",
 #' @seealso \code{\link{drawGate,GatingSet-method}}
 #'
 #' @export
-setMethod(drawGate, signature = "flowFrame", definition = function(x, channels = NULL, alias = NULL, subSample = 250000, type = "polygon", axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...){
-  
+setMethod(drawGate, signature = "flowFrame", definition = function(x, channels = NULL, alias = NULL, subSample = 250000, type = "polygon", axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...) {
+
   # Assign x to fr
   fr <- x
-  
+
   # Check type argument is valid
   type <- checkGateType(type = type, alias = alias)
-  
+
   # Set default type for 1D gates to interval
-  if(length(channels) == 1 & all(type %in% "polygon")){
-    
+  if (length(channels) == 1 & all(type %in% "polygon")) {
     type <- rep("interval", length(type))
-    
   }
-  
+
   # Check alias is supplied correctly
-  checkAlias(alias = alias, type = type) 
-  
+  checkAlias(alias = alias, type = type)
+
   # Check supplied channel(s) are valid
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
 
   # Make one call to drawPlot
-  if(plot == TRUE){
-    
-    plotCyto(fr, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, ...)
-    
-  }
-  
-  # Construct gates save as filters object
-  if(length(type) == 1 & type[1] == "quadrant"){
-    
-  gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-    
-  }else if(length(type) == 1 & type[1] == "web"){
-
-  gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-  
-  }else{
-  
-  gates <- mapply(function(type, alias){
-    
-    if(type == "polygon"){
-      
-      drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-      
-    }else if(type == "rectangle"){
-      
-      drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-      
-    }else if(type == "interval"){
-      
-      drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels,...)
-      
-    }else if(type == "threshold"){
-      
-      drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-      
-    }else if(type == "boundary"){ 
-      
-      drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-      
-    }else if(type == "ellipse"){
-      
-      drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-      
+  if (plot == TRUE) {
+    if(getOption("cytoRSuite_interact") == FALSE) {
+      plotCyto(fr, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, ...)
+    }else{
+      plotCyto(fr, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, ...)
     }
-    
-  }, type, alias)
-  
   }
-  
+
+  # Construct gates save as filters object
+  if (length(type) == 1 & type[1] == "quadrant") {
+    gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+  } else if (length(type) == 1 & type[1] == "web") {
+    gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+  } else {
+    gates <- mapply(function(type, alias) {
+      if (type == "polygon") {
+        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "rectangle") {
+        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "interval") {
+        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels, ...)
+      } else if (type == "threshold") {
+        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "boundary") {
+        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "ellipse") {
+        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      }
+    }, type, alias)
+  }
+
   gates <- filters(gates)
-  
+
   return(gates)
 })
 
@@ -197,102 +180,77 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels =
 #' @importFrom methods as
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @seealso \code{\link{plotCyto1d,flowSet-method}}
 #' @seealso \code{\link{plotCyto2d,flowSet-method}}
 #' @seealso \code{\link{drawGate,flowFrame-method}}
 #' @seealso \code{\link{drawGate,GatingSet-method}}
 #'
 #' @export
-setMethod(drawGate, signature = "flowSet", definition = function(x, select = NULL, channels = NULL, alias = NULL, subSample = 250000, type = "polygon", axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...){
+setMethod(drawGate, signature = "flowSet", definition = function(x, select = NULL, channels = NULL, alias = NULL, subSample = 250000, type = "polygon", axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...) {
 
   # Assign x to fs
   fs <- x
-  
+
   # Restrict to samples matching pData requirements
-  if(!is.null(select)){
-    
-    if(class(select) != "numeric"){
-      
+  if (!is.null(select)) {
+    if (class(select) != "numeric") {
       stop("Vector supplied to select argument should contain the numeric indicies of the samples to select.")
-      
     }
-    
+
     # Extract samples using selectFrames
     fs <- fs[select]
-    
   }
   fr <- as(fs, "flowFrame")
-  
+
   # Check type argument is valid
   type <- checkGateType(type = type, alias = alias)
-  
+
   # Set default type for 1D gates to interval
-  if(length(channels) == 1 & all(type %in% "polygon")){
-    
+  if (length(channels) == 1 & all(type %in% "polygon")) {
     type <- rep("interval", length(type))
-    
   }
-  
+
   # Check alias is supplied correctly
-  checkAlias(alias = alias, type = type) 
-  
+  checkAlias(alias = alias, type = type)
+
   # Check supplied channel(s) are valid
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
 
   # Make one call to drawPlot
-  if(plot == TRUE){
-    
-    plotCyto(fs, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, ...)
-    
+  if (plot == TRUE) {
+    if(getOption("cytoRSuite_interact") == FALSE){
+      plotCyto(fs, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, ...)
+    }else {
+      plotCyto(fs, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, ...)
+    }
   }
-  
+
   # Construct gates save as filters object
-  if(length(type) == 1 & type[1] == "quadrant"){
-    
-    gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-    
-  }else if(length(type) == 1 & type[1] == "web"){
-    
-    gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-    
-  }else{
-    
-    gates <- mapply(function(type, alias){
-      
-      if(type == "polygon"){
-        
-        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
-      }else if(type == "rectangle"){
-        
-        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
-      }else if(type == "interval"){
-        
-        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels,...)
-        
-      }else if(type == "threshold"){
-        
-        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
-      }else if(type == "boundary"){ 
-        
-        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
-      }else if(type == "ellipse"){
-        
-        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
+  if (length(type) == 1 & type[1] == "quadrant") {
+    gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+  } else if (length(type) == 1 & type[1] == "web") {
+    gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+  } else {
+    gates <- mapply(function(type, alias) {
+      if (type == "polygon") {
+        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "rectangle") {
+        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "interval") {
+        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels, ...)
+      } else if (type == "threshold") {
+        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "boundary") {
+        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "ellipse") {
+        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
       }
-      
     }, type, alias)
-    
   }
-  
+
   gates <- filters(gates)
   return(gates)
-  
 })
 
 #' drawGate GatingSet Method
@@ -334,7 +292,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
 #' @return drawn gates are applied to the
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} and saved to a
 #'   \code{\link[openCyto:gatingTemplate-class]{gatingTemplate}}.
-#'   
+#'
 #' @importFrom BiocGenerics colnames
 #' @importFrom flowWorkspace getData
 #' @importFrom openCyto add_pop
@@ -343,7 +301,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
 #' @importFrom flowCore filters
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @seealso \code{\link{plotCyto,GatingSet-method}}
 #' @seealso \code{\link{plotCyto1d,flowFrame-method}}
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
@@ -351,164 +309,125 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
 #' @seealso \code{\link{drawGate,flowSet-method}}
 #'
 #' @export
-setMethod(drawGate, signature = "GatingSet", definition = function(x, select = NULL, parent = "root", alias = NULL, channels = NULL, type = "polygon", subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...){
+setMethod(drawGate, signature = "GatingSet", definition = function(x, select = NULL, parent = "root", alias = NULL, channels = NULL, type = "polygon", subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...) {
 
   # Assign x to gs
   gs <- x
-  
+
   # Check whether a gatingTemplate ready exists for this population
-  if(!is.null(gtfile)){
-    
+  if (!is.null(gtfile)) {
+
     # Check whether gate already exists in gtfile
     checkTemplate(parent, alias, gtfile)
-  
   }
-  
+
   fs <- flowWorkspace::getData(x, parent)
-  
+
   # Restrict to samples matching pData requirements
-  if(!is.null(select)){
-    
-    if(class(select) != "numeric"){
-      
+  if (!is.null(select)) {
+    if (class(select) != "numeric") {
       stop("Vector supplied to select argument should contain the numeric indicies of the samples to select.")
-      
     }
-    
+
     # Extract samples using selectFrames
     fs <- fs[select]
-
   }
-  
+
   fr <- as(fs, "flowFrame")
-  
+
   # Check type argument is valid
   type <- checkGateType(type = type, alias = alias)
-  
+
   # Set default type for 1D gates to interval
-  if(length(channels) == 1 & all(type %in% "polygon")){
-    
+  if (length(channels) == 1 & all(type %in% "polygon")) {
     type <- rep("interval", length(type))
-    
   }
-  
+
   # Check alias is supplied correctly
-  checkAlias(alias = alias, type = type) 
-  
+  checkAlias(alias = alias, type = type)
+
   # Check supplied channel(s) are valid
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
-  
+
   # Make one call to drawPlot
-  if(plot == TRUE){
-    
-    plotCyto(x = gs, parent = parent, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, ...)
-    
+  if (plot == TRUE) {
+    if(getOption("cytoRSuite_interact") == FALSE){
+      plotCyto(x = gs, parent = parent, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, ...)
+    }else{
+      plotCyto(x = gs, parent = parent, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, ...)
+    }
   }
-  
+
   # Construct gates save as filters object
-  if(length(type) == 1 & type[1] == "quadrant"){
-    
-    gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-    
-  }else if(length(type) == 1 & type[1] == "web"){
-    
-    gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-    
-  }else{
-    
-    gates <- mapply(function(type, alias){
-      
-      if(type == "polygon"){
-        
-        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
-      }else if(type == "rectangle"){
-        
-        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
-      }else if(type == "interval"){
-        
-        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels,...)
-        
-      }else if(type == "threshold"){
-        
-        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
-      }else if(type == "boundary"){ 
-        
-        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
-      }else if(type == "ellipse"){
-        
-        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels,...)
-        
+  if (length(type) == 1 & type[1] == "quadrant") {
+    gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+  } else if (length(type) == 1 & type[1] == "web") {
+    gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+  } else {
+    gates <- mapply(function(type, alias) {
+      if (type == "polygon") {
+        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "rectangle") {
+        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "interval") {
+        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels, ...)
+      } else if (type == "threshold") {
+        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "boundary") {
+        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+      } else if (type == "ellipse") {
+        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
       }
-      
     }, type, alias)
-    
   }
-  
+
   gates <- filters(gates)
-  
+
   # Prepare gatingTemplate entries
   pop <- "+"
-  
+
   # Use add_pop to apply gates to GatingSet and construct gatingTemplate
-  if(is.null(gtfile)){
-    
+  if (is.null(gtfile)) {
     message("No gatingTemplate file name supplied - creating gatingTemplate.csv to store gates.")
 
     pops <- list()
-    for(i in 1:length(alias)){
-      
+    for (i in 1:length(alias)) {
       pops[[i]] <- add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]])
       )
-    
     }
     pops <- do.call("rbind", pops)
-    
+
     write.csv(pops, "gatingTemplate.csv", row.names = FALSE)
-    
-  }else if(checkFile(gtfile) == FALSE){
-    
-    message(paste("Supplied gtfile does not exist in working directory - writing", paste(gtfile),"."))
-    
+  } else if (checkFile(gtfile) == FALSE) {
+    message(paste("Supplied gtfile does not exist in working directory - writing", paste(gtfile), "."))
+
     pops <- list()
-    for(i in 1:length(alias)){
-      
+    for (i in 1:length(alias)) {
       pops[[i]] <- add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]])
       )
-    
     }
     pops <- do.call("rbind", pops)
-    
+
     write.csv(pops, gtfile, row.names = FALSE)
-    
-    
-  }else if(checkFile(gtfile) == TRUE){
-    
+  } else if (checkFile(gtfile) == TRUE) {
     gt <- read.csv(gtfile, header = TRUE)
-    
+
     pops <- list()
-    for(i in 1:length(alias)){
-      
+    for (i in 1:length(alias)) {
       pops[[i]] <- add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]])
       )
-    
     }
     pops <- do.call("rbind", pops)
     gt <- rbind(gt, pops)
-    
+
     write.csv(gt, gtfile, row.names = FALSE)
-    
   }
-  
+
   invisible(pops)
-  
 })
