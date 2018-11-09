@@ -5,8 +5,8 @@
 \alias{editSpillover,GatingSet-method}
 \title{Edit Spillover Matrix GatingSet Method}
 \usage{
-\S4method{editSpillover}{GatingSet}(x, parent = NULL, spfile = NULL,
-  subSample = 5000, transList = NULL, ...)
+\S4method{editSpillover}{GatingSet}(x, parent = NULL, cmfile = NULL,
+  spfile = NULL, subSample = 5000, transList = NULL, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -14,6 +14,14 @@
 
 \item{parent}{name of the pre-gated population to be plotted (e.g. "Single
 Cells").}
+
+\item{cmfile}{name of .csv file containing the names of the samples in a
+column called "name" and their matching channel in a column called
+"channel". \code{editSpillover} will the guide you through the channel
+selection process and generate a channel match file called "Compensation
+Channels.csv" automatically. If you already have a complete cmfile and
+would like to bypass the channel selection process, simply pass the name of
+the cmfile to this argument (e.g. "Compensation Channels.csv").}
 
 \item{spfile}{name of spillover matrix csv file including .csv file extension
 to use as a starting point for editing. If \code{spfile} is not supplied

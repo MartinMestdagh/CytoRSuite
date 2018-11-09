@@ -30,6 +30,9 @@ setGeneric(name = "plotCytoComp",
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}
 #'   containing gated compensation controls and an unstained control.
+#' @param channel name of the fluorescent channel associated with the
+#'   \code{\link[flowCore:flowFrame-class]{flowFrame}}. If not supplied users
+#'   will need to select the channel from a dropdown menu.
 #' @param compensate logical indicating whether the samples should be
 #'   compensated prior to plotting, set to FALSE by default. If no spillover
 #'   matrix is supplied to the spfile argument the spillover matrix will
@@ -50,7 +53,8 @@ setGeneric(name = "plotCytoComp",
 #'   plot.
 #' @param popup logical indicating whether plots should be constructed in a
 #'   pop-up window.
-#' @param ... additional arguments passed to \code{\link{plotCyto2d,flowFrame-method}}.
+#' @param ... additional arguments passed to
+#'   \code{\link{plotCyto2d,flowFrame-method}}.
 #'
 #' @importFrom flowWorkspace sampleNames pData
 #' @importFrom flowCore parameters compensate
@@ -59,7 +63,7 @@ setGeneric(name = "plotCytoComp",
 #' @importFrom graphics par mtext
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
+#'
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #'
 #' @examples
@@ -69,7 +73,7 @@ setGeneric(name = "plotCytoComp",
 #'
 #' @export
 setMethod(plotCytoComp, signature = "flowFrame", 
-          definition = function(x, compensate = FALSE, spfile = NULL, transList = NULL, mfrow, popup = FALSE, ...){
+          definition = function(x, channel = NULL, compensate = FALSE, spfile = NULL, transList = NULL, mfrow, popup = FALSE, ...){
             
   # Assign x to fr
   fr <- x
@@ -116,7 +120,11 @@ setMethod(plotCytoComp, signature = "flowFrame",
   }
             
   # Select channel associated with flowFrame
-  chan <- selectChannels(fr)
+  if(is.null(channel)){
+    chan <- selectChannels(fr)
+  }else{
+    chan <- channel
+  }
             
   # Pop-up
   if(popup == TRUE){

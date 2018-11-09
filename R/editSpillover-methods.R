@@ -82,6 +82,13 @@ setGeneric(name = "editSpillover",
 #' specified or to the same name as the specified \code{spfile}.
 #'
 #' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}}.
+#' @param cmfile name of .csv file containing the names of the samples in a
+#'   column called "name" and their matching channel in a column called
+#'   "channel". \code{editSpillover} will the guide you through the channel
+#'   selection process and generate a channel match file called "Compensation
+#'   Channels.csv" automatically. If you already have a complete cmfile and
+#'   would like to bypass the channel selection process, simply pass the name of
+#'   the cmfile to this argument (e.g. "Compensation Channels.csv").
 #' @param spfile name of spillover matrix csv file including .csv file extension
 #'   to use as a starting point for editing. If \code{spfile} is not supplied
 #'   the spillover matrix will be extracted directly from the
@@ -118,7 +125,7 @@ setGeneric(name = "editSpillover",
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #'
 #' @export
-setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile = NULL, subSample = 5000, transList = NULL, ...){
+setMethod(editSpillover, signature = "flowSet", definition = function(x, cmfile = NULL, spfile = NULL, subSample = 5000, transList = NULL, ...){
   
   require(shiny)
   require(shinythemes)
@@ -127,6 +134,19 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
   fs <- x
   nms <- sampleNames(fs)
   channels <- getChannels(fs)
+  
+  # Select a fluorescent channel for each compensation control
+  if(is.null(cmfile)){
+    
+    pData(fs)$channel <- paste(selectChannels(fs))
+    write.csv(pData(fs), "Compensation Channels.csv", row.names = FALSE)
+    
+  }else{
+    
+    pd <- read.csv(cmfile, header = TRUE, row.names = 1)
+    pData(fs)$channel <- paste(pd$channel)
+    
+  }
   
   # Read in spillover matrix to object spill
   if(!is.null(spfile)){
@@ -157,24 +177,43 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
       
       titlePanel("cytoRSuite Spillover Matrix Editor"),
       
-      sidebarPanel(
-        selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs)),
-        selectInput(inputId = "flowFrame", label = "Select Sample:", choices = sampleNames(fs)),
-        selectInput(inputId = "xchannel", label = "X Axis:", choices = channels, selected = channels[1]),
-        selectInput(inputId = "ychannel", label = "Y Axis:", choices = channels, selected = channels[2]),
-        checkboxInput(inputId = "NIL", label = "Overlay Unstained Control", value = TRUE),
-        checkboxInput(inputId = "median", label = "Unstained Control Median", value = TRUE),
-        checkboxInput(inputId = "trace", label = "Median Tracker", value = TRUE),
-        actionButton("saveBtn", "Save")
-      ),
-      
-      mainPanel(
-        rHandsontableOutput("spillover"),
-        plotOutput("plot", height = "500px", width = "50%")
+      tabsetPanel(
+        tabPanel("Spillover", fluid = TRUE,
+                 sidebarLayout(
+                   sidebarPanel(
+                     selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs), selected = pData(fs)$name[match("Unstained", pData(fs)$channel)]),
+                     selectInput(inputId = "flowFrame", label = "Select Sample:", choices = sampleNames(fs)),
+                     selectInput(inputId = "xchannel", label = "X Axis:", choices = channels),
+                     selectInput(inputId = "ychannel", label = "Y Axis:", choices = channels),
+                     checkboxInput(inputId = "NIL", label = "Overlay Unstained Control", value = TRUE),
+                     checkboxInput(inputId = "median", label = "Unstained Control Median", value = TRUE),
+                     checkboxInput(inputId = "trace", label = "Median Tracker", value = TRUE),
+                     actionButton("saveBtn", "Save")
+                   ),
+                   mainPanel(
+                     rHandsontableOutput("spillover"),
+                     plotOutput("plot", height = "500px", width = "50%")
+                   )
+                 )
+        ),
+        tabPanel("Plots", fluid = TRUE,
+                 sidebarLayout(
+                   sidebarPanel(
+                     selectInput(inputId = "Unstained2", label = "Select Unstained Control:", choices = sampleNames(fs), selected = pData(fs)$name[match("Unstained", pData(fs)$channel)]),
+                     selectInput(inputId = "flowFrame2", label = "Select Sample:", choices = sampleNames(fs)),
+                     checkboxInput(inputId = "NIL2", label = "Overlay Unstained Control", value = TRUE),
+                     checkboxInput(inputId = "Uncomp", label = "Underlay Uncompenasted Control", value = TRUE),
+                     checkboxInput(inputId = "Comp", label = "Overlay Compenasted Control", value = TRUE)
+                   ),
+                   mainPanel(fluidRow(
+                     plotOutput("plots", height = "800px", width = "100%")  
+                   )
+                   )
+                 )
+        )
       )
-    ),
-    
-    server = function(input, output, session){
+    ), 
+    server <- function(input, output, session) {
       
       values <- reactiveValues()
       
@@ -220,6 +259,13 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
                                                                                          }
                                                                                          }") %>% hot_rows(rowHeights = 20)
       
+      })
+      
+      # Update xchannel selection based on selected control - spillover
+      observe({
+        fr <- input$flowFrame
+        xchan <- pData(fs)$channel[match(input$flowFrame, pData(fs)$name)]
+        updateSelectInput(session, "xchannel", selected = xchan)
       })
       
       # Apply compensation after each edit
@@ -364,11 +410,38 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
         
       })
       
+      output$plots <- renderPlot({
+        
+        xchan <- pData(fs)$channel[match(input$flowFrame2, pData(fs)$name)]
+        if(input$Uncomp == TRUE){
+          if(input$Comp == TRUE & input$NIL2 == FALSE){
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$flowFrame2]], col = c("blue","magenta"), subSample = subSample, alpha = 0.6)
+          }else if(input$Comp == TRUE & input$NIL2 == TRUE){
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = list(fs.comp()[[input$flowFrame2]],fs.comp()[[input$Unstained2]]), col = c("blue","magenta","black"), subSample = subSample, alpha = 0.6)
+          }else if(input$Comp == FALSE & input$NIL2 == TRUE){
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6)
+          }else if(input$Comp == FALSE & input$NIL2 == FALSE){
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, col = "blue", subSample = subSample, alpha = 0.6)
+          }
+        }else if(input$Uncomp == FALSE){
+          if(input$Comp == TRUE & input$NIL2 == TRUE){
+            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6)
+          }else if(input$Comp == FALSE & input$NIL2 == TRUE){
+            plotCytoComp(fs.comp()[[input$Unstained2]], channel = xchan, transList = transList, col = "black", subSample = subSample, alpha = 0.6)
+          }else if(input$Comp == TRUE & input$NIL2 == FALSE){  
+            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, col = "magenta", subSample = subSample, alpha = 0.6)
+          }else if(input$Comp == FALSE & input$NIL2 == FALSE){
+            
+          }
+        }
+      })
+      
       observe({
         input$saveBtn
         class(values$spill) <- "numeric"
         spill.mat <- values$spill/100
         write.csv(spill.mat, spfile)
+        
       })
       
     })
@@ -410,6 +483,13 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #' @param parent name of the pre-gated population to be plotted (e.g. "Single
 #'   Cells").
+#' @param cmfile name of .csv file containing the names of the samples in a
+#'   column called "name" and their matching channel in a column called
+#'   "channel". \code{editSpillover} will the guide you through the channel
+#'   selection process and generate a channel match file called "Compensation
+#'   Channels.csv" automatically. If you already have a complete cmfile and
+#'   would like to bypass the channel selection process, simply pass the name of
+#'   the cmfile to this argument (e.g. "Compensation Channels.csv").
 #' @param spfile name of spillover matrix csv file including .csv file extension
 #'   to use as a starting point for editing. If \code{spfile} is not supplied
 #'   the spillover matrix will be extracted directly from the
@@ -447,7 +527,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, spfile 
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #'
 #' @export
-setMethod(editSpillover, signature = "GatingSet", definition = function(x, parent = NULL, spfile = NULL, subSample = 5000, transList = NULL, ...){
+setMethod(editSpillover, signature = "GatingSet", definition = function(x, parent = NULL, cmfile = NULL, spfile = NULL, subSample = 5000, transList = NULL, ...){
   
   require(shiny)
   require(shinythemes)
@@ -491,255 +571,8 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
     fs <- getData(gs, getNodes(gs)[length(getNodes(gs))])
     
   }
-  
-  # Read in spillover matrix to object spill
-  if(!is.null(spfile)){
-    
-    spill <- read.csv(spfile, header = TRUE, row.names = 1)
-    spill <- as.matrix(spill)
-    
-  }else{
-    
-    spfile <- "Spillover Matrix.csv"
-    spill <- fs[[1]]@description$SPILL
-    
-  }
-  colnames(spill) <- channels
-  rownames(spill) <- channels
-  
-  # Rhandsontable does handle decimal points if none are supplied in the dataset - if matrix is empty edit first value in second column to 0.01
-  if(all(spill %in% c(0,1))){
-    
-    spill[1,2] <- 0.0001
-    
-  }
-  
-  shinyApp(
-    ui <- fluidPage(
-      
-      theme = shinytheme("yeti"),
-      
-      titlePanel("cytoRSuite Spillover Matrix Editor"),
-      
-      sidebarPanel(
-        selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs)),
-        selectInput(inputId = "flowFrame", label = "Select Sample:", choices = sampleNames(fs)),
-        selectInput(inputId = "xchannel", label = "X Axis:", choices = channels, selected = channels[1]),
-        selectInput(inputId = "ychannel", label = "Y Axis:", choices = channels, selected = channels[2]),
-        checkboxInput(inputId = "NIL", label = "Overlay Unstained Control", value = TRUE),
-        checkboxInput(inputId = "median", label = "Unstained Control Median", value = TRUE),
-        checkboxInput(inputId = "trace", label = "Median Tracker", value = TRUE),
-        actionButton("saveBtn", "Save")
-      ),
-      
-      mainPanel(
-        rHandsontableOutput("spillover"),
-        plotOutput("plot", height = "500px", width = "50%")
-      )
-    ),
-    
-    server = function(input, output, session){
-      
-      values <- reactiveValues()
-      
-      observe({
-        
-        if(!is.null(input$spillover)){
-          
-          spill <- hot_to_r(input$spillover)
-          rownames(spill) <- colnames(spill)
-          values$spill <- spill
-          
-        }else{
-          
-          values$spill <- spill*100
-          
-        }
-        
-      })    
-      
-      
-      output$spillover <- renderRHandsontable({
-        
-        
-        rhandsontable(values$spill, rowHeaderWidth = 105, readOnly = FALSE) %>% hot_cols(type = "numeric", colWidths = 105, format = "0.000", halign = "htCenter", renderer = "
-                                                                                         function (instance, td, row, col, prop, value, cellProperties) {
-                                                                                         Handsontable.renderers.TextRenderer.apply(this, arguments);
-                                                                                         if(value < 0 ){
-                                                                                         td.style.background = 'lightblue';
-                                                                                         } else if (value == 0 ){
-                                                                                         td.style.background = 'white';
-                                                                                         } else if (value > 0 & value <= 10) {
-                                                                                         td.style.background = 'lightgreen';
-                                                                                         } else if (value > 10 & value <= 25){
-                                                                                         td.style.background = 'yellow';
-                                                                                         } else if (value > 25 & value <= 50){
-                                                                                         td.style.background = 'orange';
-                                                                                         } else if (value > 50 & value < 100){
-                                                                                         td.style.background = 'red';
-                                                                                         } else if (value == 100){
-                                                                                         td.style.background = 'darkgrey';
-                                                                                         } else if (value > 100){
-                                                                                         td.style.background = 'violet';
-                                                                                         }
-                                                                                         }") %>% hot_rows(rowHeights = 20)
-      
-      })
-      
-      # Apply compensation after each edit
-      fs.comp <- eventReactive(values$spill, {
-        
-        fs <- compensate(fs, values$spill/100)
-        
-        # Apply logicle transformation to fluorescent channels
-        if(!is.null(transList)){
-          
-          if(class(transList)[1] == "transformerList"){
-            
-            transList <<- transformList(names(transList),lapply(transList, `[[`, "transform"))
-            
-          }else if(class(transList)[1] == "transformList"){
-            
-            transList <<- transList
-            fs <- transform(fs, transList)
-            
-          }else{
-            
-            stop("Supplied transList should be of class transformList or transFormerList.")
-            
-          }
-          
-        }else{
-          
-          transList <<- estimateLogicle(as(fs,"flowFrame"), channels)
-          fs <- transform(fs, transList)
-          
-        }
-        
-        return(fs)
-        
-      })
-      
-      output$plot <- renderPlot({
-        
-        # Axes Limits
-        fr.exprs <- exprs(fs.comp()[[input$flowFrame]])
-        xrange <- range(fr.exprs[, input$xchannel])
-        yrange <- range(fr.exprs[, input$ychannel])
-        
-        # X Axis Limits
-        if(xrange[1] > 0){
-          
-          xmin <- -0.5
-          
-        }else if(xrange[1] <= 0){
-          
-          xmin <- xrange[1]
-        }
-        xlim <- c(xmin,4.5)
-        
-        
-        # Y Axis Limits
-        if(yrange[1] > 0){
-          
-          ymin <- -0.5
-          
-        }else if(yrange[1] <= 0){
-          
-          ymin <- yrange[1]
-        } 
-        ylim <- c(ymin,4.5)
-        
-        # Plot
-        if(input$NIL == FALSE){
-          
-          plotCyto(fs.comp()[[input$flowFrame]], channels = c(input$xchannel,input$ychannel), subSample = subSample, transList = transList, main = input$flowFrame, cex.pts = 3, xlim = xlim, ylim = ylim, ...)
-          
-          if(input$median == TRUE){
-            
-            medians <- fsApply(fs.comp(), each_col, "median")[input$Unstained,channels]
-            MFI <- data.frame("Channel" = channels, "Median" = medians)
-            
-            cutoff <- MFI[match(input$ychannel, MFI$Channel),]
-            
-            abline(h = cutoff[2], col = "red", lwd = 2)
-            
-          }
-          
-          if(input$trace == TRUE){
-            cells <- exprs(fs.comp()[[input$flowFrame]])
-            cells <- cells[order(cells[,input$xchannel]),]
-            cells <- as.data.frame(cells)
-            
-            n <- nrow(cells)
-            splt <- seq(1,20,1)
-            r <- ceiling(nrow(cells)/20)
-            cuts <- splt*r
-            cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
-            
-            xmedians <- lapply(cells, function(x) median(x[,input$xchannel]))
-            ymedians <- lapply(cells, function(x) median(x[,input$ychannel]))
-            
-            medians <- data.frame(unlist(xmedians), unlist(ymedians))
-            colnames(medians) <- c(input$xchannel,input$ychannel)
-            
-            loessMod <- loess(medians[,input$ychannel] ~ medians[,input$xchannel], data = medians, span = 0.9)
-            loessMod <- predict(loessMod)
-            
-            lines(medians[,input$xchannel], loessMod, col = "magenta3", lwd = 3)
-            
-          }
-          
-        }else if(input$NIL == TRUE){
-          
-          plotCyto(fs.comp()[[input$flowFrame]], channels = c(input$xchannel,input$ychannel), overlay = fs.comp()[[input$Unstained]], subSample = subSample, transList = transList, main = input$flowFrame, cex.pts = 3, xlim = xlim, ylim = ylim, ...)
-          
-          if(input$median == TRUE){
-            
-            medians <- fsApply(fs.comp(), each_col, median)[input$Unstained,channels]
-            MFI <- data.frame("Channel" = channels, "Median" = medians)
-            
-            cutoff <- MFI[match(input$ychannel, MFI$Channel),]
-            
-            abline(h = cutoff[2], col = "red", lwd = 2)
-            
-          }
-          
-          if(input$trace == TRUE){
-            cells <- exprs(fs.comp()[[input$flowFrame]])
-            cells <- cells[order(cells[,input$xchannel]),]
-            cells <- as.data.frame(cells)
-            
-            n <- nrow(cells)
-            splt <- seq(1,20,1)
-            r <- ceiling(nrow(cells)/20)
-            cuts <- splt*r
-            cells <- split(cells, cumsum(1:nrow(cells) %in% cuts))
-            
-            xmedians <- lapply(cells, function(x) median(x[,input$xchannel]))
-            ymedians <- lapply(cells, function(x) median(x[,input$ychannel]))
-            
-            medians <- data.frame(unlist(xmedians), unlist(ymedians))
-            colnames(medians) <- c(input$xchannel,input$ychannel)
-            
-            loessMod <- loess(medians[,input$ychannel] ~ medians[,input$xchannel], data = medians, span = 0.9)
-            loessMod <- predict(loessMod)
-            
-            lines(medians[,input$xchannel], loessMod, col = "magenta3", lwd = 3)
-            
-          }
-          
-        }
-        
-      })
-      
-      observe({
-        input$saveBtn
-        class(values$spill) <- "numeric"
-        spill.mat <- values$spill/100
-        write.csv(spill.mat, spfile)
-      })
-      
-    })
+
+  # Make call to editSpillover flowSet method
+  editSpillover(x = fs, cmfile = cmfile, spfile = spfile, transList = transList, subSample = subSample)
   
 })

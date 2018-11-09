@@ -5,12 +5,17 @@
 \alias{plotCytoComp,flowFrame-method}
 \title{Plot Compensation - flowFrame Method}
 \usage{
-\S4method{plotCytoComp}{flowFrame}(x, compensate = FALSE,
-  spfile = NULL, transList = NULL, mfrow, popup = FALSE, ...)
+\S4method{plotCytoComp}{flowFrame}(x, channel = NULL,
+  compensate = FALSE, spfile = NULL, transList = NULL, mfrow,
+  popup = FALSE, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}
 containing gated compensation controls and an unstained control.}
+
+\item{channel}{name of the fluorescent channel associated with the
+\code{\link[flowCore:flowFrame-class]{flowFrame}}. If not supplied users
+will need to select the channel from a dropdown menu.}
 
 \item{compensate}{logical indicating whether the samples should be
 compensated prior to plotting, set to FALSE by default. If no spillover
@@ -37,7 +42,8 @@ plot.}
 \item{popup}{logical indicating whether plots should be constructed in a
 pop-up window.}
 
-\item{...}{additional arguments passed to \code{\link{plotCyto2d,flowFrame-method}}.}
+\item{...}{additional arguments passed to
+\code{\link{plotCyto2d,flowFrame-method}}.}
 }
 \description{
 Plot each compensation control in all fluorescent channels to identify any

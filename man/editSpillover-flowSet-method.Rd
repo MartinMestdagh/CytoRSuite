@@ -5,11 +5,19 @@
 \alias{editSpillover,flowSet-method}
 \title{Edit Spillover Matrix - flowSet Method}
 \usage{
-\S4method{editSpillover}{flowSet}(x, spfile = NULL, subSample = 5000,
-  transList = NULL, ...)
+\S4method{editSpillover}{flowSet}(x, cmfile = NULL, spfile = NULL,
+  subSample = 5000, transList = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
+
+\item{cmfile}{name of .csv file containing the names of the samples in a
+column called "name" and their matching channel in a column called
+"channel". \code{editSpillover} will the guide you through the channel
+selection process and generate a channel match file called "Compensation
+Channels.csv" automatically. If you already have a complete cmfile and
+would like to bypass the channel selection process, simply pass the name of
+the cmfile to this argument (e.g. "Compensation Channels.csv").}
 
 \item{spfile}{name of spillover matrix csv file including .csv file extension
 to use as a starting point for editing. If \code{spfile} is not supplied
