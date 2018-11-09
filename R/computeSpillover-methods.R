@@ -128,7 +128,8 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
   }else{
     
     pd <- read.csv(cmfile, header = TRUE, row.names = 1)
-    pData(fs)$channel <- paste(pd$channel)
+    chans <- pd$channel[match(sampleNames(fs), row.names(pd))]
+    pData(fs)$channel <- paste(chans)
     
   }
   
