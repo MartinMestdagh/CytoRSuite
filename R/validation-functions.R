@@ -308,7 +308,7 @@ setMethod(checkChannels, signature = "GatingSet", definition = function(x, chann
 #' @noRd
 checkGateType <- function(type, alias){
   
-  if(type %in% c("q","Q","quadrant","Quadrant") & length(alias) != 4){
+  if(all(type %in% c("q","Q","quadrant","Quadrant")) & length(alias) != 4){
     
     stop("Supply the names of 4 poulations to alias for quadrant gates.")
     
