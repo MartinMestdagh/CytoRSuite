@@ -259,8 +259,13 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
 #'
 #' @param x object of class
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param select vector containing the indicies of samples within gs to use for
-#'   plotting.
+#' @param groupBy numeric (e.g. 2) or vector of pData column names (e.g.
+#'   c("Treatment","Concentration") indicating how the samples should be grouped
+#'   prior to gating, set to the length of x by default to construct a single
+#'   gate for all samples. If groupBy is suppied a different gate will be
+#'   constructed for each group.
+#' @param select vector containing the indicies of samples within each group to
+#'   use for plotting.
 #' @param channels vector of channel names to use for plotting, can be of length
 #'   1 for 1-D density histogram or length 2 for 2-D scatter plot.
 #' @param parent name of the \code{parent} population to extract for gating.
@@ -309,10 +314,11 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
 #' @seealso \code{\link{drawGate,flowSet-method}}
 #'
 #' @export
-setMethod(drawGate, signature = "GatingSet", definition = function(x, select = NULL, parent = "root", alias = NULL, channels = NULL, type = "polygon", subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...) {
+setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = length(x), select = NULL, parent = "root", alias = NULL, channels = NULL, type = "polygon", subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...) {
 
   # Assign x to gs
   gs <- x
+  smp <- length(gs)
 
   # Check whether a gatingTemplate ready exists for this population
   if (!is.null(gtfile)) {
@@ -323,6 +329,58 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, select = N
 
   fs <- flowWorkspace::getData(x, parent)
 
+  # grouping required
+  if(is.numeric(groupBy)){
+    
+    if(length(groupBy) > 1){
+      
+      stop("Only a single numeric can be supplied to groupBy.")
+      
+    }else if(groupBy > length(gs)){
+      
+      groupBy <- length(gs)
+      
+    }
+    
+    if(groupBy == length(gs)){
+      
+      grps <- list(fs)
+      
+    }else{
+      
+      gps <- ceiling(length(gs)/groupBy)
+      gb <- sapply(1:(gps-1), function(x) rep(x, groupBy))
+      gb <- c(gb,rep(gps, (smp - length(gb))))
+      pData(gs)$groupby <- gb
+      
+      grps <- lapply(unique(pData(gs)$groupby), function(x){
+        
+        fs[which(pData(gs)$groupby %in% x)]
+        
+      })
+      
+    }
+    
+  }else if(is.character(groupBy)){
+    
+    if(!all(groupBy %in% colnames(pData(gs)))){
+      
+      stop("Names supplied to groupBy do not exist in pData(x).")
+      
+    }
+    
+    pData(gs)$groupby <- do.call(paste, pData(gs)[, groupBy, drop = FALSE])
+    grps <- lapply(unique(pData(gs)$groupby), function(x){
+      
+      fs[which(pData(gs)$groupby %in% x)]
+      
+    })
+    
+  }
+  
+  # Gate each group - list of filters
+  fltrsLst <- lapply(grps, function(fs){
+  
   # Restrict to samples matching pData requirements
   if (!is.null(select)) {
     if (class(select) != "numeric") {
@@ -383,6 +441,34 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, select = N
 
   gates <- filters(gates)
 
+  })
+  
+  # Name gates with groupBy info
+  if(is.numeric(groupBy)){
+  
+    # group number
+    names(fltrsLst) <- unique(pData(gs)$groupby)
+    
+  }else if(is.character(groupBy)){
+    
+    # merge columns
+    names(fltrsLst) <- unique(do.call(paste, pData(gs)[, groupBy, drop = FALSE]))
+    
+  }
+  gates <- fltrsLst
+  
+  # format gates to be a list of alias lists each of length group appropriately named
+  gates <- lapply(1:length(alias), function(y){
+    gates <- lapply(gates, function(x){
+      
+        gts <- filters(list(x[[y]]))
+      
+    })
+    names(gates) <- unique(pData(gs)$groupby)
+    return(gates)
+  })
+  names(gates) <- alias
+  
   # Prepare gatingTemplate entries
   pop <- "+"
 
@@ -390,11 +476,14 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, select = N
   if (is.null(gtfile)) {
     message("No gatingTemplate file name supplied - creating gatingTemplate.csv to store gates.")
 
+    # need to extract alias from gates list into new named list
+    
     pops <- list()
     for (i in 1:length(alias)) {
       pops[[i]] <- add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
-        gating_args = list(gate = gates[[i]])
+        gating_args = list(gate = gates[[i]]), groupBy = paste(groupBy, collapse = ","), collapseDataForGating = TRUE,
+        preprocessing_method = "ppdrawGate"
       )
     }
     pops <- do.call("rbind", pops)
@@ -405,9 +494,11 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, select = N
 
     pops <- list()
     for (i in 1:length(alias)) {
+      print(gates[[i]])
       pops[[i]] <- add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
-        gating_args = list(gate = gates[[i]])
+        gating_args = list(gate = gates[[i]]), groupBy = groupBy, collapseDataForGating = TRUE, 
+        preprocessing_method = "ppdrawGate"
       )
     }
     pops <- do.call("rbind", pops)
@@ -420,7 +511,8 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, select = N
     for (i in 1:length(alias)) {
       pops[[i]] <- add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
-        gating_args = list(gate = gates[[i]])
+        gating_args = list(gate = gates[[i]]), groupBy = paste(groupBy, collapse = ","), collapseDataForGating = TRUE,
+        preprocessing_method = "ppdrawGate"
       )
     }
     pops <- do.call("rbind", pops)

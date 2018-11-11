@@ -5,8 +5,8 @@
 \alias{drawGate,GatingSet-method}
 \title{drawGate GatingSet Method}
 \usage{
-\S4method{drawGate}{GatingSet}(x, select = NULL, parent = "root",
-  alias = NULL, channels = NULL, type = "polygon",
+\S4method{drawGate}{GatingSet}(x, groupBy = length(x), select = NULL,
+  parent = "root", alias = NULL, channels = NULL, type = "polygon",
   subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5,
   labels = TRUE, plot = TRUE, ...)
 }
@@ -14,8 +14,14 @@
 \item{x}{object of class
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{select}{vector containing the indicies of samples within gs to use for
-plotting.}
+\item{groupBy}{numeric (e.g. 2) or vector of pData column names (e.g.
+c("Treatment","Concentration") indicating how the samples should be grouped
+prior to gating, set to the length of x by default to construct a single
+gate for all samples. If groupBy is suppied a different gate will be
+constructed for each group.}
+
+\item{select}{vector containing the indicies of samples within each group to
+use for plotting.}
 
 \item{parent}{name of the \code{parent} population to extract for gating.}
 
