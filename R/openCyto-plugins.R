@@ -135,14 +135,21 @@ ppdrawGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...) 
     
   }else if(!is.na(groupBy) & grepl("^[A-Za-z]+$", groupBy) == FALSE){
     
-    # groupBy is numeric - index in gs
-    grps <- ceiling(smp/as.numeric(groupBy))
-    gb <- sapply(1:(grps-1), function(x) rep(x, groupBy))
-    gb <- c(gb,rep(grps, (smp - length(gb))))
-    pData(gs)$groupby <- gb
+    if(groupBy == smp){
+      
+      grpby <- 1
+      
+    }else{
+      
+      # groupBy is numeric - index in gs
+      grps <- ceiling(smp/as.numeric(groupBy))
+      gb <- sapply(1:(grps-1), function(x) rep(x, groupBy))
+      gb <- c(gb,rep(grps, (smp - length(gb))))
+      pData(gs)$groupby <- gb
     
-    grpby <- pData(gs)[,"groupby"][match(pData(fs[1])[, "name"], pData(gs)[, "name"])]
+      grpby <- pData(gs)[,"groupby"][match(pData(fs[1])[, "name"], pData(gs)[, "name"])]
     
+    }
   }
   
   # No grouping select first gate - only 1 gate expected
