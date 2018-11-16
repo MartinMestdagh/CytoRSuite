@@ -120,7 +120,7 @@ registerPlugins(gate_manual, "manualGate")
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-ppdrawGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...) {
+ppmanualGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...) {
   
   # Samples
   smp <- length(gs)
@@ -142,11 +142,7 @@ ppdrawGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...) 
     }else{
       
       # groupBy is numeric - index in gs
-      grps <- ceiling(smp/as.numeric(groupBy))
-      gb <- sapply(1:(grps-1), function(x) rep(x, groupBy))
-      gb <- c(gb,rep(grps, (smp - length(gb))))
-      pData(gs)$groupby <- gb
-    
+      pData(gs)$groupby <- rep(1:smp, each = groupBy, length.out = smp)
       grpby <- pData(gs)[,"groupby"][match(pData(fs[1])[, "name"], pData(gs)[, "name"])]
     
     }
@@ -162,4 +158,4 @@ ppdrawGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...) 
   return(grpby)
   
 }
-registerPlugins(fun = ppdrawGate, methodName = 'ppdrawGate', dep=NA, "preprocessing")
+registerPlugins(fun = ppmanualGate, methodName = 'ppmanualGate', dep=NA, "preprocessing")

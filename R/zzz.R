@@ -4,8 +4,9 @@
 #' @noRd
 .onLoad <- function(libname,pkgname){
 
+  options("cytoRSuite_interact" = TRUE)
   openCyto::registerPlugins(fun = gate_draw, methodName = "drawGate")
   openCyto::registerPlugins(fun = gate_manual, methodName = "manualGate")
-  openCyto::registerPlugins(fun = ppdrawGate, methodName = 'ppdrawGate', dep=NA, "preprocessing")
+  openCyto::registerPlugins(fun = ppmanualGate, methodName = 'ppmanualGate', dep=NA, "preprocessing")
   
 }

@@ -147,7 +147,7 @@ extractGate <- function(parent, alias, gtfile){
 #' @return an object of calss \code{GatingSet} with edited gate applied, as well
 #'   as gatingTemplate file with editied gate saved.
 #'
-#' @importFrom flowWorkspace getData getTransformations GatingSet getGate setGate recompute
+#' @importFrom flowWorkspace getData getTransformations GatingSet getGate setGate recompute pData
 #' @importFrom flowCore parameters filterList
 #' @importFrom openCyto gatingTemplate
 #' @importFrom data.table as.data.table fread fwrite :=
@@ -179,35 +179,42 @@ extractGate <- function(parent, alias, gtfile){
 #' @export
 editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NULL, type = NULL, gtfile = NULL, ...){
   
-  # Rename x to gs
-  gs <- x
-  fs <- suppressMessages(getData(gs, parent))
-  
-  # Overlay
-  if(!is.null(overlay)){
+  # Parent
+  if(is.null(parent)){
     
-    # Extract populations to overlay - list of flowSets
-    if(class(overlay) == "character"){
-      
-      overlay <- lapply(overlay, function(overlay){getData(gs, overlay)})
-      
-      overlay <- lapply(overlay, function(x){
-        
-        fr <- as(x,"flowFrame")
-        
-        if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
-          
-          fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
-          
-        }
-        
-        return(fr)
-        
-      })
-      
-    }
+    stop("Please supply the name of the parent population.")
+    
+  }else if(!parent %in% basename(getNodes(x))){
+    
+    stop("Supplied parent does not exist in the GatingSet.")
     
   }
+  
+  # Alias
+  if(is.null(alias)){
+    
+    stop("Please supply the name(s) of the gates to edit to the alias argument.")
+    
+  }else if(!all(alias %in% basename(getNodes(x)))){
+    
+    stop("Supplied alias does not exist in the GatingSet.")
+    
+  }
+  
+  # gatingTemplate
+  if(is.null(gtfile)){
+    
+    stop("Please supply the name of gatingTemplate to the gtfile argument.")
+    
+  }else{
+    
+    checkFile(gtfile)
+    
+  }
+  
+  # Rename x to gs
+  gs <- x
+  pd <- pData(gs)
   
   # Extract transList from gs
   if(length(getTransformations(gs[[1]])) != 0){
@@ -223,73 +230,211 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     
   }
   
-  # Restrict to samples matching select requirements
-  if(!is.null(select)){
+  # Extract gates from gt
+  gt <- suppressMessages(gatingTemplate(gtfile))
+  
+  # Extract population nodes from gt
+  nds <- getNodes(gt, only.names = TRUE)
+  
+  #Parent Node
+  prnt <- names(nds)[match(parent,nds)]
+  
+  # Extract gates given parent and child node(s)
+  gt_gates <- lapply(alias, function(x){
     
-    if(class(select) != "numeric"){
+    # Alias node
+    alias <- names(nds[match(x,nds)])
+    
+    gm <- getGate(gt, prnt, alias)
+    gate <- eval(parameters(gm)$gate)
+    
+  })
+  names(gt_gates) <- alias # gt_gates is list (length(alias)) of list of filters (1x filters per group)
+  
+  # Read in gtfile
+  gt <- read.csv(gtfile, header = TRUE)
+  
+  # Get groupBy from gatingTemplate
+  grpby <- as.character(gt[gt$parent == parent & gt$alias == alias[1], "groupBy"])
+  
+  if(grepl("^[A-Za-z]+$", grpby) == FALSE){
+    
+    grpby <- as.numeric(grpby)
+    
+  }
+  
+  # Get channels from gatingTemplate
+  channels <- unique(unlist(strsplit(as.character(gt[gt$parent == parent & gt$alias %in% alias, "dims"]), ",", fixed = TRUE)))
+  
+  # Menu to select which groups require editing
+  if(is.numeric(grpby)){
       
-      stop("Vector supplied to select argument should contain the numeric indicies of the samples to select.")
+    # All samples in same group
+    if(grpby == length(gs)){
+        
+      # no selection required - grps indicates which filters object to edit
+      grps <- 1
+      pData(gs)$groupby <- rep(1,length(gs))
+        
+    }else{
+        
+      grps <- ceiling(length(gs)/grpby)
+      opts <- seq(1, grps, 1)
+        
+      # assign groups to pData$groupby
+      pData(gs)$groupby <- rep(1:length(gs), each = grpby, length.out = length(gs))
+        
+      grps <- select.list(opts, multiple = TRUE, graphics = TRUE, title = "Select the group(s) to edit:")
+        
+    }
+      
+  }else if(is.character(grpby)){
+      
+    vrs <- unlist(strsplit(grpby, ",", fixed = TRUE))
+    opts <- unique(do.call(paste, pData(gs)[, grpby, drop = FALSE]))
+      
+    pData(gs)$groupby <- do.call(paste, pData(gs)[, grpby, drop = FALSE])
+      
+    grps <- select.list(opts, multiple = TRUE, graphics = TRUE, title = "Select the group(s) to edit:")
+      
+  }
+  
+  # Split GatingSet into list of GatingSet groups
+  if(is.numeric(grpby)){
+      
+    if(grpby == length(gs)){
+        
+      gs.lst <- list(gs)
+      names(gs.lst) <- 1
+        
+    }else{
+        
+      gs.lst <- lapply(grps, function(x) gs[which(pData(gs)$groupby == x)])
+      names(gs.lst) <- grps
+        
+    }
+      
+  }else if(is.character(grpby)){
+      
+    gs.lst <- lapply(grps, function(x) gs[which(pData(gs)$groupby == x)])
+    names(gs.lst) <- grps
+      
+  }
+    
+  # plot, edit and save gate for each group
+  new_gates <- lapply(gs.lst, function(grp){
+      
+    # Extract parent population for plotting
+    fs <- suppressMessages(getData(grp, parent))
+    fr <- as(fs, "flowFrame")
+      
+    # Overlay
+    if(!is.null(overlay)){
+        
+      # Extract populations to overlay - list of flowSets
+      if(class(overlay) == "character"){
+          
+        overlay <- lapply(overlay, function(overlay){getData(grp, overlay)})
+          
+        overlay <- lapply(overlay, function(x){
+            
+          fr <- as(x,"flowFrame")
+            
+          if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
+              
+            fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+              
+          }
+            
+          return(fr)
+            
+        })
+          
+      }
+        
+    }
+      
+    # Extract gate(s) for plotting
+    gates <- filters(lapply(alias, function(x){getGate(grp[[1]],x)}))
+    
+    # Plot data and existing gates
+    if(is.numeric(grpby)){
+      
+      if(parent == "root"){
+        
+        pnt <- "All Events"
+        
+      }
+      
+      main <- paste("Group", pData(grp)$groupby[1], "\n", pnt)
+      
+    }else if(is.character(grpby)){
+      
+      if(parent = "root"){
+        
+        pnt <- "All Events"
+        
+      }
+      
+      main <- paste(pData(grp)$groupby[1], "\n", pnt)
       
     }
     
-    # Extract samples using selectFrames
-    fs <- fs[select]
+    plotCyto(fr, channels = channels, overlay = overlay, popup = TRUE, legend = FALSE, gates = gates, col.gate = "magenta", transList = transList, labels = FALSE, main = main, lwd.gate = 2.5, ...)
     
-  }
-  fr <- as(fs, "flowFrame")
-  
-  if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
-    
-    fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
-    
-  }
-  
-  # Extract gate(s) from GatingSet
-  gates <- filters(lapply(alias, function(x){getGate(gs[[1]],x)}))
-  
-  # If no type supplied determine using getGateType
-  if(is.null(type)){
-    
-    type <- getGateType(gates)
-    
-  }
-  
-  # Check type argument is valid
-  type <- checkGateType(type = type, alias = alias)
-  
-  # Check alias is supplied correctly
-  checkAlias(alias = alias, type = type)  
-  
-  # Extract channels from gates
-  channels <- parameters(gates[[1]])
-  
-  # Plot data & existing gates
-  plotCyto(fr, channels = channels, overlay = overlay, popup = TRUE, legend = FALSE, gates = gates, col.gate = "magenta", transList = transList, labels = FALSE, main = paste("Combined Events \n", parent), lwd.gate = 2.5, ...)
-  
-  # 2D Interval gates require axis argument
-  if("interval" %in% type){
-    
-    intvl <- rbind(gates[[match("interval", type)[1]]]@min,gates[[match("interval", type)[1]]]@max)
-    
-    if(all(is.finite(intvl[,1]))){
+    # If no type supplied determine using getGateType
+    if(is.null(type)){
       
-      axis <- "x"
-      
-    }else if(all(is.finite(intvl[,2]))){
-      
-      axis <- "y"
+      type <- getGateType(gates)
       
     }
     
-  }
+    # Check type argument is valid
+    type <- checkGateType(type = type, alias = alias)
+    
+    # Check alias is supplied correctly
+    checkAlias(alias = alias, type = type)  
+    
+    # Extract channels from gates
+    channels <- parameters(gates[[1]])
+      
+    # 2D Interval gates require axis argument
+    if("interval" %in% type){
+    
+      intvl <- rbind(gates[[match("interval", type)[1]]]@min,gates[[match("interval", type)[1]]]@max)
+    
+      if(all(is.finite(intvl[,1]))){
+      
+        axis <- "x"
+      
+      }else if(all(is.finite(intvl[,2]))){
+      
+        axis <- "y"
+      
+      }
+    
+    }
+    
+    # Draw new gates - set plot to FALSE (filters object of length alias)
+    new_gates <- drawGate(fr, alias = alias, channels = channels, type = type, axis = axis, plot = FALSE)
+    names(new_gates) <- alias
+    
+    # Modify existing gate(s)
+    lapply(seq_along(alias), function(pop){
+      
+      gt_gates[[alias[pop]]][[match(pData(grp)$groupby[1], names(gt_gates[[pop]]))]] <<- filters(list(new_gates[[alias[pop]]]))
+      
+    })
+    
+    return(new_gates)
+  })
   
-  # Make new call to drawGate to get new gates - set plot = FALSE
-  new <- drawGate(fr, alias = alias, channels = channels, type = type, axis = axis, plot = FALSE)
-  
+
   # Re-name parent and pop to be data.table friendly
   prnt <- parent
   als <- alias
   gtmd <- "manualGate"
+  ppmd <- "ppmanualGate"
   
   # Find and Edit gatingTemplate entries - each alias and gate separate
   gt <- data.table::fread(gtfile)
@@ -297,32 +442,32 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   for(i in 1:length(alias)){
     
     gt[parent == prnt & alias == als[i], gating_method := gtmd]
-    gt[parent == prnt & alias == als[i], gating_args := .argDeparser(list(gate = new[[i]]))]
-    gt[parent == prnt & alias == als[i], collapseDataForGating := NA]
-    gt[parent == prnt & alias == als[i], groupBy := NA]
-    gt[parent == prnt & alias == als[i], preprocessing_method := NA]
+    gt[parent == prnt & alias == als[i], gating_args := .argDeparser(list(gate = gt_gates[[i]]))]
+    gt[parent == prnt & alias == als[i], collapseDataForGating := TRUE]
+    gt[parent == prnt & alias == als[i], groupBy := grpby]
+    gt[parent == prnt & alias == als[i], preprocessing_method := ppmd]
     gt[parent == prnt & alias == als[i], preprocessing_args := NA]
     
   }
   
+  # Save updated gatingTemplate
   data.table::fwrite(gt, gtfile)
   
-  # Apply new gate(s) to GatingSet
-  gate.lst <- lapply(new, function(x){
+  # Apply new gates to GatingSet by group
+  lapply(grps, function(grp){
     
-    gts <- rep(list(x), length(gs))
-    names(gts) <- sampleNames(gs)
-    flowCore::filterList(gts)
+    lapply(seq_along(alias), function(pop){
+
+      fltrs <- rep(list(gt_gates[[alias[pop]]][[grp]][[1]]), length(gs[which(pData(gs)$groupby == grp)]))
+      names(fltrs) <- as.character(pData(gs[which(pData(gs)$groupby == grp)])$name)
+      
+      suppressMessages(setGate(gs[which(pData(gs)$groupby == grp)], alias[pop], fltrs))
+      suppressMessages(recompute(gs[which(pData(gs)$groupby == grp)], alias[pop]))
+      
+    })
     
   })
-  
-  lapply(seq_along(alias), function(x){
-    
-    suppressMessages(setGate(gs, alias[x], gate.lst[[x]]))
-    suppressMessages(recompute(gs, alias[x]))
-    
-  })
-  
+
   assign(deparse(substitute(x)), gs, envir=globalenv())
   
 }

@@ -336,19 +336,19 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
       
       stop("Only a single numeric can be supplied to groupBy.")
       
-    }else if(groupBy > length(gs)){
+    }else if(groupBy > smp){
       
-      groupBy <- length(gs)
+      groupBy <- smp
       
     }
     
-    if(groupBy == length(gs)){
+    if(groupBy == smp){
       
       grps <- list(fs)
       
     }else{
       
-      gps <- ceiling(length(gs)/groupBy)
+      gps <- ceiling(smp/groupBy)
       gb <- sapply(1:(gps-1), function(x) rep(x, groupBy))
       gb <- c(gb,rep(gps, (smp - length(gb))))
       pData(gs)$groupby <- gb
@@ -467,23 +467,32 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
     names(gates) <- unique(pData(gs)$groupby)
     return(gates)
   })
-  names(gates) <- alias
   
   # Prepare gatingTemplate entries
   pop <- "+"
-
+  
+  # Prepare groupBy
+  if(is.character(groupBy)){
+    
+    groupBy <- paste(groupBy, collapse = ",")
+    
+  }else if(is.numeric(groupBy)){
+    
+    groupBy <- as.character(groupBy)
+    
+  }
+  
   # Use add_pop to apply gates to GatingSet and construct gatingTemplate
   if (is.null(gtfile)) {
     message("No gatingTemplate file name supplied - creating gatingTemplate.csv to store gates.")
 
     # need to extract alias from gates list into new named list
-    
     pops <- list()
     for (i in 1:length(alias)) {
       pops[[i]] <- add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
-        gating_args = list(gate = gates[[i]]), groupBy = paste(groupBy, collapse = ","), collapseDataForGating = TRUE,
-        preprocessing_method = "ppdrawGate"
+        gating_args = list(gate = gates[[i]]), groupBy = groupBy, collapseDataForGating = TRUE,
+        preprocessing_method = "ppmanualGate"
       )
     }
     pops <- do.call("rbind", pops)
@@ -494,11 +503,10 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
 
     pops <- list()
     for (i in 1:length(alias)) {
-      print(gates[[i]])
       pops[[i]] <- add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]]), groupBy = groupBy, collapseDataForGating = TRUE, 
-        preprocessing_method = "ppdrawGate"
+        preprocessing_method = "ppmanualGate"
       )
     }
     pops <- do.call("rbind", pops)
@@ -511,8 +519,8 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
     for (i in 1:length(alias)) {
       pops[[i]] <- add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
-        gating_args = list(gate = gates[[i]]), groupBy = paste(groupBy, collapse = ","), collapseDataForGating = TRUE,
-        preprocessing_method = "ppdrawGate"
+        gating_args = list(gate = gates[[i]]), groupBy = groupBy, collapseDataForGating = TRUE,
+        preprocessing_method = "ppmanualGate"
       )
     }
     pops <- do.call("rbind", pops)
