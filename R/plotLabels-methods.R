@@ -108,6 +108,16 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
   prcnt <- round(cnt/events,4)
   prcnt <- sprintf("%.2f %%",100*prcnt)
   
+  # 1D gate plotted in 2D
+  if(length(channels) == 2 & length(parameters(gates)) == 1){
+    
+    rg <- matrix(c(as.numeric(gates@min),as.numeric(gates@max), -Inf, Inf), ncol = 2, nrow = 2)
+    colnames(rg) <- c(as.vector(parameters(gates)), channels[!channels == as.vector(parameters(gates))])
+    rownames(rg) <- c("min","max")
+    gates <- rectangleGate(.gate = rg)
+    
+  }
+  
   # Check supplied channels & gate channels
   chans <- parameters(gates)  
   

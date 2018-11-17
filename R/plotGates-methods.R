@@ -60,10 +60,10 @@ setMethod(plotGates, signature = "rectangleGate", definition = function(x, chann
     
     if(length(channels) == 2 & length(parameters(gt)) == 1){
     
-      gt <- matrix(c(as.numeric(gt@min),as.numeric(gt@max), -Inf, Inf), ncol = 2, nrow = 2)
-      colnames(gt) <- c(as.vector(parameters(gt)), channels[!channels == as.vector(parameters(gt))])
-      rownames(gt) <- c("min","max")
-      gt <- rectangleGate(.gate = gt)
+      rg <- matrix(c(as.numeric(gt@min),as.numeric(gt@max), -Inf, Inf), ncol = 2, nrow = 2)
+      colnames(rg) <- c(as.vector(parameters(gt)), channels[!channels == as.vector(parameters(gt))])
+      rownames(rg) <- c("min","max")
+      gt <- rectangleGate(.gate = rg)
     
     }
     
@@ -73,7 +73,7 @@ setMethod(plotGates, signature = "rectangleGate", definition = function(x, chann
     
   }
   
-  if(!all(channels %in% as.vector(parameters(gt)))){
+  if(!all(as.vector(parameters(gt)) %in% channels)){
     
     stop("Channels used to construct the plot do not match those of the supplied gate.")
     
@@ -83,30 +83,30 @@ setMethod(plotGates, signature = "rectangleGate", definition = function(x, chann
   if(length(gt@min) == 2){
     
     # Replace -Inf x values for plotting
-    if(is.infinite(gt@min[1])){
+    if(is.infinite(gt@min[channels[1]])){
       
-      gt@min[1] <- par("usr")[1]
+      gt@min[channels[1]] <- par("usr")[1]
       
     }
     
     # Replace Inf x values for plotting
-    if(is.infinite(gt@max[1])){
+    if(is.infinite(gt@max[channels[1]])){
       
-      gt@max[1] <- par("usr")[2]
+      gt@max[channels[1]] <- par("usr")[2]
       
     }
     
     # Replace -Inf y values for plotting
-    if(is.infinite(gt@min[2])){
+    if(is.infinite(gt@min[channels[2]])){
       
-      gt@min[2] <- par("usr")[3]
+      gt@min[channels[2]] <- par("usr")[3]
       
     }
     
     # Replace Inf y values for plotting
-    if(is.infinite(gt@max[2])){
+    if(is.infinite(gt@max[channels[2]])){
       
-      gt@max[2] <- par("usr")[4]
+      gt@max[channels[2]] <- par("usr")[4]
       
     }
     
@@ -195,7 +195,7 @@ setMethod(plotGates, signature = "polygonGate", definition = function(x, channel
     
   }
   
-  if(!all(channels %in% as.vector(parameters(gt)))){
+  if(!all(as.vector(parameters(gt)) %in% channels)){
     
     stop("Channels used to construct the plot do not match those of the supplied gate.")
     
@@ -293,7 +293,7 @@ setMethod(plotGates, signature = "ellipsoidGate", definition = function(x, chann
     
   }
   
-  if(!all(channels %in% as.vector(parameters(gt)))){
+  if(!all(as.vector(parameters(gt)) %in% channels)){
     
     stop("Channels used to construct the plot do not match those of the supplied gate.")
     
@@ -344,11 +344,11 @@ setMethod(plotGates, signature = "list", definition = function(x, channels, col.
   # Check Channels
   if(missing(channels)){
     
-    channels <- as.vector(parameters(gts[[1]]))
+    channels <- unique(as.vector(sapply(gts,parameters)))
     
   }
   
-  if(!all(channels %in% as.vector(parameters(gts[[1]])))){
+  if(!all(unique(as.vector(sapply(gts,parameters))) %in% channels)){
     
     stop("Channels used to construct the plot do not match those of the supplied gate.")
     
@@ -477,11 +477,11 @@ setMethod(plotGates, signature = "filters", definition = function(x, channels, c
   # Check Channels
   if(missing(channels)){
     
-    channels <- as.vector(parameters(gts[[1]]))
+    channels <- unique(as.vector(sapply(gts,parameters)))
     
   }
   
-  if(!all(channels %in% as.vector(parameters(gts[[1]])))){
+  if(!all(unique(as.vector(sapply(gts,parameters))) %in% channels)){
     
     stop("Channels used to construct the plot do not match those of the supplied gate.")
     
