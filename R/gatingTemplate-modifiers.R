@@ -222,8 +222,6 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     transList <- transformList(names(getTransformations(gs[[1]])), getTransformations(gs[[1]]))
     trnsfrmrLst <- transformerList(names(getTransformations(gs[[1]], only.function = FALSE)),getTransformations(gs[[1]], only.function = FALSE))
     
-    trans <- TRUE
-    
   }else{
     
     transList <- NULL

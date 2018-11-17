@@ -248,6 +248,11 @@ setMethod(plotCyto, signature = "GatingSet",
       transList <- NULL
       
     }
+    transList <- checkTransList(transList, inverse = FALSE)
+    
+  }else{
+    
+    trasnList <- checkTransList(transList, inverse = FALSE)
     
   }
   
@@ -480,6 +485,12 @@ setMethod(plotCyto, signature = "GatingHierarchy",
       transList <- NULL
       
     }
+    
+    transList <- checkTransList(transList, inverse = FALSE)
+    
+  }else{
+    
+    transList <- checkTransList(transList, inverse = FALSE)
     
   }
             

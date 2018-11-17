@@ -276,16 +276,9 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, cmfile 
         
         # Apply logicle transformation to fluorescent channels
         if(!is.null(transList)){
-          
-          if(class(transList)[1] != "transformList"){
             
-            stop("Please supply a transList object of class transformList.")
-            
-          }else{
-            
-            fs <- transform(fs, transList)
-            
-          }
+          transList <- checkTransList(transList, inverse = FALSE)
+          fs <- transform(fs, transList)
           
         }else{
           
@@ -552,13 +545,14 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
       transList <- NULL
     
     }
+    transList <- checkTransList(transList, inverse = FALSE)
     
   }
   
   # Convert to transformerList
   if(!is.null(transList)){
     
-    transList <- transformerList(names(transList), transList)
+    transList <- checkTransList(transList, inverse = FALSE)
     
   }
   

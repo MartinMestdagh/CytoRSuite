@@ -116,8 +116,6 @@ setMethod(plotCytoExprs, signature = "flowFrame", definition = function(x, chann
   par(mfrow = c(1,1))
   par(oma = c(0,0,0,0))
   
-  return(NULL)
-  
 })
 
 #' Plot Population Density Distribution in All Channels - flowSet Method
@@ -177,8 +175,6 @@ setMethod(plotCytoExprs, signature = "flowSet", definition = function(x, channel
     plotCytoExprs(x = fs[[1]], overlay = fs[2:length(fs)], channels = channels, transList = transList, ...)
   
   }
-  
-  return(NULL)
   
 })
 
@@ -253,16 +249,14 @@ setMethod(plotCytoExprs, signature = "GatingHierarchy", definition = function(x,
     trnsfrms[sapply(trnsfrms, is.null)] <- NULL
     transList <- transformList(names(trnsfrms), trnsfrms)
     
-  }else if(!is.null(transList) & class(transList)[1] == "transformerList"){
+  }else{
     
-    transList <- transformList(names(transList), lapply(transList, `[[`, "transform"))
+    transList <- checkTransList(transList, inverse = FALSE)
     
   }
   
   # Plots
   plotCytoExprs(x = fr, channels = channels, transList = transList, ...)
-  
-  return(NULL)
   
 })
 
@@ -337,15 +331,13 @@ setMethod(plotCytoExprs, signature = "GatingSet", definition = function(x, paren
     trnsfrms[sapply(trnsfrms, is.null)] <- NULL
     transList <- transformList(names(trnsfrms), trnsfrms)
     
-  }else if(!is.null(transList) & class(transList)[1] == "transformerList"){
+  }else{
     
-    transList <- transformList(names(transList), lapply(transList, `[[`, "transform"))
+    transList <- checkTransList(transList, inverse = FALSE)
     
   }
   
   # Plots
   plotCytoExprs(x = fs, channels = channels, transList = transList, ...)
-  
-  return(NULL)
   
 })

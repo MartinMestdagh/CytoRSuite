@@ -159,6 +159,7 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
   # Get Axis Breaks and Labels from transList if supplied
   if(!is.null(transList)){
     
+    transList <- checkTransList(transList, inverse = FALSE)
     axs <- axisLabels(fr, channel = channel, transList = transList)
     axs <- list(axs)
     names(axs) <- channel
@@ -1054,6 +1055,7 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
   # Get Axis Breaks and Labels from trans
   if(!is.null(transList)){
     
+    transList <- checkTransList(transList, inverse = FALSE)
     axs <- lapply(channels, function(channel) {axisLabels(fr, channel = channel, transList = transList)})
     names(axs) <- channels
     xlabels <- axs[[1]]

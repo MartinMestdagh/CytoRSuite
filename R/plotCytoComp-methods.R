@@ -108,12 +108,13 @@ setMethod(plotCytoComp, signature = "flowFrame",
               
      if(!is.null(transList)){
                 
+       transList <- checkTransList(transList, inverse = FALSE)
        fr <- suppressMessages(transform(fr, transList))
                 
       }else{
                 
-        trans <- estimateLogicle(fr, channels)
-        fr <- suppressMessages(transform(fr, trans))
+        transList <- estimateLogicle(fr, channels)
+        fr <- suppressMessages(transform(fr, transList))
                 
       }
               
@@ -275,12 +276,13 @@ setMethod(plotCytoComp, signature = "flowSet",
     
     if(!is.null(transList)){
       
+      transList <- checkTransList(transList, inverse = FALSE)
       fs <- suppressMessages(transform(fs, transList))
       
     }else{
       
-      trans <- estimateLogicle(as(fs,"flowFrame"), channels)
-      fs <- suppressMessages(transform(fs, trans))
+      transList <- estimateLogicle(as(fs,"flowFrame"), channels)
+      fs <- suppressMessages(transform(fs, transList))
       
     }
     
@@ -535,20 +537,7 @@ setMethod(plotCytoComp, signature = "GatingSet",
     
   }else{
     
-    if(class(transList)[1] == "transformerList"){
-      
-      # Convert transformerList to transformList object
-      transList <- transformList(names(transList), lapply(transList, `[[`, "transform"))
-      
-    }else if(class(transList)[1] == "transformList"){
-      
-      
-      
-    }else{
-      
-      stop("Supplied transList should be of class transformList or transformerList.")
-      
-    }
+    transList <- checkTransList(transList, inverse = FALSE)
     
   }
   
