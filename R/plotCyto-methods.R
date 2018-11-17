@@ -365,8 +365,21 @@ setMethod(plotCyto, signature = "GatingSet",
       
     }
     
+    # Gates
+    if(!is.null(alias) & is.character(alias)){
+      
+      gates <- lapply(alias, function(pop) getGate(gs[[1]], pop))
+      names(gates) <- alias
+      gates <- filters(gates)
+      
+    }else{
+      
+      gates <- NULL
+      
+    }
+    
     # Call to plotCyto flowFrame method
-    plotCyto(fr, channels = channels, overlay = overlay, transList = transList, main = main, text.labels = text.labels, text.legend = text.legend, ...)
+    plotCyto(fr, channels = channels, overlay = overlay, transList = transList, main = main, text.labels = text.labels, text.legend = text.legend, gates = gates, ...)
     
   }
   
