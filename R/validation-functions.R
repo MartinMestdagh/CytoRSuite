@@ -525,7 +525,7 @@ checkTransList <- function(transList = NULL, inverse = FALSE){
     
   }else{
     
-    if(!class(transList)[1] %in% c("trandformList","transformerList")){
+    if(!class(transList)[1] %in% c("transformList","transformerList")){
       
       stop("Supplied transList should be of class transformList or transformerList.")
       
