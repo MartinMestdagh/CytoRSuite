@@ -114,7 +114,11 @@ setGeneric(name="computeSpillover",
 #' @export
 setMethod(computeSpillover, signature = "flowSet", definition = function(x, transList = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...){
   
+  # Assign x to fs
   fs <- x
+  
+  # Extract pData information
+  pd <- pData(fs)
   
   # Extract fluorescent channels
   channels <- getChannels(fs)
@@ -122,14 +126,14 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
   # Select a fluorescent channel for each compensation control
   if(is.null(cmfile)){
     
-    pData(fs)$channel <- paste(selectChannels(fs))
-    write.csv(pData(fs), "Compensation Channels.csv", row.names = FALSE)
+    pd$channel <- paste(selectChannels(fs))
+    write.csv(pd, "Compensation Channels.csv", row.names = FALSE)
     
   }else{
     
-    pd <- read.csv(cmfile, header = TRUE, row.names = 1)
-    chans <- pd$channel[match(sampleNames(fs), row.names(pd))]
-    pData(fs)$channel <- paste(chans)
+    cm <- read.csv(cmfile, header = TRUE, row.names = 1)
+    chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
+    pd$channel <- paste(chans)
     
   }
   
@@ -210,14 +214,17 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
   }
   
   # Extract unstained control based on selected channels in pData(fs)
-  NIL <- fs[[match("Unstained", pData(fs)$channel)]]
-  fs <- fs[-match("Unstained", pData(fs)$channel)]
+  NIL <- fs[[match("Unstained", pd$channel)]]
+  fs <- fs[-match("Unstained", pd$channel)]
   
   # Names
   nms <- sampleNames(fs)
   
   # Samples
   smp <- length(fs)
+  
+  # Remove NIL from pd
+  pd <- pd[!pd$channel == "Unstained",]
   
   # Gate positive populations
   pops <- lapply(seq(1,smp,1), function(x){
@@ -226,7 +233,7 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
     fr <- fs[[x]]
     
     # Channel
-    chan <- pData(fs)$channel[x]
+    chan <- pd$channel[x]
     
     # Plot
     plotCyto(NIL, channels = chan, overlay = fr, offset = 0, transList = transList, popup = TRUE, fill = c("red","dodgerblue"), legend = FALSE, alpha = 0.6, main = nms[x], ...)
@@ -261,12 +268,12 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
   # Normalise each row to stained channel
   lapply(seq(1,nrow(signal),1), function(x){
     
-    signal[x, ] <<- signal[x, ]/signal[x, match(pData(fs)$channel[x], colnames(spill))]
+    signal[x, ] <<- signal[x, ]/signal[x, match(pd$channel[x], colnames(spill))]
     
   }) 
   
   # Insert values into appropriate rows
-  rws <- match(pData(fs)$channel, rownames(spill))
+  rws <- match(pd$channel, rownames(spill))
   spill[rws,] <- signal
   
   write.csv(spill, spfile)
