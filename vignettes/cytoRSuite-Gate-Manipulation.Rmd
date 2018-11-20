@@ -43,7 +43,7 @@ gs <- transform(gs, trans)
 ```
 
 ```{r, eval = TRUE, echo = FALSE, message = FALSE}
-gt <- suppressMessages(gatingTemplate("Gate-Manipulation/Manipulation-gatingTemplate-Full.csv"))
+gt <- suppressMessages(gatingTemplate("Gate-manipulation/Manipulation-gatingTemplate-Full.csv"))
 suppressMessages(gating(gt,gs))
 ```
 
@@ -115,7 +115,7 @@ plotCyto(gs, parent = "T Cells", alias = c("CD4 T Cells","CD8 T Cells"), channel
 
 ## **3. editGate**
 
-**editGate** provides a simple way to modify existing gates applied to the GatingSet and saved to the gatingTemplate csv file. **editGate** features:
+**editGate** provides a simple way to modify existing gates applied to the GatingSet and saved to the gatingTemplate csv file. Key features of  **editGate** include:
 
 * Re-plots the data with the existing gate(s) in pink.
 * Determines which **drawGate** type was used to construct the gate(s).
