@@ -171,9 +171,6 @@ setMethod(plotCyto, signature = "flowSet",
 #'   \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
 #'   \code{list of flowFrame lists} containing populations to be overlayed onto
 #'   the plot(s).
-#' @param stack vector of length 2 indicating offset for samples and number of
-#'   samples per plot. Set to \code{c(0,1)} to plot each sample in a separate
-#'   panel.
 #' @param text.labels vector of names to use in population labels, set to
 #'   \code{alias} by default.
 #' @param main title to use for the plot, set to the name of the sample and the

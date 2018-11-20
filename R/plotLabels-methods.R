@@ -2,9 +2,9 @@
 #'
 #' @param x object of class \code{"flowFrame"}.
 #' @param gates object of class
-#'   \code{\link[flowCore:rectangleGate]{rectangleGate}},
-#'   \code{\link[flowCore:polygonGate]{polygonGate}},
-#'   \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}, \code{"list"} or
+#'   \code{\link[flowCore:rectangleGate-class]{rectangleGate}},
+#'   \code{\link[flowCore:polygonGate-class]{polygonGate}},
+#'   \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{"list"} or
 #'   \code{\link[flowCore:filters-class]{filters}}.
 #' @param ... additional method-specific arguments.
 #'
@@ -34,7 +34,7 @@ setGeneric(name = "plotLabels",
 #' @param x a \code{\link[flowCore:flowFrame-class]{flowFrame}} gated in the
 #'   existing plot.
 #' @param gates an object of class
-#'   \code{\link[flowCore:rectangleGate]{rectangleGate}}.
+#'   \code{\link[flowCore:rectangleGate-class]{rectangleGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
 #' @param alias the name of the gated population, set to NA by default to only
@@ -309,7 +309,7 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
 #' @param x a \code{\link[flowCore:flowFrame-class]{flowFrame}} gated in the
 #'   existing plot.
 #' @param gates an object of class
-#'   \code{\link[flowCore:polygonGate]{polygonGate}}.
+#'   \code{\link[flowCore:polygonGate-class]{polygonGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
 #' @param alias the name of the gated population, set to NA by default to only
@@ -439,7 +439,7 @@ setMethod(plotLabels, signature = c("flowFrame", "polygonGate"),
 #' @param x a \code{\link[flowCore:flowFrame-class]{flowFrame}} gated in the
 #'   existing plot.
 #' @param gates an object of class
-#'   \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}.
+#'   \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
 #' @param alias the name of the gated population, set to NA by default to only
@@ -569,9 +569,9 @@ setMethod(plotLabels, signature = c("flowFrame", "ellipsoidGate"),
 #' @param x a \code{\link[flowCore:flowFrame-class]{flowFrame}} gated in the
 #'   existing plot.
 #' @param gates an object of class \code{"list"} containing objects of class
-#'   \code{\link[flowCore:rectangleGate]{rectangleGate}},
-#'   \code{\link[flowCore:polygonGate]{polygonGate}} or
-#'   \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}.
+#'   \code{\link[flowCore:rectangleGate-class]{rectangleGate}},
+#'   \code{\link[flowCore:polygonGate-class]{polygonGate}} or
+#'   \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
 #' @param alias the name of the gated population, set to NA by default to only
@@ -629,9 +629,9 @@ setMethod(plotLabels, signature = c("flowFrame", "list"),
 #'   existing plot.
 #' @param gates an object of class \code{\link[flowCore:filters-class]{filters}}
 #'   containing objects of class
-#'   \code{\link[flowCore:rectangleGate]{rectangleGate}},
-#'   \code{\link[flowCore:polygonGate]{polygonGate}} or
-#'   \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}.
+#'   \code{\link[flowCore:rectangleGate-class]{rectangleGate}},
+#'   \code{\link[flowCore:polygonGate-class]{polygonGate}} or
+#'   \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}.
 #' @param channels a vector indicating the fluorescent channel(s) to be used for
 #'   gating.
 #' @param alias the name of the gated population, set to NA by default to only

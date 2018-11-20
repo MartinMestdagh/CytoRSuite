@@ -14,7 +14,7 @@
 existing plot.}
 
 \item{gates}{an object of class
-\code{\link[flowCore:polygonGate]{polygonGate}}.}
+\code{\link[flowCore:polygonGate-class]{polygonGate}}.}
 
 \item{channels}{a vector indicating the fluorescent channel(s) to be used for
 gating.}

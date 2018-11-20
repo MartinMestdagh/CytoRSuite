@@ -30,14 +30,14 @@ for the gated population(s), \code{TRUE} by default.}
 }
 \value{
 a\code{\link[flowCore:filters-class]{filters}} list containing the
-  constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+  constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
   object(s).
 }
 \description{
 \code{drawRectangle} constructs an interactive plotting window to allow
 manual selection of the co-ordinates of a rectangle gate(s) (through mouse
 click) which are constructed into
-\code{\link[flowCore:rectangleGate]{rectangleGate}} objects and stored
+\code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects and stored
 in a \code{\link[flowCore:filters-class]{filters}} list. Simply select 2
 diagonal co-ordinates to construct the rectangleGate(s).
 }

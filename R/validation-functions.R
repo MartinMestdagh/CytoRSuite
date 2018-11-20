@@ -513,6 +513,7 @@ checkTemplate <- function(parent, alias, gtfile){
 #'   \code{\link[flowCore:transformList-class]{transformList}}
 #'
 #' @importFrom flowCore inverseLogicleTransform transformList
+#' @importFrom methods is
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'

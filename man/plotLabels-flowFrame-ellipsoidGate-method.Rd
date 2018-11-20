@@ -14,7 +14,7 @@
 existing plot.}
 
 \item{gates}{an object of class
-\code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}.}
+\code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}.}
 
 \item{channels}{a vector indicating the fluorescent channel(s) to be used for
 gating.}

@@ -11,7 +11,7 @@
 }
 \arguments{
 \item{x}{an object of class
-\code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}.}
+\code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}.}
 
 \item{channels}{fluorescent channels to used to construct the plot.}
 

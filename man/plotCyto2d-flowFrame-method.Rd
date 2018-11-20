@@ -39,9 +39,9 @@ plotting.}
 lines, set to 0 by default to turn off contour lines.}
 
 \item{gates}{gate object(s) to be added to plot. Gates can be of class
-\code{\link[flowCore:rectangleGate]{rectangleGate}},
-\code{\link[flowCore:polygonGate]{polygonGate}} or
-\code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}. Multiple gates of
+\code{\link[flowCore:rectangleGate-class]{rectangleGate}},
+\code{\link[flowCore:polygonGate-class]{polygonGate}} or
+\code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}. Multiple gates of
 mixed classes can also be supplied in \code{list} or
 \code{\link[flowCore:filters-class]{filters}} objects.}
 

@@ -29,7 +29,7 @@ for the gated population(s), \code{TRUE} by default.}
 }
 \value{
 a\code{\link[flowCore:filters-class]{filters}} list containing the
-  constructed \code{\link[flowCore:polygonGate]{polygonGate}}
+  constructed \code{\link[flowCore:polygonGate-class]{polygonGate}}
   object(s).
 }
 \description{
@@ -37,7 +37,7 @@ a\code{\link[flowCore:filters-class]{filters}} list containing the
 with gate co-ordinates (angled lines) and supports any number of gates as
 indicated by the \code{alias} argument. To construct the gate simply select
 the center point and surrounding divider points on plot edge. \code{drawWeb}
-will contruct the \code{\link[flowCore:polygonGate]{polygonGate}}
+will contruct the \code{\link[flowCore:polygonGate-class]{polygonGate}}
 objects and store them in a \code{\link[flowCore:filters-class]{filters}}
 list.
 }

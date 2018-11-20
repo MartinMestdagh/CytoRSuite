@@ -1,9 +1,9 @@
 #' Plot Gate Objects onto an Existing Plot
 #'
 #' @param x gate object of class
-#'   \code{\link[flowCore:rectangleGate]{rectangleGate}},
-#'   \code{\link[flowCore:polygonGate]{polygonGate}},
-#'   \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}, \code{list} or
+#'   \code{\link[flowCore:rectangleGate-class]{rectangleGate}},
+#'   \code{\link[flowCore:polygonGate-class]{polygonGate}},
+#'   \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{list} or
 #'   \code{\link[flowCore:filters-class]{filters}}.
 #' @param ... additional method-specific arguments.
 #'
@@ -23,7 +23,7 @@ setGeneric(name = "plotGates",
 #' Plot rectangleGate Objects onto an Existing plot
 #'
 #' @param x an object of class
-#'   \code{\link[flowCore:rectangleGate]{rectangleGate}}.
+#'   \code{\link[flowCore:rectangleGate-class]{rectangleGate}}.
 #' @param channels fluorescent channels to used to construct the plot.
 #' @param col.gate indicates the colour of the gate to be constructed, set to
 #'   \code{"red"} by default.
@@ -156,7 +156,7 @@ setMethod(plotGates, signature = "rectangleGate", definition = function(x, chann
 
 #' Plot polygonGate Objects onto an Existing Plot
 #'
-#' @param x an object of class \code{\link[flowCore:polygonGate]{polygonGate}}.
+#' @param x an object of class \code{\link[flowCore:polygonGate-class]{polygonGate}}.
 #' @param channels fluorescent channels to used to construct the plot.
 #' @param col.gate indicates the colour of the gate to be constructed, set to
 #'   \code{"red"} by default.
@@ -253,7 +253,7 @@ setMethod(plotGates, signature = "polygonGate", definition = function(x, channel
 #' Plot ellipsoidGate Objects onto an Existing Plot
 #'
 #' @param x an object of class
-#'   \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}.
+#'   \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}.
 #' @param channels fluorescent channels to used to construct the plot.
 #' @param col.gate indicates the colour of the gate to be constructed, set to
 #'   \code{"red"} by default.

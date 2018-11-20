@@ -3,7 +3,7 @@
 #' \code{drawPolygon} constructs an interactive plotting window to allow manual
 #' selection of the co-ordinates of a ploygon gate(s) (through mouse click)
 #' which are constructed into
-#' \code{\link[flowCore:polygonGate]{polygonGate}} objects and stored in a
+#' \code{\link[flowCore:polygonGate-class]{polygonGate}} objects and stored in a
 #' \code{\link[flowCore:filters-class]{filters}} list.
 #'
 #' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
@@ -22,7 +22,7 @@
 #' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:polygonGate]{polygonGate}}
+#'   constructed \code{\link[flowCore:polygonGate-class]{polygonGate}}
 #'   object(s).
 #'
 #' @keywords manual, gating, draw, polygonGate, openCyto
@@ -102,7 +102,7 @@ drawPolygon <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
 #' \code{drawRectangle} constructs an interactive plotting window to allow
 #' manual selection of the co-ordinates of a rectangle gate(s) (through mouse
 #' click) which are constructed into
-#' \code{\link[flowCore:rectangleGate]{rectangleGate}} objects and stored
+#' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Simply select 2
 #' diagonal co-ordinates to construct the rectangleGate(s).
 #'
@@ -122,7 +122,7 @@ drawPolygon <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
 #' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
 #'   object(s).
 #'
 #' @keywords manual, gating, draw, rectangleGate, openCyto
@@ -195,7 +195,7 @@ drawRectangle <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 #' \code{drawInterval} constructs an interactive plotting window for user to
 #' select the lower and upper bounds of a population (through mouse click) which
 #' is constructed into a
-#' \code{\link[flowCore:rectangleGate]{rectangleGate}} object and stored
+#' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' interval gates are supported, for 2-D interval gates an additional argument
 #' \code{axis} must be supplied to indicate which axis should be gated.
@@ -218,7 +218,7 @@ drawRectangle <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 #' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
 #'   object(s).
 #'
 #' @keywords manual, gating, draw, rectangleGate, openCyto, interval
@@ -320,7 +320,7 @@ drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", la
 #'
 #' \code{drawThreshold} constructs an interactive plotting window for user to
 #' select the lower bound of a population which is constructed into a
-#' \code{\link[flowCore:rectangleGate]{rectangleGate}} object and stored
+#' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' threshold gates are supported, for 2-D threshold gates all events above the
 #' select x and y coordinates are included in the gate. Multiple threshold gates
@@ -341,7 +341,7 @@ drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", la
 #' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}} object.
+#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object.
 #'
 #' @keywords manual, gating, draw, rectangleGate, openCyto, threshold
 #'
@@ -417,7 +417,7 @@ drawThreshold <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 #'
 #' \code{drawBoundary} constructs an interactive plotting window for user to
 #' select the upper bound of a population which is constructed into a
-#' \code{\link[flowCore:rectangleGate]{rectangleGate}} object and stored
+#' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 #' in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 #' boundary gates are supported, for 2-D boundary gates all events below the
 #' select x and y coordinates are included in the gate. Multiple boundary gates
@@ -438,7 +438,7 @@ drawThreshold <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 #' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
 #'   object.
 #'
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, boundary
@@ -514,7 +514,7 @@ drawBoundary <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
 #'
 #' \code{drawEllipse} constructs an interactive plotting window for user to
 #' select the limits of a population in 2 dimensions (4 points) which is
-#' constructed into \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}
+#' constructed into \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
 #' object and stored in a \code{\link[flowCore:filters-class]{filters}} list.
 #'
 #' @param fr a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
@@ -533,7 +533,7 @@ drawBoundary <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
 #' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}
+#'   constructed \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
 #'   object(s).
 #'
 #' @keywords manual, gating, draw, ellipsoidGate, openCyto, ellipse
@@ -655,7 +655,7 @@ drawEllipse <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
 #'
 #' \code{drawQuadrants} constructs an interactive plotting window for user to
 #' select the crosshair center of 4 populations which is used to construct 4
-#' \code{\link[flowCore:rectangleGate]{rectangleGate}} objects which are
+#' \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects which are
 #' stored in a\code{\link[flowCore:filters-class]{filters}}  list. Populations
 #' are assigned in the following order: bottom left, bottom right, top right and
 #' top left.
@@ -674,7 +674,7 @@ drawEllipse <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
 #' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the 4
-#'   constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+#'   constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
 #'   objects.
 #'
 #' @keywords manual, gating, draw, FlowJo, rectangleGate, openCyto, quadrants
@@ -783,7 +783,7 @@ drawQuadrants <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 #' with gate co-ordinates (angled lines) and supports any number of gates as
 #' indicated by the \code{alias} argument. To construct the gate simply select
 #' the center point and surrounding divider points on plot edge. \code{drawWeb}
-#' will contruct the \code{\link[flowCore:polygonGate]{polygonGate}}
+#' will contruct the \code{\link[flowCore:polygonGate-class]{polygonGate}}
 #' objects and store them in a \code{\link[flowCore:filters-class]{filters}}
 #' list.
 #'
@@ -803,7 +803,7 @@ drawQuadrants <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 #' @param ... additional arguments for \code{\link{plotCyto,flowFrame-method}}.
 #'
 #' @return a\code{\link[flowCore:filters-class]{filters}} list containing the
-#'   constructed \code{\link[flowCore:polygonGate]{polygonGate}}
+#'   constructed \code{\link[flowCore:polygonGate-class]{polygonGate}}
 #'   object(s).
 #'
 #' @keywords manual, gating, draw, polygonGate, openCyto, drawWeb

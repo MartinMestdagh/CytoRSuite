@@ -5,9 +5,9 @@
 \alias{plotCyto,GatingSet-method}
 \title{plotCyto - GatingSet Method}
 \usage{
-\S4method{plotCyto}{GatingSet}(x, parent, alias, channels,
-  transList = NULL, merge = FALSE, overlay = NULL, stack = c(0, 1),
-  text.labels, text.legend, main, ...)
+\S4method{plotCyto}{GatingSet}(x, parent, alias = NULL, channels,
+  transList = NULL, merge = FALSE, overlay = NULL, text.labels,
+  text.legend, main, mfrow = NULL, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -41,10 +41,6 @@ to plotting to yield a single plot, set to FALSE by default.}
 \code{list of flowFrame lists} containing populations to be overlayed onto
 the plot(s).}
 
-\item{stack}{vector of length 2 indicating offset for samples and number of
-samples per plot. Set to \code{c(0,1)} to plot each sample in a separate
-panel.}
-
 \item{text.labels}{vector of names to use in population labels, set to
 \code{alias} by default.}
 
@@ -53,9 +49,12 @@ panel.}
 \item{main}{title to use for the plot, set to the name of the sample and the
 name of the parent population by default.}
 
+\item{mfrow}{a vector of the length 2 indicating the dimensions of the grid
+for plotting \code{c(#rows, #columns)}.}
+
 \item{...}{additional arguments passed to
-\code{\link{plotCyto1d,flowSet-method}} or
-\code{\link{plotCyto2d,flowSet-method}}.}
+\code{\link{plotCyto1d,flowFrame-method}} or
+\code{\link{plotCyto2d,flowFrame-method}}.}
 }
 \description{
 Explore & visualise flow cytometry data for a GatingSet.

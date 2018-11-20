@@ -30,13 +30,13 @@ for the gated population(s), \code{TRUE} by default.}
 }
 \value{
 a\code{\link[flowCore:filters-class]{filters}} list containing the
-  constructed \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}
+  constructed \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
   object(s).
 }
 \description{
 \code{drawEllipse} constructs an interactive plotting window for user to
 select the limits of a population in 2 dimensions (4 points) which is
-constructed into \code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}
+constructed into \code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}
 object and stored in a \code{\link[flowCore:filters-class]{filters}} list.
 }
 \seealso{

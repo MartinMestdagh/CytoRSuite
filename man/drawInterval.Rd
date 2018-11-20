@@ -33,14 +33,14 @@ for the gated population(s), \code{TRUE} by default.}
 }
 \value{
 a\code{\link[flowCore:filters-class]{filters}} list containing the
-  constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+  constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
   object(s).
 }
 \description{
 \code{drawInterval} constructs an interactive plotting window for user to
 select the lower and upper bounds of a population (through mouse click) which
 is constructed into a
-\code{\link[flowCore:rectangleGate]{rectangleGate}} object and stored
+\code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 interval gates are supported, for 2-D interval gates an additional argument
 \code{axis} must be supplied to indicate which axis should be gated.

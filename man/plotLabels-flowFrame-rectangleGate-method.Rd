@@ -14,7 +14,7 @@
 existing plot.}
 
 \item{gates}{an object of class
-\code{\link[flowCore:rectangleGate]{rectangleGate}}.}
+\code{\link[flowCore:rectangleGate-class]{rectangleGate}}.}
 
 \item{channels}{a vector indicating the fluorescent channel(s) to be used for
 gating.}

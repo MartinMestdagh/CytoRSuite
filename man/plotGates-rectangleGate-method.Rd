@@ -11,7 +11,7 @@
 }
 \arguments{
 \item{x}{an object of class
-\code{\link[flowCore:rectangleGate]{rectangleGate}}.}
+\code{\link[flowCore:rectangleGate-class]{rectangleGate}}.}
 
 \item{channels}{fluorescent channels to used to construct the plot.}
 

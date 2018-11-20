@@ -10,9 +10,9 @@ plotLabels(x, gates, ...)
 \item{x}{object of class \code{"flowFrame"}.}
 
 \item{gates}{object of class
-\code{\link[flowCore:rectangleGate]{rectangleGate}},
-\code{\link[flowCore:polygonGate]{polygonGate}},
-\code{\link[flowCore:ellipsoidGate]{ellipsoidGate}}, \code{"list"} or
+\code{\link[flowCore:rectangleGate-class]{rectangleGate}},
+\code{\link[flowCore:polygonGate-class]{polygonGate}},
+\code{\link[flowCore:ellipsoidGate-class]{ellipsoidGate}}, \code{"list"} or
 \code{\link[flowCore:filters-class]{filters}}.}
 
 \item{...}{additional method-specific arguments.}

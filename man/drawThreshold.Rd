@@ -29,12 +29,12 @@ for the gated population(s), \code{TRUE} by default.}
 }
 \value{
 a\code{\link[flowCore:filters-class]{filters}} list containing the
-  constructed \code{\link[flowCore:rectangleGate]{rectangleGate}} object.
+  constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}} object.
 }
 \description{
 \code{drawThreshold} constructs an interactive plotting window for user to
 select the lower bound of a population which is constructed into a
-\code{\link[flowCore:rectangleGate]{rectangleGate}} object and stored
+\code{\link[flowCore:rectangleGate-class]{rectangleGate}} object and stored
 in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 threshold gates are supported, for 2-D threshold gates all events above the
 select x and y coordinates are included in the gate. Multiple threshold gates

@@ -5,7 +5,7 @@
 \alias{plotCyto,GatingHierarchy-method}
 \title{plotCyto - GatingHierarchy Method}
 \usage{
-\S4method{plotCyto}{GatingHierarchy}(x, parent, alias, channels,
+\S4method{plotCyto}{GatingHierarchy}(x, parent, alias = NULL, channels,
   transList = NULL, overlay = NULL, text.labels, text.legend, main,
   ...)
 }

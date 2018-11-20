@@ -10,7 +10,7 @@
   cex.gate = 1)
 }
 \arguments{
-\item{x}{an object of class \code{\link[flowCore:polygonGate]{polygonGate}}.}
+\item{x}{an object of class \code{\link[flowCore:polygonGate-class]{polygonGate}}.}
 
 \item{channels}{fluorescent channels to used to construct the plot.}
 

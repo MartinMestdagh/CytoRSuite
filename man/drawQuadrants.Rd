@@ -28,13 +28,13 @@ for the gated population(s), \code{TRUE} by default.}
 }
 \value{
 a\code{\link[flowCore:filters-class]{filters}} list containing the 4
-  constructed \code{\link[flowCore:rectangleGate]{rectangleGate}}
+  constructed \code{\link[flowCore:rectangleGate-class]{rectangleGate}}
   objects.
 }
 \description{
 \code{drawQuadrants} constructs an interactive plotting window for user to
 select the crosshair center of 4 populations which is used to construct 4
-\code{\link[flowCore:rectangleGate]{rectangleGate}} objects which are
+\code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects which are
 stored in a\code{\link[flowCore:filters-class]{filters}}  list. Populations
 are assigned in the following order: bottom left, bottom right, top right and
 top left.

@@ -30,14 +30,14 @@ for the gated population(s), \code{TRUE} by default.}
 }
 \value{
 a\code{\link[flowCore:filters-class]{filters}} list containing the
-  constructed \code{\link[flowCore:polygonGate]{polygonGate}}
+  constructed \code{\link[flowCore:polygonGate-class]{polygonGate}}
   object(s).
 }
 \description{
 \code{drawPolygon} constructs an interactive plotting window to allow manual
 selection of the co-ordinates of a ploygon gate(s) (through mouse click)
 which are constructed into
-\code{\link[flowCore:polygonGate]{polygonGate}} objects and stored in a
+\code{\link[flowCore:polygonGate-class]{polygonGate}} objects and stored in a
 \code{\link[flowCore:filters-class]{filters}} list.
 }
 \seealso{
