@@ -320,6 +320,9 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   gs <- x
   smp <- length(gs)
 
+  # Extract pData information
+  pd <- pData(gs)
+  
   # Check whether a gatingTemplate ready exists for this population
   if (!is.null(gtfile)) {
 
@@ -354,16 +357,16 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
     
   }else if(is.character(groupBy)){
     
-    if(!all(groupBy %in% colnames(pData(gs)))){
+    if(!all(groupBy %in% colnames(pd))){
       
       stop("Names supplied to groupBy do not exist in pData(x).")
       
     }
     
-    pData(gs)$groupby <- do.call(paste, pData(gs)[, groupBy, drop = FALSE])
-    grps <- lapply(unique(pData(gs)$groupby), function(x){
+    pd$groupby <- do.call(paste, pd[, groupBy, drop = FALSE])
+    grps <- lapply(unique(pd$groupby), function(x){
       
-      fs[which(pData(gs)$groupby %in% x)]
+      fs[which(pd$groupby %in% x)]
       
     })
     
@@ -435,7 +438,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
         
       }
       
-      main <- paste(pData(gs[sampleNames(fs)])$groupby[1], "\n", pnt)
+      main <- paste(pd[pd$name %in% sampleNames(fs), "groupby"][1], "\n", pnt)
       
     }
   
@@ -479,12 +482,12 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   if(is.numeric(groupBy)){
   
     # group number
-    names(fltrsLst) <- unique(pData(gs)$groupby)
+    names(fltrsLst) <- unique(pd$groupby)
     
   }else if(is.character(groupBy)){
     
     # merge columns
-    names(fltrsLst) <- unique(do.call(paste, pData(gs)[, groupBy, drop = FALSE]))
+    names(fltrsLst) <- unique(do.call(paste, pd[, groupBy, drop = FALSE]))
     
   }
   gates <- fltrsLst
@@ -496,7 +499,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
         gts <- filters(list(x[[y]]))
       
     })
-    names(gates) <- unique(pData(gs)$groupby)
+    names(gates) <- unique(pd$groupby)
     return(gates)
   })
   
