@@ -111,6 +111,7 @@ registerPlugins(gate_manual, "manualGate")
 #'   numeric or vector of pData column names.
 #' @param isCollapse logical indicating when the data should be collapsed prior
 #'   to gating, not used.
+#' @param ... additional arguments (not used).
 #'
 #' @return index of save drawGate to apply to sample or merged groupBy information.
 #'
