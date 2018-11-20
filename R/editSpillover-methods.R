@@ -412,21 +412,21 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, cmfile 
         xchan <- pData(fs)$channel[match(input$flowFrame2, pData(fs)$name)]
         if(input$Uncomp == TRUE){
           if(input$Comp == TRUE & input$NIL2 == FALSE){
-            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$flowFrame2]], col = c("blue","magenta"), subSample = subSample, alpha = 0.6)
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$flowFrame2]], col = c("blue","magenta"), subSample = subSample, alpha = 0.6, main = input$flowFrame2)
           }else if(input$Comp == TRUE & input$NIL2 == TRUE){
-            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = list(fs.comp()[[input$flowFrame2]],fs.comp()[[input$Unstained2]]), col = c("blue","magenta","black"), subSample = subSample, alpha = 0.6)
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = list(fs.comp()[[input$flowFrame2]],fs.comp()[[input$Unstained2]]), col = c("blue","magenta","black"), subSample = subSample, alpha = 0.6, main = input$flowFrame2)
           }else if(input$Comp == FALSE & input$NIL2 == TRUE){
-            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6)
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6, main = input$flowFrame2)
           }else if(input$Comp == FALSE & input$NIL2 == FALSE){
-            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, col = "blue", subSample = subSample, alpha = 0.6)
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, col = "blue", subSample = subSample, alpha = 0.6, main = input$flowFrame2)
           }
         }else if(input$Uncomp == FALSE){
           if(input$Comp == TRUE & input$NIL2 == TRUE){
-            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6)
+            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6, main = input$flowFrame2)
           }else if(input$Comp == FALSE & input$NIL2 == TRUE){
-            plotCytoComp(fs.comp()[[input$Unstained2]], channel = xchan, transList = transList, col = "black", subSample = subSample, alpha = 0.6)
+            plotCytoComp(fs.comp()[[input$Unstained2]], channel = xchan, transList = transList, col = "black", subSample = subSample, alpha = 0.6, main = input$flowFrame2)
           }else if(input$Comp == TRUE & input$NIL2 == FALSE){  
-            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, col = "magenta", subSample = subSample, alpha = 0.6)
+            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, col = "magenta", subSample = subSample, alpha = 0.6, main = input$flowFrame2)
           }else if(input$Comp == FALSE & input$NIL2 == FALSE){
             
           }
