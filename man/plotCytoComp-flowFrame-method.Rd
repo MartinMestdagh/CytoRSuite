@@ -7,7 +7,7 @@
 \usage{
 \S4method{plotCytoComp}{flowFrame}(x, channel = NULL,
   compensate = FALSE, spfile = NULL, transList = NULL, mfrow,
-  popup = FALSE, ...)
+  popup = FALSE, main = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}
@@ -41,6 +41,9 @@ plot.}
 
 \item{popup}{logical indicating whether plots should be constructed in a
 pop-up window.}
+
+\item{main}{title to use for the plots, set to the name of the sample by
+default.}
 
 \item{...}{additional arguments passed to
 \code{\link{plotCyto2d,flowFrame-method}}.}

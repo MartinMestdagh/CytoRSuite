@@ -53,6 +53,8 @@ setGeneric(name = "plotCytoComp",
 #'   plot.
 #' @param popup logical indicating whether plots should be constructed in a
 #'   pop-up window.
+#' @param main title to use for the plots, set to the name of the sample by
+#'   default.
 #' @param ... additional arguments passed to
 #'   \code{\link{plotCyto2d,flowFrame-method}}.
 #'
@@ -73,7 +75,7 @@ setGeneric(name = "plotCytoComp",
 #'
 #' @export
 setMethod(plotCytoComp, signature = "flowFrame", 
-          definition = function(x, channel = NULL, compensate = FALSE, spfile = NULL, transList = NULL, mfrow, popup = FALSE, ...){
+          definition = function(x, channel = NULL, compensate = FALSE, spfile = NULL, transList = NULL, mfrow, popup = FALSE, main = NULL, ...){
             
   # Assign x to fr
   fr <- x
@@ -164,7 +166,16 @@ setMethod(plotCytoComp, signature = "flowFrame",
                   
     if(channels[y] == channels[length(channels)]){
                   
-      mtext(nm, outer = TRUE, cex = 1, font = 2)
+      
+      if(is.null(main)){
+        
+        mtext(nms, outer = TRUE, cex = 1, font = 2)
+        
+      }else{
+        
+        mtext(main, outer = TRUE, cex = 1, font = 2)
+        
+      }
                   
     }
                 
@@ -212,6 +223,8 @@ setMethod(plotCytoComp, signature = "flowFrame",
 #'   plot.
 #' @param popup logical indicating whether plots should be constructed in a
 #'   pop-up window.
+#' @param main vector of titles to use for the plots, set to the name of the
+#'   sample by default.
 #' @param ... additional arguments passed to
 #'   \code{\link{plotCyto2d,flowFrame-method}}.
 #'
@@ -233,7 +246,7 @@ setMethod(plotCytoComp, signature = "flowFrame",
 #'
 #' @export
 setMethod(plotCytoComp, signature = "flowSet", 
-          definition = function(x, cmfile = NULL, compensate = FALSE, spfile = NULL, transList = NULL, overlay = TRUE, mfrow, popup = FALSE, ...){
+          definition = function(x, cmfile = NULL, compensate = FALSE, spfile = NULL, transList = NULL, overlay = TRUE, mfrow, popup = FALSE, main = NULL, ...){
      
   # Assign x to fs
   fs <- x
@@ -381,7 +394,15 @@ setMethod(plotCytoComp, signature = "flowSet",
       # Call new plot
       if(x != smp & channels[y] == channels[length(channels)]){
         
-        mtext(nms[x], outer = TRUE, cex = 1, font = 2)
+        if(is.null(main)){
+        
+          mtext(nms[x], outer = TRUE, cex = 1, font = 2)
+          
+        }else{
+          
+          mtext(main[x], outer = TRUE, cex = 1, font = 2)
+          
+        }
         
         if(popup == TRUE){
           
@@ -399,7 +420,15 @@ setMethod(plotCytoComp, signature = "flowSet",
         
       }else if(x == smp & channels[y] == channels[length(channels)]){
         
-        mtext(nms[x], outer = TRUE, cex = 1, font = 2)
+        if(is.null(main)){
+          
+          mtext(nms[x], outer = TRUE, cex = 1, font = 2)
+          
+        }else{
+          
+          mtext(main[x], outer = TRUE, cex = 1, font = 2)
+          
+        }
         
       }
       

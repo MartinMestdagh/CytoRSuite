@@ -7,7 +7,7 @@
 \usage{
 \S4method{plotCytoComp}{flowSet}(x, cmfile = NULL, compensate = FALSE,
   spfile = NULL, transList = NULL, overlay = TRUE, mfrow,
-  popup = FALSE, ...)
+  popup = FALSE, main = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}
@@ -45,6 +45,9 @@ plot.}
 
 \item{popup}{logical indicating whether plots should be constructed in a
 pop-up window.}
+
+\item{main}{vector of titles to use for the plots, set to the name of the
+sample by default.}
 
 \item{...}{additional arguments passed to
 \code{\link{plotCyto2d,flowFrame-method}}.}
