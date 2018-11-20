@@ -259,7 +259,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
 #'
 #' @param x object of class
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' @param groupBy numeric (e.g. 2) or vector of pData column names (e.g.
+#' @param groupBy vector of pData column names (e.g.
 #'   c("Treatment","Concentration") indicating how the samples should be grouped
 #'   prior to gating, set to the length of x by default to construct a single
 #'   gate for all samples. If groupBy is suppied a different gate will be
@@ -348,16 +348,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
       
     }else{
       
-      gps <- ceiling(smp/groupBy)
-      gb <- sapply(1:(gps-1), function(x) rep(x, groupBy))
-      gb <- c(gb,rep(gps, (smp - length(gb))))
-      pData(gs)$groupby <- gb
-      
-      grps <- lapply(unique(pData(gs)$groupby), function(x){
-        
-        fs[which(pData(gs)$groupby %in% x)]
-        
-      })
+      stop("Numeric groupBy is not currently supported - use pData variables instead.")
       
     }
     
@@ -381,65 +372,106 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   # Gate each group - list of filters
   fltrsLst <- lapply(grps, function(fs){
   
-  # Restrict to samples matching pData requirements
-  if (!is.null(select)) {
-    if (class(select) != "numeric") {
-      stop("Vector supplied to select argument should contain the numeric indicies of the samples to select.")
-    }
-
-    # Extract samples using selectFrames
-    fs <- fs[select]
-  }
-
-  fr <- as(fs, "flowFrame")
-
-  # Check type argument is valid
-  type <- checkGateType(type = type, alias = alias)
-
-  # Set default type for 1D gates to interval
-  if (length(channels) == 1 & all(type %in% "polygon")) {
-    type <- rep("interval", length(type))
-  }
-
-  # Check alias is supplied correctly
-  checkAlias(alias = alias, type = type)
-
-  # Check supplied channel(s) are valid
-  channels <- checkChannels(fr, channels = channels, plot = TRUE)
-
-  # Make one call to drawPlot
-  if (plot == TRUE) {
-    if(getOption("cytoRSuite_interact") == FALSE){
-      plotCyto(x = gs, parent = parent, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, ...)
-    }else{
-      plotCyto(x = gs, parent = parent, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, ...)
-    }
-  }
-
-  # Construct gates save as filters object
-  if (length(type) == 1 & type[1] == "quadrant") {
-    gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
-  } else if (length(type) == 1 & type[1] == "web") {
-    gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
-  } else {
-    gates <- mapply(function(type, alias) {
-      if (type == "polygon") {
-        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
-      } else if (type == "rectangle") {
-        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
-      } else if (type == "interval") {
-        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels, ...)
-      } else if (type == "threshold") {
-        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
-      } else if (type == "boundary") {
-        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
-      } else if (type == "ellipse") {
-        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+    # Restrict to samples matching pData requirements
+    if (!is.null(select)) {
+      if (class(select) != "numeric") {
+        stop("Vector supplied to select argument should contain the numeric indicies of the samples to select.")
       }
-    }, type, alias)
-  }
 
-  gates <- filters(gates)
+      # Extract samples using selectFrames
+      fs <- fs[select]
+    }
+    fr <- as(fs, "flowFrame")
+    
+    # Remove "Original" column introduced by coercion
+    if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
+      
+      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      
+    }
+
+    # Check type argument is valid
+    type <- checkGateType(type = type, alias = alias)
+
+    # Set default type for 1D gates to interval
+    if (length(channels) == 1 & all(type %in% "polygon")) {
+      type <- rep("interval", length(type))
+    }
+
+    # Check alias is supplied correctly
+    checkAlias(alias = alias, type = type)
+
+    # Check supplied channel(s) are valid
+    channels <- checkChannels(fr, channels = channels, plot = TRUE)
+
+    # Main
+    if(is.numeric(groupBy)){
+      
+      if(parent == "root"){
+        
+        pnt <- "All Events"
+        
+      }else{
+        
+        pnt <- parent
+        
+      }
+      
+      if(groupBy == length(gs)){
+        
+        main <- paste("Combined Events","\n", pnt)
+        
+      }
+      
+    }else if(is.character(groupBy)){
+      
+      if(parent == "root"){
+        
+        pnt <- "All Events"
+        
+      }else{
+        
+        pnt <- parent
+        
+      }
+      
+      main <- paste(pData(gs[sampleNames(fs)])$groupby[1], "\n", pnt)
+      
+    }
+  
+    # Make one call to drawPlot
+    if (plot == TRUE) {
+      if(getOption("cytoRSuite_interact") == FALSE){
+        plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, main = main, ...)
+      }else{
+        plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, main = main, ...)
+      }
+    }
+
+    # Construct gates save as filters object
+    if (length(type) == 1 & type[1] == "quadrant") {
+      gates <- drawQuadrants(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+    } else if (length(type) == 1 & type[1] == "web") {
+      gates <- drawWeb(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+    } else {
+      gates <- mapply(function(type, alias) {
+        if (type == "polygon") {
+          drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        } else if (type == "rectangle") {
+          drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        } else if (type == "interval") {
+          drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels, ...)
+        } else if (type == "threshold") {
+          drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        } else if (type == "boundary") {
+          drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        } else if (type == "ellipse") {
+          drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        }
+      }, type, alias)
+    }
+
+    gates <- filters(gates)
 
   })
   
@@ -475,10 +507,6 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   if(is.character(groupBy)){
     
     groupBy <- paste(groupBy, collapse = ",")
-    
-  }else if(is.numeric(groupBy)){
-    
-    groupBy <- as.character(groupBy)
     
   }
   

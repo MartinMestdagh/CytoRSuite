@@ -233,7 +233,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   gT <- suppressMessages(gatingTemplate(gtfile))
   
   # Extract population nodes from gt
-  nds <- getNodes(gt, only.names = TRUE)
+  nds <- getNodes(gT, only.names = TRUE)
   
   #Parent Node
   prnt <- names(nds)[match(parent,nds)]
@@ -265,14 +265,8 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
         
     }else{
         
-      grps <- ceiling(length(gs)/grpby)
-      opts <- seq(1, grps, 1)
-        
-      # assign groups to pData$groupby
-      pData(gs)$groupby <- rep(1:length(gs), each = grpby, length.out = length(gs))
-        
-      grps <- select.list(opts, multiple = TRUE, graphics = TRUE, title = "Select the group(s) to edit:")
-        
+     stop("Numeric groupBy is not currently supported - use pData variables instead.")
+      
     }
       
   }else if(is.character(grpby)){
@@ -293,26 +287,18 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     als <- names(nds[match(alias[x],nds)])
     gm <- getGate(gT, prnt, als)
     gate <- eval(parameters(gm)$gate)
-    names(gate) <- unique(pData(gs)$groupby)[x]
+    names(gate) <- unique(pData(gs)$groupby)
+  
     return(gate)
   })
   names(gt_gates) <- alias # gt_gates is list (length(alias)) of list of filters (1x filters per group)
   
   # Split GatingSet into list of GatingSet groups
   if(is.numeric(grpby)){
-      
-    if(grpby == length(gs)){
         
-      gs.lst <- list(gs)
-      names(gs.lst) <- 1
-        
-    }else{
-        
-      gs.lst <- lapply(grps, function(x) gs[which(pData(gs)$groupby == x)])
-      names(gs.lst) <- grps
-        
-    }
-      
+    gs.lst <- list(gs)
+    names(gs.lst) <- 1
+    
   }else if(is.character(grpby)){
       
     gs.lst <- lapply(grps, function(x) gs[which(pData(gs)$groupby == x)])
@@ -379,11 +365,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
       if(grpby == length(gs)){
         
         main <- paste("Combined Events","\n", pnt)
-        
-      }else{
-        
-        main <- paste("Group", pData(grp)$groupby[1], "\n", pnt)
-        
+      
       }
       
     }else if(is.character(grpby)){

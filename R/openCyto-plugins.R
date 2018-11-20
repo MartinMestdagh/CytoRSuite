@@ -79,7 +79,7 @@ registerPlugins(gate_draw, "drawGate")
 #' @export
 gate_manual <- function(fr, pp_res, channels, gate){
   
-  # pp_res is merged groupBy info or numeric
+  # Index of gate to use
   if(is.numeric(pp_res)){
     
     gt <- pp_res
@@ -142,10 +142,8 @@ ppmanualGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...
       
     }else{
       
-      # groupBy is numeric - index in gs
-      pData(gs)$groupby <- rep(1:smp, each = groupBy, length.out = smp)
-      grpby <- pData(gs)[,"groupby"][match(pData(fs[1])[, "name"], pData(gs)[, "name"])]
-    
+      stop("Numeric groupBy is not currently supported - use pData variables instead.")
+      
     }
   }
   

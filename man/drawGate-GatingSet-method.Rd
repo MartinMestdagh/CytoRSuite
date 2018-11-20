@@ -14,7 +14,7 @@
 \item{x}{object of class
 \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.}
 
-\item{groupBy}{numeric (e.g. 2) or vector of pData column names (e.g.
+\item{groupBy}{vector of pData column names (e.g.
 c("Treatment","Concentration") indicating how the samples should be grouped
 prior to gating, set to the length of x by default to construct a single
 gate for all samples. If groupBy is suppied a different gate will be
