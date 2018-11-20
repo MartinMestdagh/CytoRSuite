@@ -134,21 +134,29 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, cmfile 
   require(shinythemes)
   require(rhandsontable)
   
+  # Assign x to fs
   fs <- x
+  
+  # Extract sample names
   nms <- sampleNames(fs)
+  
+  # Extract fluorescent channels
   channels <- getChannels(fs)
+  
+  # Extract pData information
+  pd <- pData(fs)
   
   # Select a fluorescent channel for each compensation control
   if(is.null(cmfile)){
     
-    pData(fs)$channel <- paste(selectChannels(fs))
-    write.csv(pData(fs), "Compensation Channels.csv", row.names = FALSE)
+    pd$channel <- paste(selectChannels(fs))
+    write.csv(pd, "Compensation Channels.csv", row.names = FALSE)
     
   }else{
     
-    pd <- read.csv(cmfile, header = TRUE, row.names = 1)
-    chans <- pd$channel[match(sampleNames(fs), row.names(pd))]
-    pData(fs)$channel <- paste(chans)
+    cm <- read.csv(cmfile, header = TRUE, row.names = 1)
+    chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
+    pd$channel <- paste(chans)
     
   }
   
@@ -185,7 +193,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, cmfile 
         tabPanel("Spillover", fluid = TRUE,
                  sidebarLayout(
                    sidebarPanel(
-                     selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs), selected = pData(fs)$name[match("Unstained", pData(fs)$channel)]),
+                     selectInput(inputId = "Unstained", label = "Select Unstained Control:", choices = sampleNames(fs), selected = pd$name[match("Unstained", pd$channel)]),
                      selectInput(inputId = "flowFrame", label = "Select Sample:", choices = sampleNames(fs)),
                      selectInput(inputId = "xchannel", label = "X Axis:", choices = channels),
                      selectInput(inputId = "ychannel", label = "Y Axis:", choices = channels),
@@ -203,7 +211,7 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, cmfile 
         tabPanel("Plots", fluid = TRUE,
                  sidebarLayout(
                    sidebarPanel(
-                     selectInput(inputId = "Unstained2", label = "Select Unstained Control:", choices = sampleNames(fs), selected = pData(fs)$name[match("Unstained", pData(fs)$channel)]),
+                     selectInput(inputId = "Unstained2", label = "Select Unstained Control:", choices = sampleNames(fs), selected = pd$name[match("Unstained", pd$channel)]),
                      selectInput(inputId = "flowFrame2", label = "Select Sample:", choices = sampleNames(fs)),
                      checkboxInput(inputId = "NIL2", label = "Overlay Unstained Control", value = TRUE),
                      checkboxInput(inputId = "Uncomp", label = "Underlay Uncompenasted Control", value = TRUE),
@@ -268,8 +276,9 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, cmfile 
       # Update xchannel selection based on selected control - spillover
       observe({
         fr <- input$flowFrame
-        xchan <- pData(fs)$channel[match(input$flowFrame, pData(fs)$name)]
+        xchan <- pd$channel[match(input$flowFrame, pd$name)]
         updateSelectInput(session, "xchannel", selected = xchan)
+        updateSelectInput(session, "flowFrame2", selected =fr)
       })
       
       # Apply compensation after each edit
@@ -409,24 +418,24 @@ setMethod(editSpillover, signature = "flowSet", definition = function(x, cmfile 
       
       output$plots <- renderPlot({
         
-        xchan <- pData(fs)$channel[match(input$flowFrame2, pData(fs)$name)]
+        xchan <- pd$channel[match(input$flowFrame2, pd$name)]
         if(input$Uncomp == TRUE){
           if(input$Comp == TRUE & input$NIL2 == FALSE){
-            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$flowFrame2]], col = c("blue","magenta"), subSample = subSample, alpha = 0.6, main = input$flowFrame2)
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$flowFrame2]], col = c("blue","magenta"), subSample = subSample, alpha = 0.6, main = input$flowFrame2, cex.pts = 3)
           }else if(input$Comp == TRUE & input$NIL2 == TRUE){
-            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = list(fs.comp()[[input$flowFrame2]],fs.comp()[[input$Unstained2]]), col = c("blue","magenta","black"), subSample = subSample, alpha = 0.6, main = input$flowFrame2)
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = list(fs.comp()[[input$flowFrame2]],fs.comp()[[input$Unstained2]]), col = c("blue","magenta","black"), subSample = subSample, alpha = 0.6, main = input$flowFrame2, cex.pts = 3)
           }else if(input$Comp == FALSE & input$NIL2 == TRUE){
-            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6, main = input$flowFrame2)
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6, main = input$flowFrame2, cex.pts = 3)
           }else if(input$Comp == FALSE & input$NIL2 == FALSE){
-            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, col = "blue", subSample = subSample, alpha = 0.6, main = input$flowFrame2)
+            plotCytoComp(fs[[input$flowFrame2]], channel = xchan, transList = transList, col = "blue", subSample = subSample, alpha = 0.6, main = input$flowFrame2, cex.pts = 3)
           }
         }else if(input$Uncomp == FALSE){
           if(input$Comp == TRUE & input$NIL2 == TRUE){
-            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6, main = input$flowFrame2)
+            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, overlay = fs.comp()[[input$Unstained2]], col = c("blue","black"), subSample = subSample, alpha = 0.6, main = input$flowFrame2, cex.pts = 3)
           }else if(input$Comp == FALSE & input$NIL2 == TRUE){
-            plotCytoComp(fs.comp()[[input$Unstained2]], channel = xchan, transList = transList, col = "black", subSample = subSample, alpha = 0.6, main = input$flowFrame2)
+            plotCytoComp(fs.comp()[[input$Unstained2]], channel = xchan, transList = transList, col = "black", subSample = subSample, alpha = 0.6, main = input$flowFrame2, cex.pts = 3)
           }else if(input$Comp == TRUE & input$NIL2 == FALSE){  
-            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, col = "magenta", subSample = subSample, alpha = 0.6, main = input$flowFrame2)
+            plotCytoComp(fs.comp()[[input$flowFrame2]], channel = xchan, transList = transList, col = "magenta", subSample = subSample, alpha = 0.6, main = input$flowFrame2, cex.pts = 3)
           }else if(input$Comp == FALSE & input$NIL2 == FALSE){
             
           }
@@ -531,8 +540,13 @@ setMethod(editSpillover, signature = "GatingSet", definition = function(x, paren
   require(shinythemes)
   require(rhandsontable)
   
+  # Assign x to gs
   gs <- x
+  
+  # Extract sample names
   nms <- sampleNames(gs)
+  
+  # Extract channels
   channels <- getChannels(gs)
   
   # Transformations
