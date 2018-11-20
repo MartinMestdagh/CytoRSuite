@@ -152,6 +152,7 @@ extractGate <- function(parent, alias, gtfile){
 #' @importFrom openCyto gatingTemplate
 #' @importFrom data.table as.data.table fread fwrite :=
 #' @importFrom methods as
+#' @importFrom utils select.list
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
@@ -229,26 +230,14 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   }
   
   # Extract gates from gt
-  gt <- suppressMessages(gatingTemplate(gtfile))
+  gT <- suppressMessages(gatingTemplate(gtfile))
   
   # Extract population nodes from gt
   nds <- getNodes(gt, only.names = TRUE)
   
   #Parent Node
   prnt <- names(nds)[match(parent,nds)]
-  
-  # Extract gates given parent and child node(s)
-  gt_gates <- lapply(alias, function(x){
-    
-    # Alias node
-    alias <- names(nds[match(x,nds)])
-    
-    gm <- getGate(gt, prnt, alias)
-    gate <- eval(parameters(gm)$gate)
-    
-  })
-  names(gt_gates) <- alias # gt_gates is list (length(alias)) of list of filters (1x filters per group)
-  
+
   # Read in gtfile
   gt <- read.csv(gtfile, header = TRUE)
   
@@ -297,6 +286,18 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
       
   }
   
+  # Extract gates given parent and child node(s)
+  gt_gates <- lapply(seq_along(alias), function(x){
+    
+    # Alias node
+    als <- names(nds[match(alias[x],nds)])
+    gm <- getGate(gT, prnt, als)
+    gate <- eval(parameters(gm)$gate)
+    names(gate) <- unique(pData(gs)$groupby)[x]
+    return(gate)
+  })
+  names(gt_gates) <- alias # gt_gates is list (length(alias)) of list of filters (1x filters per group)
+  
   # Split GatingSet into list of GatingSet groups
   if(is.numeric(grpby)){
       
@@ -325,6 +326,13 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     # Extract parent population for plotting
     fs <- suppressMessages(getData(grp, parent))
     fr <- as(fs, "flowFrame")
+    
+    # Remove "Original" column introduced by coercion
+    if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
+      
+      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      
+    }
       
     # Overlay
     if(!is.null(overlay)){
@@ -362,15 +370,31 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
         
         pnt <- "All Events"
         
+      }else{
+        
+        pnt <- parent
+        
       }
       
-      main <- paste("Group", pData(grp)$groupby[1], "\n", pnt)
+      if(grpby == length(gs)){
+        
+        main <- paste("Combined Events","\n", pnt)
+        
+      }else{
+        
+        main <- paste("Group", pData(grp)$groupby[1], "\n", pnt)
+        
+      }
       
     }else if(is.character(grpby)){
       
-      if(parent = "root"){
+      if(parent == "root"){
         
         pnt <- "All Events"
+        
+      }else{
+        
+        pnt <- parent
         
       }
       
@@ -394,7 +418,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     checkAlias(alias = alias, type = type)  
     
     # Extract channels from gates
-    channels <- parameters(gates[[1]])
+    channels <- unique(as.vector(sapply(gates,parameters)))
       
     # 2D Interval gates require axis argument
     if("interval" %in% type){
@@ -416,7 +440,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     # Draw new gates - set plot to FALSE (filters object of length alias)
     new_gates <- drawGate(fr, alias = alias, channels = channels, type = type, axis = axis, plot = FALSE)
     names(new_gates) <- alias
-    
+   
     # Modify existing gate(s)
     lapply(seq_along(alias), function(pop){
       
