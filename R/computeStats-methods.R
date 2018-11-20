@@ -423,7 +423,7 @@ setMethod(computeStats, signature = "GatingSet", definition = function(x, alias 
     
     lapply(1:length(alias), function(x){
       
-      write.csv(sts[[x]], paste(alias[x],stat, ".csv"))
+      write.csv(sts[[x]], paste(format(Sys.Date(), "%d%m%y"),"-",alias[x],"-",stat,".csv",sep = ""))
       
     })
     
