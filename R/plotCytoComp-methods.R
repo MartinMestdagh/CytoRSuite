@@ -301,15 +301,18 @@ setMethod(plotCytoComp, signature = "flowSet",
     
   }
   
+  # Extract pData information
+  pd <- pData(fs)
+  
   # Channel match file
   if(is.null(cmfile)){
     
     # No cmfile supplied
     message("No cmfile name supplied channels will be selected manually from menu.")
-    pData(fs)$channel <- paste(selectChannels(fs))
+    pd$channel <- paste(selectChannels(fs))
     
     message("writing new cmfile Compensation Channels.csv to save channel matching.")
-    write.csv(pData(fs), "Compensation Channels.csv", row.names = FALSE)
+    write.csv(pd, "Compensation Channels.csv", row.names = FALSE)
     
   }else if(checkFile(cmfile) == FALSE){
     
@@ -317,18 +320,18 @@ setMethod(plotCytoComp, signature = "flowSet",
     
   }else{
     
-    pd <- read.csv(cmfile, header = TRUE, row.names = 1)
-    chans <- pd$channel[match(sampleNames(fs), row.names(pd))]
-    pData(fs)$channel <- paste(chans)
+    cm <- read.csv(cmfile, header = TRUE, row.names = 1)
+    chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
+    pd$channel <- paste(chans)
     
   }
   
   # Pull out unstained control if supplied
-  if("Unstained" %in% pData(fs)$channel){
+  if("Unstained" %in% pd$channel){
     
     unst <- TRUE
-    NIL <- fs[[match("Unstained", pData(fs)$channel)]]
-    fs <- fs[-match("Unstained", pData(fs)$channel)]
+    NIL <- fs[[match("Unstained", pd$channel)]]
+    fs <- fs[-match("Unstained", pd$channel)]
     smp <- smp - 1
     
   }else{
@@ -340,8 +343,8 @@ setMethod(plotCytoComp, signature = "flowSet",
   # Sample names
   nms <- sampleNames(fs)
   
-  # Extract pData from fs
-  pdata <- pData(fs)
+  # Restrict pd to fs
+  pd <- pd[!pd$channel == "Unstained",]
   
   # Convert fs into list of flowFrames
   fs.lst <- lapply(seq(1,smp,1), function(x) fs[[x]])
@@ -383,11 +386,11 @@ setMethod(plotCytoComp, signature = "flowSet",
       
       if(unst == TRUE & overlay == TRUE){
         
-        plotCyto(fs.lst[[x]], channels = c(pdata$channel[x], channels[y]), overlay = NIL, mfrow = FALSE, transList = transList, legend = FALSE, main = pdata$channel[x], ...)
+        plotCyto(fs.lst[[x]], channels = c(pd$channel[x], channels[y]), overlay = NIL, mfrow = FALSE, transList = transList, legend = FALSE, main = pd$channel[x], ...)
       
       }else{
         
-        plotCyto(fs.lst[[x]], channels = c(pdata$channel[x], channels[y]), mfrow = FALSE, transList = transList, legend = FALSE, main = pdata$channel[x], ...)
+        plotCyto(fs.lst[[x]], channels = c(pd$channel[x], channels[y]), mfrow = FALSE, transList = transList, legend = FALSE, main = pd$channel[x], ...)
         
       }
       
