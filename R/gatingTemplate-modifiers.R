@@ -445,6 +445,15 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   # Find and Edit gatingTemplate entries - each alias and gate separate
   gt <- data.table::fread(gtfile)
   
+  # data.table R CMD Check NOTE
+  gating_method <- NULL
+  gating_args <- NULL
+  collapseDataForGating <- NULL
+  groupBy <- NULL
+  preprocessing_method <- NULL
+  preprocessing_args <- NULL
+  
+  # Modify template
   for(i in 1:length(alias)){
     
     gt[parent == prnt & alias == als[i], gating_method := gtmd]
@@ -778,5 +787,85 @@ getGateType <- function(gates){
   }
   
   return(types)
+  
+}
+
+#' Convert Old gatingTemplates to New Format
+#' 
+#' @param gs object of class GatingSet.
+#' @param gtfile name of the gatingTemplate csv file to convert.
+#' 
+#' @return converted gatingTemplate saved to .csv file.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @importFrom data.table fread fwrite
+#' @importFrom openCyto gatingTemplate
+#' @importFrom flowWorkspace getGate getNodes
+#' @importFrom flowCore parameters filters
+#' @importFrom utils read.csv write.csv
+#' 
+#' @export
+convertGatingTemplate <- function(gs, gtfile){
+  
+  # Number of samples
+  smp <- length(gs)
+  
+  if(missing(gtfile)){
+    
+    stop("Please supply the name of the gatingTemplate to be converted.")
+    
+  }else{
+    
+    checkFile(gtfile)
+    
+  }
+  
+  # Read in gatingTemplate
+  gt <- data.table::fread(gtfile)
+  
+  # Modify template
+  for(i in 1:nrow(gt)){
+    
+    # Load gtfile into gatingTemplate
+    gT <- suppressMessages(gatingTemplate(gtfile))
+    pops <- basename(gT@nodes)[-1]
+    
+    # Extract population nodes from gT
+    nds <- getNodes(gT, only.names = TRUE)
+    
+    als <- names(nds[match(pops[i],nds)])
+    
+    #Parent Node
+    parent <- gt[alias == pops[i], "parent"]
+    parent <- as.character(parent)
+    
+    prnt <- names(nds[match(parent,nds)])
+    gm <- getGate(gT, prnt, als)
+    gate <- eval(parameters(gm)$gate)
+    gts <- list(filters(list(gate)))
+    
+    gtmd <- "manualGate"
+    ppmd <- "ppmanualGate"
+    als <- pops[i]
+    
+    gt[alias == als, gating_method := gtmd]
+    gt[alias == als, gating_args := .argDeparser(list(gate = gts))]
+    gt[alias == als, collapseDataForGating := TRUE]
+    
+  }
+  
+  # Save updated gatingTemplate
+  data.table::fwrite(gt, gtfile)
+  
+  gt <- read.csv(gtfile, header = TRUE)
+  gt$collapseDataForGating <- rep(TRUE,nrow(gt))
+  gt$groupBy <- rep(smp,nrow(gt))
+  gt$preprocessing_method <- rep("ppmanualGate",nrow(gt))
+  gt$preprocessing_args <- rep(NA,nrow(gt))
+  
+  write.csv(gt, gtfile, row.names = FALSE)
+  
+  return(gt)
   
 }
