@@ -126,13 +126,16 @@ ppmanualGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...
   # Samples
   smp <- length(gs)
   
+  # Extract pData information
+  pd <- pData(gs)
+  
   # Add groupBy info to pData gs
   if(!is.na(groupBy) & grepl("^[A-Za-z]+$", groupBy) == TRUE){
     
     # groupBy is composed of characters
-    pData(gs)$groupby <- do.call(paste, pData(gs)[, groupBy, drop = FALSE])
+    pd$groupby <- do.call(paste, pd[, groupBy, drop = FALSE])
     
-    grpby <- pData(gs)[,"groupby"][match(pData(fs[1])[, "name"], pData(gs)[, "name"])]
+    grpby <- pd[,"groupby"][match(pData(fs[1])[, "name"], pd[, "name"])]
     
   }else if(!is.na(groupBy) & grepl("^[A-Za-z]+$", groupBy) == FALSE){
     
