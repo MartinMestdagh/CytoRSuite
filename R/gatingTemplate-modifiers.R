@@ -809,6 +809,7 @@ getGateType <- function(gates){
 convertGatingTemplate <- function(gs, gtfile){
   
   # data.table R CMD Check NOTE
+  alias <- NULL
   gating_method <- NULL
   gating_args <- NULL
   collapseDataForGating <- NULL
@@ -873,7 +874,5 @@ convertGatingTemplate <- function(gs, gtfile){
   gt$preprocessing_args <- rep(NA,nrow(gt))
   
   write.csv(gt, gtfile, row.names = FALSE)
-  
-  return(gt)
   
 }
