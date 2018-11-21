@@ -382,7 +382,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
         
       }
       
-      main <- paste(pd$groupby[1], "\n", pnt)
+      main <- paste(unique(pd[pd$name %in% sampleNames(grp),"groupby"]), "\n", pnt)
       
     }
     
