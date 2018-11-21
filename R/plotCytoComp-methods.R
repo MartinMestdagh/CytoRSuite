@@ -169,7 +169,7 @@ setMethod(plotCytoComp, signature = "flowFrame",
       
       if(is.null(main)){
         
-        mtext(nms, outer = TRUE, cex = 1, font = 2)
+        mtext(nm, outer = TRUE, cex = 1, font = 2)
         
       }else{
         
