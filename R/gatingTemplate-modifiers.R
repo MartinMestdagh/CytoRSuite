@@ -213,8 +213,10 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     
   }
   
-  # Rename x to gs
+  # Assign x to gs
   gs <- x
+  
+  # Extract pData information
   pd <- pData(gs)
   
   # Extract transList from gs
@@ -261,7 +263,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
         
       # no selection required - grps indicates which filters object to edit
       grps <- 1
-      pData(gs)$groupby <- rep(1,length(gs))
+      pd$groupby <- rep(1,length(gs))
         
     }else{
         
@@ -272,9 +274,9 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   }else if(is.character(grpby)){
       
     vrs <- unlist(strsplit(grpby, ",", fixed = TRUE))
-    opts <- unique(do.call(paste, pData(gs)[, grpby, drop = FALSE]))
+    opts <- unique(do.call(paste, pd[, grpby, drop = FALSE]))
       
-    pData(gs)$groupby <- do.call(paste, pData(gs)[, grpby, drop = FALSE])
+    pd$groupby <- do.call(paste, pd[, grpby, drop = FALSE])
       
     grps <- select.list(opts, multiple = TRUE, graphics = TRUE, title = "Select the group(s) to edit:")
       
@@ -287,7 +289,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     als <- names(nds[match(alias[x],nds)])
     gm <- getGate(gT, prnt, als)
     gate <- eval(parameters(gm)$gate)
-    names(gate) <- unique(pData(gs)$groupby)
+    names(gate) <- unique(pd$groupby)
   
     return(gate)
   })
@@ -301,7 +303,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     
   }else if(is.character(grpby)){
       
-    gs.lst <- lapply(grps, function(x) gs[which(pData(gs)$groupby == x)])
+    gs.lst <- lapply(grps, function(x) gs[which(pd$groupby == x)])
     names(gs.lst) <- grps
       
   }
@@ -380,7 +382,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
         
       }
       
-      main <- paste(pData(grp)$groupby[1], "\n", pnt)
+      main <- paste(pd$groupby[1], "\n", pnt)
       
     }
     
@@ -426,7 +428,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     # Modify existing gate(s)
     lapply(seq_along(alias), function(pop){
       
-      gt_gates[[alias[pop]]][[match(pData(grp)$groupby[1], names(gt_gates[[pop]]))]] <<- filters(list(new_gates[[alias[pop]]]))
+      gt_gates[[alias[pop]]][[match(pd[pd$name %in% sampleNames(grp),"groupby"][1], names(gt_gates[[pop]]))]] <<- filters(list(new_gates[[alias[pop]]]))
       
     })
     
@@ -462,11 +464,11 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     
     lapply(seq_along(alias), function(pop){
 
-      fltrs <- rep(list(gt_gates[[alias[pop]]][[grp]][[1]]), length(gs[which(pData(gs)$groupby == grp)]))
-      names(fltrs) <- as.character(pData(gs[which(pData(gs)$groupby == grp)])$name)
+      fltrs <- rep(list(gt_gates[[alias[pop]]][[grp]][[1]]), length(gs[which(pd$groupby == grp)]))
+      names(fltrs) <- as.character(sampleNames(gs[which(pd$groupby == grp)]))
       
-      suppressMessages(setGate(gs[which(pData(gs)$groupby == grp)], alias[pop], fltrs))
-      suppressMessages(recompute(gs[which(pData(gs)$groupby == grp)], alias[pop]))
+      suppressMessages(setGate(gs[which(pd$groupby == grp)], alias[pop], fltrs))
+      suppressMessages(recompute(gs[which(pd$groupby == grp)], alias[pop]))
       
     })
     
