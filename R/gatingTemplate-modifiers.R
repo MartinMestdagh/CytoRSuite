@@ -808,6 +808,14 @@ getGateType <- function(gates){
 #' @export
 convertGatingTemplate <- function(gs, gtfile){
   
+  # data.table R CMD Check NOTE
+  gating_method <- NULL
+  gating_args <- NULL
+  collapseDataForGating <- NULL
+  groupBy <- NULL
+  preprocessing_method <- NULL
+  preprocessing_args <- NULL
+  
   # Number of samples
   smp <- length(gs)
   
