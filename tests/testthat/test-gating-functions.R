@@ -14,11 +14,8 @@ test_that(".onLoad set cytoRSuite_interact to TRUE", {
 # drawPolygon -
 
 test_that("drawPolygon returns the appropriate gates", {
-  
-  coords <- matrix(c(50000,100000,100000,75000,50000, 10000,10000,60000,85000,60000), ncol = 2, nrow = 5)
-  colnames(coords) <- c("FSC-A","SSC-A")
-  pg <- polygonGate(filterId = "Cells", .gate = coords)
-  dp <- drawPolygon(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"))
+
+  dp <- drawPolygon(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"), subSample = 100)
   
   expect_s4_class(dp, "filters")
   expect_s4_class(dp[[1]], "polygonGate")
@@ -31,12 +28,8 @@ test_that("drawPolygon returns the appropriate gates", {
 ## drawRectangle -
 
 test_that("drawRectangle returns the appropriate gates", {
-  
-  coords <- matrix(c(25000,150000, 5000,150000), ncol = 2, nrow = 2)
-  colnames(coords) <- c("FSC-A","SSC-A")
-  rownames(coords) <- c("min","max")
-  rg <- rectangleGate(filterId = "Cells", .gate = coords)
-  dr <- drawRectangle(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"))
+
+  dr <- drawRectangle(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"), subSample = 100)
   
   expect_s4_class(dr, "filters")
   expect_s4_class(dr[[1]], "rectangleGate")
@@ -50,11 +43,7 @@ test_that("drawRectangle returns the appropriate gates", {
 
 test_that("drawInterval returns the appropriate gates", {
   
-  coords <- matrix(c(25000,150000,-Inf,Inf), ncol = 2, nrow = 2)
-  colnames(coords) <- c("FSC-A","SSC-A")
-  rownames(coords) <- c("min","max")
-  ig <- rectangleGate(filterId = "Cells", .gate = coords)
-  di <- drawInterval(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"))
+  di <- drawInterval(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"), subSample = 100)
   
   expect_s4_class(di, "filters")
   expect_s4_class(di[[1]], "rectangleGate")
@@ -68,11 +57,7 @@ test_that("drawInterval returns the appropriate gates", {
 
 test_that("drawThreshold returns the appropriate gates", {
   
-  coords <- matrix(c(25000,Inf,5000,Inf), ncol = 2, nrow = 2)
-  colnames(coords) <- c("FSC-A","SSC-A")
-  rownames(coords) <- c("min","max")
-  tg <- rectangleGate(filterId = "Cells", .gate = coords)
-  dt <- drawThreshold(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"))
+  dt <- drawThreshold(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"), subSample = 100)
   
   expect_s4_class(dt, "filters")
   expect_s4_class(dt[[1]], "rectangleGate")
@@ -86,16 +71,12 @@ test_that("drawThreshold returns the appropriate gates", {
 
 test_that("drawBoundary returns the appropriate gates", {
 
-  coords <- matrix(c(-Inf, 200000, -Inf, 200000), ncol = 2, nrow = 2)
-  colnames(coords) <- c("FSC-A","SSC-A")
-  rownames(coords) <- c("min","max")
-  tb <- rectangleGate(filterId = "Cells", .gate = coords)
-  db <- drawBoundary(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"))
+  db <- drawBoundary(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"), subSample = 100)
   
   expect_s4_class(db, "filters")
   expect_s4_class(db[[1]], "rectangleGate")
-  expect_equal(db[[1]], tb)
-  expect_equal(parameters(db[[1]]), parameters(tb))
+  expect_equal(db[[1]], bg)
+  expect_equal(parameters(db[[1]]), parameters(bg))
   
 })
 
@@ -104,10 +85,12 @@ test_that("drawBoundary returns the appropriate gates", {
 
 test_that("drawEllipse returns the appropriate gates",{
   
-  de <- drawEllipse(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"))
+  de <- drawEllipse(fs[[1]], alias = "Cells", channels = c("FSC-A","SSC-A"), subSample = 100)
   
   expect_s4_class(de, "filters")
   expect_s4_class(de[[1]], "ellipsoidGate")
+  expect_equal(de[[1]]@mean, eg@mean)
+  expect_equal(round(de[[1]]@cov, 8), round(eg@cov, 8))
   
 })
 
@@ -116,11 +99,12 @@ test_that("drawEllipse returns the appropriate gates",{
 
 test_that("drawQuadrants returns the appropriate gates",{
   
-  dq <- drawQuadrants(fs[[1]], alias = c("A","B","C","D"), channels = c("FSC-A","SSC-A"))
+  dq <- drawQuadrants(fs[[1]], alias = c("A","B","C","D"), channels = c("FSC-A","SSC-A"), subSample = 100)
   
   expect_s4_class(dq, "filters")
   expect_length(dq, 4)
-  expect_s4_class(dq[[1]], "rectangleGate")
+  expect_equal(as.vector(sapply(dq,class)), rep("rectangleGate", 4))
+  expect_equal(qg, dq)
   
 })
 
@@ -129,10 +113,11 @@ test_that("drawQuadrants returns the appropriate gates",{
 
 test_that("drawWeb returns the appropriate gates",{
   
-  dw <- drawWeb(fs[[1]], alias = c("A","B","C"), channels = c("FSC-A","SSC-A"))
+  dw <- drawWeb(fs[[1]], alias = c("A","B","C"), channels = c("FSC-A","SSC-A"), subSample = 100)
   
   expect_s4_class(dw, "filters")
   expect_length(dw, 3)
-  expect_s4_class(dw[[1]], "polygonGate")
+  expect_equal(as.vector(sapply(dw,class)), rep("polygonGate", 3))
+  expect_equal(wg, dw, tolerance = 0.01)
   
 })
