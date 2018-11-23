@@ -1322,6 +1322,7 @@ drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
   gates <- lapply(seq(1, length(gates), 1), function(x) {
     coords <- as.matrix(gates[[x]])[, -3]
     colnames(coords) <- channels
+    rownames(coords) <- NULL
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias[x])
 
     if (labels == TRUE) {
