@@ -384,7 +384,7 @@ drawThreshold <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
   message(paste("Select the lower bound of the", alias, "population to construct a threshold gate. \n"))
 
   if (length(alias) > 1) {
-    stop("Multiple threhold gates are not supported.")
+    stop("Multiple threshold gates are not supported.")
   }
 
   # Extract gate coordinates
@@ -399,11 +399,13 @@ drawThreshold <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
     pts <- data.frame(x = c(coords$x, Inf))
     pts <- as.matrix(pts)
     colnames(pts) <- channels[1]
+    rownames(pts) <- c("min","max")
     abline(v = coords$x, lwd = 2.5, col = "red")
   } else if (length(channels) == 2) {
     pts <- data.frame(x = c(coords$x, Inf), y = c(coords$y, Inf))
     pts <- as.matrix(pts)
     colnames(pts) <- channels
+    rownames(pts) <- c("min","max")
     rect(xleft = min(coords$x), ybottom = min(coords$y), xright = max(exprs(fr)[, channels[1]]), ytop = max(exprs(fr)[, channels[2]]), border = "red", lwd = 2.5)
   }
 
@@ -496,11 +498,13 @@ drawBoundary <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
     pts <- data.frame(x = c(-Inf, coords$x))
     pts <- as.matrix(pts)
     colnames(pts) <- channels[1]
+    rownames(pts) <- c("min","max")
     abline(v = coords$x, lwd = 2.5, col = "red")
   } else if (length(channels) == 2) {
     pts <- data.frame(x = c(-Inf, coords$x), y = c(-Inf, coords$y))
     pts <- as.matrix(pts)
     colnames(pts) <- channels
+    rownames(pts) <- c("min","max")
     rect(xleft = min(exprs(fr)[, channels[1]]), ybottom = min(exprs(fr)[, channels[2]]), xright = max(coords$x), ytop = max(coords$y), border = "red", lwd = 2.5)
   }
 
@@ -850,13 +854,13 @@ drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
   if (getOption("cytoRSuite_interact") == TRUE) {
     center <- locator(n = 1, type = "p", lwd = 2, pch = 16, col = "red")
   } else {
-    center <- list(c(150000), c(150000))
+    center <- list(c(120627.9), c(147367.9))
     names(center) <- c("x", "y")
 
     # Number of populations for tests set to 3
-    alias <- c("A", "B", "C")
+    alias <- c("A", "B", "C", "D", "E", "F", "G", "H")
   }
-
+  
   # User Prompt
   message("Select surrounding co-ordinates on plot edges to draw a web gate.")
 
@@ -868,7 +872,7 @@ drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
   ymax <- round(max(vals[, channels[2]]), 4)
 
   # Test co-ordinates
-  tst <- list(list(c(50000), c(0)), list(c(150000), c(250000)), list(c(250000), c(50000)))
+  tst <- list(list(c(18175.99), c(109811.2)), list(c(59368), c(-8549.33)), list(c(167629), c(4538.609)), list(c(246316.3), c(3400.527)), list(c(264799.9), c(184924.5)), list(c(238922.9), c(267435.5)), list(c(107425.3), c(258899.9)), list(c(-4004.315), c(244104.8)))
 
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq(1:length(alias)), function(x) {
@@ -878,7 +882,7 @@ drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
       pt <- tst[[x]]
       names(pt) <- c("x", "y")
     }
-
+    
     lines(x = c(center$x, pt$x), y = c(center$y, pt$y), lwd = 2.5, col = "red")
 
     return(c(pt$x, pt$y))

@@ -88,6 +88,15 @@ test_that("drawThreshold returns the appropriate gates", {
   
   expect_error(drawThreshold(fs[[1]], channels = "FSC-A"), "Please supply a name for a the gated population as the alias argument.")
   
+  dt <- drawThreshold(fs[[1]], alias = "Cells", channels = "FSC-A")
+  
+  expect_s4_class(dt, "filters")
+  expect_s4_class(dt[[1]], "rectangleGate")
+  expect_equal(dt[[1]], tg1)
+  expect_equal(parameters(dt[[1]]), parameters(tg1))
+  
+  expect_error(drawThreshold(fs[[1]], alias = c("A","B"), channels = "FSC-A"), "Multiple threshold gates are not supported.")
+  
 })
 
 ## -----------------------------------------------------------------------------------
@@ -102,8 +111,17 @@ test_that("drawBoundary returns the appropriate gates", {
   expect_equal(db[[1]], bg)
   expect_equal(parameters(db[[1]]), parameters(bg))
   
-  expect_error(drawBoundary(fs[[1]], channels = "FSC-A"), "Please supply a name for a the gated population as the alias argument.")
+  db <- drawBoundary(fs[[1]], alias = "Cells", channels = "FSC-A")
   
+  expect_s4_class(db, "filters")
+  expect_s4_class(db[[1]], "rectangleGate")
+  expect_equal(db[[1]], bg1)
+  expect_equal(parameters(db[[1]]), parameters(bg1))
+  
+  
+  expect_error(drawBoundary(fs[[1]], channels = "FSC-A"), "Please supply a name for a the gated population as the alias argument.")
+  expect_error(drawBoundary(fs[[1]], alias = c("A","B"), channels = "FSC-A"), "Multiple boundary gates are not supported.")
+
 })
 
 ## -----------------------------------------------------------------------------------
@@ -145,11 +163,11 @@ test_that("drawQuadrants returns the appropriate gates",{
 
 test_that("drawWeb returns the appropriate gates",{
   
-  dw <- drawWeb(fs[[1]], alias = c("A","B","C"), channels = c("FSC-A","SSC-A"), subSample = 100)
+  dw <- drawWeb(fs[[1]], alias = c("A","B","C","D","E","F","G","H"), channels = c("FSC-A","SSC-A"), subSample = 100)
   
   expect_s4_class(dw, "filters")
-  expect_length(dw, 3)
-  expect_equal(as.vector(sapply(dw,class)), rep("polygonGate", 3))
+  expect_length(dw, 8)
+  expect_equal(as.vector(sapply(dw,class)), rep("polygonGate", 8))
   expect_equal(wg, dw, tolerance = 0.01)
   
   expect_error(drawWeb(fs[[1]], channels = "FSC-A"), "Please supply a name for a the gated population as the alias argument.")
