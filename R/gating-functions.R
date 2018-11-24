@@ -174,7 +174,7 @@ drawRectangle <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
     coords <- data.frame(coords)
     coords <- as.matrix(coords)
     colnames(coords) <- channels
-
+    
     rect(xleft = min(coords[, 1]), ybottom = min(coords[, 2]), xright = max(coords[, 1]), ytop = max(coords[, 2]), border = "red", lwd = 2.5)
 
     gate <- flowCore::rectangleGate(.gate = coords, filterId = alias)
@@ -286,10 +286,12 @@ drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", la
         coords <- data.frame(x = coords[, 1])
         coords <- as.matrix(coords)
         colnames(coords) <- channels[1]
+        rownames(coords) <- c("min","max")
       } else if (length(channels) == 2) {
         coords <- data.frame(x = coords[, 1], y = c(-Inf, Inf))
         coords <- as.matrix(coords)
         colnames(coords) <- channels
+        rownames(coords) <- c("min","max")
       }
       gate <- rectangleGate(.gate = coords, filterId = alias)
 
@@ -301,6 +303,7 @@ drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", la
       coords <- data.frame(x = c(-Inf, Inf), y = coords[, 2])
       coords <- as.matrix(coords)
       colnames(coords) <- channels
+      rownames(coords) <- c("min","max")
 
       gate <- rectangleGate(.gate = coords, filterId = alias)
 
@@ -711,7 +714,7 @@ drawQuadrants <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
   }
 
   if (!length(alias) == 4) {
-    stop("Supply 4 population names as the alias argument to construct a set of quadrant gates")
+    stop("Supply 4 population names as the alias argument to construct a set of quadrant gates.")
   }
 
   # Construct gates

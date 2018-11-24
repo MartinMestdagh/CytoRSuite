@@ -47,10 +47,23 @@ colnames(coords) <- c("FSC-A","SSC-A")
 pg <- polygonGate(filterId = "Cells", .gate = coords)
 
 # intervalGate -
+# 1D x axis -
+coords <- matrix(c(25000,150000), ncol = 1, nrow = 2)
+colnames(coords) <- c("FSC-A")
+rownames(coords) <- c("min","max")
+igx <- rectangleGate(filterId = "Cells", .gate = coords)
+
+# 2D x axis-
 coords <- matrix(c(25000,150000,-Inf,Inf), ncol = 2, nrow = 2)
 colnames(coords) <- c("FSC-A","SSC-A")
 rownames(coords) <- c("min","max")
 ig <- rectangleGate(filterId = "Cells", .gate = coords)
+
+# 2D y axis -
+coords <- matrix(c(-Inf,Inf,-Inf,Inf), ncol = 2, nrow = 2)
+colnames(coords) <- c("FSC-A","SSC-A")
+rownames(coords) <- c("min","max")
+igy <- rectangleGate(filterId = "Cells", .gate = coords)
 
 # thresholdGate -
 coords <- matrix(c(25000,Inf,5000,Inf), ncol = 2, nrow = 2)
