@@ -871,14 +871,14 @@ drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
   ymin <- round(min(vals[, channels[2]]), 4)
   ymax <- round(max(vals[, channels[2]]), 4)
 
-  # Test co-ordinates
-  tst <- list(list(c(18175.99), c(109811.2)), list(c(59368), c(-8549.33)), list(c(167629), c(4538.609)), list(c(246316.3), c(3400.527)), list(c(264799.9), c(184924.5)), list(c(238922.9), c(267435.5)), list(c(107425.3), c(258899.9)), list(c(-4004.315), c(244104.8)))
 
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq(1:length(alias)), function(x) {
     if (getOption("cytoRSuite_interact") == TRUE) {
       pt <- locator(n = 1, type = "p", lwd = 2.5, pch = 16, col = "red")
     } else {
+      # Test co-ordinates
+      tst <- list(list(c(18175.99), c(109811.2)), list(c(59368), c(-8549.33)), list(c(167629), c(4538.609)), list(c(246316.3), c(3400.527)), list(c(264799.9), c(184924.5)), list(c(238922.9), c(267435.5)), list(c(107425.3), c(258899.9)), list(c(-4004.315), c(244104.8)))
       pt <- tst[[x]]
       names(pt) <- c("x", "y")
     }

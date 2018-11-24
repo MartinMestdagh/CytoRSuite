@@ -84,9 +84,9 @@ setMethod(computeStats, signature = "flowFrame", definition = function(x, channe
       
     transList <- checkTransList(transList, inverse = FALSE)
     inv <- checkTransList(transList, inverse = TRUE)
-        
+    fr <- transform(fr, inv) 
+    
   }
-  fr <- transform(fr, inv)
   
   # Extract data from fr
   fr.exprs <- exprs(fr)
