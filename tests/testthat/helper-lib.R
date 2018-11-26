@@ -2,6 +2,9 @@
 # Load in vdiffr for image comparison -
 library(vdiffr)
 
+# Load in robustbase -
+library(robustbase)
+
 ## ----------------------------------------------------------------------
 # Assign Activation dataset to fs -
 fs <- Activation
@@ -31,6 +34,9 @@ gtf <- read.csv("Example-gatingTemplate.csv")
 
 # Gating -
 gating(gt, gs)
+
+# Extract populations -
+Va2 <- getData(gs, "T Cells")
 
 ## --------------------------------------------------------------------
 # Construct gate objects -

@@ -28,7 +28,8 @@ Suggests:
   rmarkdown,
   testthat,
   vdiffr,
-  covr
+  covr,
+  robustbase
 Remotes: 
   Bioconductor/BiocGenerics@a2de4dd,
   RGLab/RProtoBufLib@trunk,

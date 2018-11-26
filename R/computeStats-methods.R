@@ -160,7 +160,7 @@ setMethod(computeStats, signature = "flowFrame", definition = function(x, channe
       # No transList supplied 
       }else{
         
-        sts <- exp(mean(log(fr.exprs)))
+        sts <- suppressWarnings(exp(mean(log(fr.exprs))))
         
         if(is.nan(sts)){
           
@@ -249,15 +249,7 @@ setMethod(computeStats, signature = "flowSet", definition = function(x, channels
   
   # Merge with pdata
   pdata[,"name"] <- list(NULL)
-  if(class(sts) == "list"){
-    
-    sts <- lapply(sts, function(x){
-    
-      cbind(pdata,x)
-    
-    })
-    
-  }else if(class(sts) == "data.frame"){
+  if(class(sts) == "data.frame"){
     
     sts <- lapply(list(sts), function(x){
       
