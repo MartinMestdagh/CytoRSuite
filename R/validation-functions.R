@@ -768,7 +768,7 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
 
 #' Check Statistic for ComputeStats
 #' 
-#' @param stat 
+#' @param stat computeStats statistic.
 #' 
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
