@@ -60,6 +60,9 @@ setGeneric(name = "computeStats",
 #' @export
 setMethod(computeStats, signature = "flowFrame", definition = function(x, channels = NULL, transList = NULL, stat = "median", adjust = 1.5){
 
+  # Check statistic
+  stat <- checkStat(stat = stat)
+  
   # Assign x to fr
   fr <- x
   
@@ -227,6 +230,9 @@ setMethod(computeStats, signature = "flowFrame", definition = function(x, channe
 #' @export
 setMethod(computeStats, signature = "flowSet", definition = function(x, channels = NULL, transList = NULL, stat = "median", adjust = 1.5){
   
+  # Check statistic
+  stat <- checkStat(stat = stat)
+  
   # Assign x to fs
   fs <- x
   
@@ -334,6 +340,9 @@ setMethod(computeStats, signature = "flowSet", definition = function(x, channels
 #' @export
 setMethod(computeStats, signature = "GatingSet", definition = function(x, alias = NULL, parent = NULL, channels = NULL, transList = NULL, stat = "median", adjust = 1.5, save = TRUE){
   
+  # Check statistic
+  stat <- checkStat(stat = stat)
+  
   # Assign x to gs
   gs <- x
   
@@ -359,7 +368,7 @@ setMethod(computeStats, signature = "GatingSet", definition = function(x, alias 
     
     sts <- lapply(fs.lst, function(fs){
       
-      as.data.frame(computeStats(fs, channels = channels, transList = transList, stat = "count", adjust = 1.5))
+      as.data.frame(computeStats(fs, channels = channels, transList = transList, stat = "count", adjust = adjust))
       
     })
     names(sts) <- alias
@@ -368,7 +377,7 @@ setMethod(computeStats, signature = "GatingSet", definition = function(x, alias 
     prnts <- lapply(parent, function(x){
       
       fs <- getData(gs, x)
-      as.data.frame(computeStats(fs, channels = channels, transList = transList, stat = "count", adjust = 1.5))
+      as.data.frame(computeStats(fs, channels = channels, transList = transList, stat = "count", adjust = adjust))
       
     })
     names(prnts) <- parent

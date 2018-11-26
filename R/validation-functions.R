@@ -765,3 +765,40 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
   return(overlay)
   
 })
+
+#' Check Statistic for ComputeStats
+#' 
+#' @param stat 
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @noRd
+checkStat <- function(stat){
+  
+  if(!stat %in% c("mean","Mean","median","Median","mode","Mode","count","Count","freq","Freq","geo mean","Geo mean","Geo Mean","CV","cv","CVI","cvi")){
+  
+    stop("Supplied statistic not supported.")
+    
+  }
+
+  if(stat %in% c("mean","Mean")){
+    stat <- "mean"
+  }else if(stat %in% c("median", "Median")){
+    stat <- "median"
+  }else if(stat %in% c("mode","Mode")){
+    stat <- "mode"
+  }else if(stat %in% c("count","Count")){
+    stat <- "count"
+  }else if(stat %in% c("freq","Freq")){
+    stat <- "freq"
+  }else if(stat %in% c("geo mean","Geo mean","Geo Mean")){
+    stat <- "geo mean"
+  }else if(stat %in% c("cv","CV")){
+    stat <- "CV"
+  }else if(stat %in% c("cvi","CVI")){
+    stat <- "CVI"
+  }
+
+  return(stat)
+  
+}
