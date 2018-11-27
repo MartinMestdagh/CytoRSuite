@@ -49,7 +49,7 @@ drawPolygon <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
 
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("cytoRSuite_interact") == FALSE) {
+    if (getOption("CytoRSuite_interact") == FALSE) {
       plotCyto(fr, channels = channels, popup = FALSE, legend = FALSE, labels = FALSE, ...)
     } else {
       plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
@@ -63,7 +63,7 @@ drawPolygon <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
     message(paste("Select at least 3 points to construct a polygon gate around the", alias, "population. \n"))
 
     # Extract gate coordinates
-    if (getOption("cytoRSuite_interact") == TRUE) {
+    if (getOption("CytoRSuite_interact") == TRUE) {
       coords <- locator(type = "o", lwd = 2, pch = 16, col = "red")
     } else {
       coords <- list(c(50000, 100000, 100000, 75000, 50000), c(10000, 10000, 60000, 85000, 60000))
@@ -82,7 +82,7 @@ drawPolygon <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
 
     gate <- flowCore::polygonGate(.gate = coords, filterId = alias)
 
-    if (getOption("cytoRSuite_interact") == FALSE) {
+    if (getOption("CytoRSuite_interact") == FALSE) {
       plotGates(gate, channels = channels)
     }
 
@@ -150,7 +150,7 @@ drawRectangle <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("cytoRSuite_interact") == FALSE) {
+    if (getOption("CytoRSuite_interact") == FALSE) {
       plotCyto(fr, channels = channels, popup = FALSE, legend = TRUE, labels = FALSE, ...)
     } else {
       plotCyto(fr, channels = channels, popup = TRUE, legend = TRUE, labels = FALSE, ...)
@@ -164,7 +164,7 @@ drawRectangle <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
     message(paste("Select 2 diagonal points to construct a rectangle gate around the", alias, "population. \n"))
 
     # Extract gate coordinates
-    if (getOption("cytoRSuite_interact") == TRUE) {
+    if (getOption("CytoRSuite_interact") == TRUE) {
       coords <- locator(n = 2, type = "p", lwd = 2, pch = 16, col = "red")
     } else {
       coords <- list(c(25000, 150000), c(5000, 150000))
@@ -245,7 +245,7 @@ drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", la
 
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("cytoRSuite_interact") == FALSE) {
+    if (getOption("CytoRSuite_interact") == FALSE) {
       plotCyto(fr, channels = channels, popup = FALSE, legend = FALSE, labels = FALSE, ...)
     } else {
       plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
@@ -259,7 +259,7 @@ drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", la
     message(paste("Select the lower and upper bounds of the", alias, "population to construct an interval gate. \n"))
 
     # Extract gate coordinates
-    if (getOption("cytoRSuite_interact") == TRUE) {
+    if (getOption("CytoRSuite_interact") == TRUE) {
       coords <- locator(n = 2, type = "o", lwd = 2.5, pch = 16, col = "red")
     } else {
       coords <- list(c(25000, 150000), c(-Inf, Inf))
@@ -370,7 +370,7 @@ drawThreshold <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("cytoRSuite_interact") == FALSE) {
+    if (getOption("CytoRSuite_interact") == FALSE) {
       plotCyto(fr, channels = channels, popup = FALSE, legend = FALSE, labels = FALSE, ...)
     } else {
       plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
@@ -388,7 +388,7 @@ drawThreshold <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
   }
 
   # Extract gate coordinates
-  if (getOption("cytoRSuite_interact") == TRUE) {
+  if (getOption("CytoRSuite_interact") == TRUE) {
     coords <- locator(n = 1, type = "p", lwd = 2.5, pch = 16, col = "red")
   } else {
     coords <- list(c(25000), c(5000))
@@ -470,7 +470,7 @@ drawBoundary <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
 
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("cytoRSuite_interact") == FALSE) {
+    if (getOption("CytoRSuite_interact") == FALSE) {
       plotCyto(fr, channels = channels, popup = FALSE, legend = FALSE, labels = FALSE, ...)
     } else {
       plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
@@ -487,7 +487,7 @@ drawBoundary <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
   }
 
   # Extract gate coordinates
-  if (getOption("cytoRSuite_interact") == TRUE) {
+  if (getOption("CytoRSuite_interact") == TRUE) {
     coords <- locator(n = 1, type = "p", lwd = 2.5, pch = 16, col = "red")
   } else {
     coords <- list(c(200000), c(200000))
@@ -568,7 +568,7 @@ drawEllipse <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
 
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("cytoRSuite_interact") == FALSE) {
+    if (getOption("CytoRSuite_interact") == FALSE) {
       plotCyto(fr, channels = channels, popup = FALSE, legend = FALSE, labels = FALSE, ...)
     } else {
       plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
@@ -582,7 +582,7 @@ drawEllipse <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
     message(paste("Select 4 points to define the limits of the", alias, "population to construct an ellipsoid gate. \n"))
 
     # Extract gate coordinates
-    if (getOption("cytoRSuite_interact") == TRUE) {
+    if (getOption("CytoRSuite_interact") == TRUE) {
       coords <- locator(n = 4, type = "p", lwd = 2, pch = 16, col = "red")
     } else {
       coords <- list(c(40000, 60000, 100000, 60000), c(50000, 5000, 50000, 100000))
@@ -708,7 +708,7 @@ drawQuadrants <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("cytoRSuite_interact") == FALSE) {
+    if (getOption("CytoRSuite_interact") == FALSE) {
       plotCyto(fr, channels = channels, popup = FALSE, legend = FALSE, labels = FALSE, ...)
     } else {
       plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
@@ -725,7 +725,7 @@ drawQuadrants <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
   message(paste("Select 1 point designating the center point of the populations to construct quadrant gates. \n"))
 
   # Extract points of drawn gate
-  if (getOption("cytoRSuite_interact") == TRUE) {
+  if (getOption("CytoRSuite_interact") == TRUE) {
     pts <- locator(n = 1, type = "o", lwd = 2, pch = 16)
   } else {
     pts <- list(c(150000), c(150000))
@@ -838,7 +838,7 @@ drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
 
   # Call new plot?
   if (plot == TRUE) {
-    if (getOption("cytoRSuite_interact") == FALSE) {
+    if (getOption("CytoRSuite_interact") == FALSE) {
       plotCyto(fr, channels = channels, popup = FALSE, legend = FALSE, labels = FALSE, ...)
     } else {
       plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, labels = FALSE, ...)
@@ -851,7 +851,7 @@ drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
   # Select center of the web gate
   message("Select the center of the web gate.")
 
-  if (getOption("cytoRSuite_interact") == TRUE) {
+  if (getOption("CytoRSuite_interact") == TRUE) {
     center <- locator(n = 1, type = "p", lwd = 2, pch = 16, col = "red")
   } else {
     center <- list(c(120627.9), c(147367.9))
@@ -874,7 +874,7 @@ drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
 
   # Get all gate co-ordinates - c(center, others)
   coords <- lapply(seq(1:length(alias)), function(x) {
-    if (getOption("cytoRSuite_interact") == TRUE) {
+    if (getOption("CytoRSuite_interact") == TRUE) {
       pt <- locator(n = 1, type = "p", lwd = 2.5, pch = 16, col = "red")
     } else {
       # Test co-ordinates

@@ -104,10 +104,18 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels =
 
   # Make one call to drawPlot
   if (plot == TRUE) {
-    if(getOption("cytoRSuite_interact") == FALSE) {
-      plotCyto(fr, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, ...)
+    if(getOption("CytoRSuite_interact") == FALSE) {
+      if(length(channels) == 2){
+        plotCyto(fr, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, ...)
+      }else{
+        plotCyto(fr, channels = channels, popup = FALSE, legend = FALSE, ...)
+      }
     }else{
-      plotCyto(fr, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, ...)
+      if(length(channels) == 2){
+        plotCyto(fr, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, ...)
+      }else{
+        plotCyto(fr, channels = channels, popup = TRUE, legend = FALSE, ...)
+      }
     }
   }
 
@@ -119,17 +127,17 @@ setMethod(drawGate, signature = "flowFrame", definition = function(x, channels =
   } else {
     gates <- mapply(function(type, alias) {
       if (type == "polygon") {
-        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawPolygon(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       } else if (type == "rectangle") {
-        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawRectangle(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       } else if (type == "interval") {
-        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels, ...)
+        drawInterval(fr = fr, channels = channels, alias = alias, plot = FALSE, axis = axis, labels = labels, ...)
       } else if (type == "threshold") {
-        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawThreshold(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       } else if (type == "boundary") {
-        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawBoundary(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       } else if (type == "ellipse") {
-        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawEllipse(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       }
     }, type, alias)
   }
@@ -219,10 +227,18 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
 
   # Make one call to drawPlot
   if (plot == TRUE) {
-    if(getOption("cytoRSuite_interact") == FALSE){
-      plotCyto(fs, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, ...)
+    if(getOption("CytoRSuite_interact") == FALSE){
+      if(length(channels) == 2){
+        plotCyto(fs, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, ...)
+      }else{
+        plotCyto(fs, channels = channels, popup = FALSE, legend = FALSE, merge = TRUE, ...)
+      }
     }else {
-      plotCyto(fs, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, ...)
+      if(length(channels) == 2){
+        plotCyto(fs, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, ...)
+      }else{
+        plotCyto(fs, channels = channels, popup = TRUE, legend = FALSE, merge = TRUE, ...)
+      }
     }
   }
 
@@ -234,17 +250,17 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
   } else {
     gates <- mapply(function(type, alias) {
       if (type == "polygon") {
-        drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawPolygon(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       } else if (type == "rectangle") {
-        drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawRectangle(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       } else if (type == "interval") {
-        drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels, ...)
+        drawInterval(fr = fr, channels = channels, alias = alias, plot = FALSE, axis = axis, labels = labels, ...)
       } else if (type == "threshold") {
-        drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawThreshold(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       } else if (type == "boundary") {
-        drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawBoundary(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       } else if (type == "ellipse") {
-        drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+        drawEllipse(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
       }
     }, type, alias)
   }
@@ -444,10 +460,18 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   
     # Make one call to drawPlot
     if (plot == TRUE) {
-      if(getOption("cytoRSuite_interact") == FALSE){
-        plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, main = main, ...)
+      if(getOption("CytoRSuite_interact") == FALSE){
+        if(length(channels) == 2){
+          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, main = main, ...)
+        }else{
+          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, popup = FALSE, legend = FALSE, merge = TRUE, main = main, ...)
+        }
       }else{
-        plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, main = main, ...)
+        if(length(channels) == 2){
+          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, main = main, ...)
+        }else{
+          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, popup = TRUE, legend = FALSE, merge = TRUE, main = main, ...)
+        }
       }
     }
 
@@ -459,17 +483,17 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
     } else {
       gates <- mapply(function(type, alias) {
         if (type == "polygon") {
-          drawPolygon(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+          drawPolygon(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
         } else if (type == "rectangle") {
-          drawRectangle(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+          drawRectangle(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
         } else if (type == "interval") {
-          drawInterval(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, axis = axis, labels = labels, ...)
+          drawInterval(fr = fr, channels = channels, alias = alias, plot = FALSE, axis = axis, labels = labels, ...)
         } else if (type == "threshold") {
-          drawThreshold(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+          drawThreshold(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
         } else if (type == "boundary") {
-          drawBoundary(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+          drawBoundary(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
         } else if (type == "ellipse") {
-          drawEllipse(fr = fr, channels = channels, alias = alias, subSample = subSample, plot = FALSE, labels = labels, ...)
+          drawEllipse(fr = fr, channels = channels, alias = alias, plot = FALSE, labels = labels, ...)
         }
       }, type, alias)
     }
@@ -520,11 +544,11 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
     # need to extract alias from gates list into new named list
     pops <- list()
     for (i in 1:length(alias)) {
-      pops[[i]] <- add_pop(
+      pops[[i]] <- suppressWarnings(add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]]), groupBy = groupBy, collapseDataForGating = TRUE,
         preprocessing_method = "ppmanualGate"
-      )
+      ))
     }
     pops <- do.call("rbind", pops)
 
@@ -534,11 +558,11 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
 
     pops <- list()
     for (i in 1:length(alias)) {
-      pops[[i]] <- add_pop(
+      pops[[i]] <- suppressWarnings(add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]]), groupBy = groupBy, collapseDataForGating = TRUE, 
         preprocessing_method = "ppmanualGate"
-      )
+      ))
     }
     pops <- do.call("rbind", pops)
 
@@ -548,11 +572,11 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
 
     pops <- list()
     for (i in 1:length(alias)) {
-      pops[[i]] <- add_pop(
+      pops[[i]] <- suppressWarnings(add_pop(
         gs = x, alias = alias[i], parent = parent, pop = pop, dims = paste(channels, collapse = ","), gating_method = "manualGate",
         gating_args = list(gate = gates[[i]]), groupBy = groupBy, collapseDataForGating = TRUE,
         preprocessing_method = "ppmanualGate"
-      )
+      ))
     }
     pops <- do.call("rbind", pops)
     gt <- rbind(gt, pops)

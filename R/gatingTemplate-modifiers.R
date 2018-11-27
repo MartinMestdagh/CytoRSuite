@@ -120,7 +120,6 @@ extractGate <- function(parent, alias, gtfile){
     
   })
   
-  gates <- filters(gates)
   return(gates)
 }
 
