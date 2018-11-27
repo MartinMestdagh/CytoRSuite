@@ -282,7 +282,7 @@ gating(gt, gs)
 getNodes(gs)
 ```
 
-```{r, eval = TRUE,, echo = FALSE, fig.keep = 'none'}
+```{r, eval = TRUE,, echo = FALSE, message = FALSE, fig.keep = 'none'}
 # Add samples to GatingSet
 gs <- GatingSet(fs)
 
@@ -303,12 +303,12 @@ getNodes(gs)
 
 ```{r,eval = TRUE, fig.height = 9, fig.width = 9}
 # Plot gating strategy using plotCytoGates
-plotCytoGates(gs[[2]])
+plotCytoGates(gs[[1]])
 ```
 
 ```{r,eval = TRUE, fig.height = 9, fig.width = 9}
 # plotCytoGates Back-Gating Support
-plotCytoGates(gs[[2]], overlay = c("CD4 T Cells","CD8 T Cells","Dendritic Cells"), col = "black")
+plotCytoGates(gs[[4]], overlay = c("CD4 T Cells","CD8 T Cells","Dendritic Cells"), col = "black")
 ```
 
 Dillon Hammill, BMedSci (Hons)

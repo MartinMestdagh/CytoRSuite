@@ -250,44 +250,6 @@ gating(gt, gs)
 getNodes(gs)
 ```
 
-    #> ....done!
-    #> Adding population:Cells
-    #> Adding population:Single Cells
-    #> Adding population:Live Cells
-    #> Adding population:T Cells
-    #> Adding population:Dendritic Cells
-    #> Adding population:CD4 T Cells
-    #> Adding population:CD8 T Cells
-    #> Adding population:CD69+ CD4 T Cells
-    #> Adding population:CD69+ CD8 T Cells
-    #> Preprocessing for 'Cells'
-    #> Gating for 'Cells'
-    #> done.
-    #> Preprocessing for 'Single Cells'
-    #> Gating for 'Single Cells'
-    #> done.
-    #> Preprocessing for 'Live Cells'
-    #> Gating for 'Live Cells'
-    #> done.
-    #> Preprocessing for 'Dendritic Cells'
-    #> Gating for 'Dendritic Cells'
-    #> done.
-    #> Preprocessing for 'T Cells'
-    #> Gating for 'T Cells'
-    #> done.
-    #> Preprocessing for 'CD8 T Cells'
-    #> Gating for 'CD8 T Cells'
-    #> done.
-    #> Preprocessing for 'CD69+ CD8 T Cells'
-    #> Gating for 'CD69+ CD8 T Cells'
-    #> done.
-    #> Preprocessing for 'CD4 T Cells'
-    #> Gating for 'CD4 T Cells'
-    #> done.
-    #> Preprocessing for 'CD69+ CD4 T Cells'
-    #> Gating for 'CD69+ CD4 T Cells'
-    #> done.
-    #> finished.
     #>  [1] "root"                                                                
     #>  [2] "/Cells"                                                              
     #>  [3] "/Cells/Single Cells"                                                 
@@ -301,14 +263,14 @@ getNodes(gs)
 
 ``` r
 # Plot gating strategy using plotCytoGates
-plotCytoGates(gs[[2]])
+plotCytoGates(gs[[1]])
 ```
 
 ![](man/figures/README-unnamed-chunk-25-1.png)
 
 ``` r
 # plotCytoGates Back-Gating Support
-plotCytoGates(gs[[2]], overlay = c("CD4 T Cells","CD8 T Cells","Dendritic Cells"), col = "black")
+plotCytoGates(gs[[4]], overlay = c("CD4 T Cells","CD8 T Cells","Dendritic Cells"), col = "black")
 ```
 
 ![](man/figures/README-unnamed-chunk-26-1.png)

@@ -331,6 +331,13 @@ setMethod(plotCyto, signature = "GatingSet",
     # Merge into flowFrame
     fr <- as(fs, "flowFrame")
     
+    # Remove "original" introduced by coercion
+    if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
+      
+      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      
+    }
+    
     # Plot title
     if(missing(main)){
       
