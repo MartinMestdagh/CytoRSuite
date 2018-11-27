@@ -42,10 +42,7 @@ For more details please refer to the vignettes which document all of these featu
 **Demonstration**
 -----------------
 
-To give you a taste of what **CytoRSuite** can do, here we will demonstrate the use of **drawGate** to analyse some in vitro T cell activation data supplied with the package. For more details on this dataset see **?Activation**. The Activation dataset is comprised of two separate files:
-
-1.  Unactivated sample
-2.  Activated sample
+To give you a taste of what **CytoRSuite** can do, here we will demonstrate the use of **drawGate** to analyse some in vitro T cell activation data supplied with the package. For more details on this dataset see **?Activation**.
 
 Feel free to run the below code chunks in your R session so that you see how easy it is to draw gates using **drawGate** and visualise gating strategies using **plotCytoGates**!
 

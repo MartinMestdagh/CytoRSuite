@@ -50,10 +50,7 @@ For more details please refer to the vignettes which document all of these featu
 
 ## **Demonstration**
 
-To give you a taste of what **CytoRSuite** can do, here we will demonstrate the use of **drawGate** to analyse some in vitro T cell activation data supplied with the package. For more details on this dataset see **?Activation**. The Activation dataset is comprised of two separate files:
-
-1. Unactivated sample
-2. Activated sample
+To give you a taste of what **CytoRSuite** can do, here we will demonstrate the use of **drawGate** to analyse some in vitro T cell activation data supplied with the package. For more details on this dataset see **?Activation**.
 
 Feel free to run the below code chunks in your R session so that you see how easy it is to draw gates using **drawGate** and visualise gating strategies using **plotCytoGates**!
 
@@ -133,9 +130,7 @@ gs <- transform(gs, trans)
 **drawGate** is a convenient wrapper for the gating functions in CytoRSuite which constructs drawn gates, applies the gate(s) directly to the **GatingSet** and saves the gate(s) to an **openCyto gatingTemplate** csv file for future use. **drawGate** will pool the data and plot it in an interactive plotting window which will allow the user to draw gates around the population of interest. The type of gate is determined by the **gate_type** argument. Below we will demonstrate some of the key features of drawGate, for details on specific gate types please refer to the gating functions vignette.
 
 ```{r, echo = FALSE, eval = TRUE, message = FALSE}
-gt <- system.file("extdata", "Example-gatingTemplate.csv", package = "CytoRSuiteData")
-gt <- gatingTemplate(gt)
-gating(gt,gs)
+gating(Activation_gatingTemplate,gs)
 ```
 
 Here we will gate a population "Cells" within the parent population "root" in FSC-A and SSC-A channels using a polygon gate. The gate will be automatically applied to the GatingSet and saved in a gatingTemplate csv called "Example gatingTemplate.csv" in the current working directory.
@@ -293,9 +288,7 @@ gs <- compensate(gs, spill)
 gs <- transform(gs, trans)
 
 # Apply saved gates to GatingSet
-gt <- system.file("extdata", "Example-gatingTemplate.csv", package = "CytoRSuiteData")
-gt <- gatingTemplate(gt)
-gating(gt, gs)
+gating(Activation_gatingTemplate, gs)
 
 # Check gates have been applied
 getNodes(gs)
