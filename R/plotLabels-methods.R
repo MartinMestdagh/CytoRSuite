@@ -75,7 +75,7 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
  
   # Assign x to fr
   fr <- x
-            
+   
   # Channels needed to position label
   if(missing(channels)){
     
@@ -107,7 +107,7 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
   cnt <- BiocGenerics::nrow(flowCore::Subset(fr, gates))
   prcnt <- round(cnt/events,4)
   prcnt <- sprintf("%.2f %%",100*prcnt)
-  
+
   # 1D gate plotted in 2D
   if(length(channels) == 2 & length(parameters(gates)) == 1){
     
@@ -119,7 +119,7 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
   }
   
   # Check supplied channels & gate channels
-  chans <- parameters(gates)  
+  chans <- as.vector(parameters(gates)) 
   
   # 1D gate supplied
   if(length(chans) == 1){
@@ -134,8 +134,8 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
         
         if(is.null(x.text) & is.null(y.text)){
           
-          xmin <- gates@min[channels[1]]
-          xmax <- gates@max[channels[1]]
+          xmin <- gates@min
+          xmax <- gates@max
           
           if(is.infinite(xmin)){
             
@@ -269,7 +269,7 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
     y.text <- (ymin + ymax)/2
     
   }
-   
+  
   # Add labels
   if(all(format.text %in% "alias")){
     
@@ -668,10 +668,10 @@ setMethod(plotLabels, signature = c("flowFrame", "list"),
 #' @export
 setMethod(plotLabels, signature = c("flowFrame", "filters"), 
           definition = function(x, gates, channels, alias = NA, format.text = NULL, x.text = NULL, y.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6){
-            
+  
   # Make calls to plotLabels
   mapply(function(gate, alias, font.text, col.text, cex.text, alpha){
-              
+        
     plotLabels(x = x, gates = gate, channels = channels, alias = alias, format.text = format.text, font.text = font.text, col.text = col.text, cex.text = cex.text, alpha = alpha)
               
   }, gates, alias, font.text, col.text, cex.text, alpha)
