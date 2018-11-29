@@ -145,7 +145,8 @@ ppmanualGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...
       
     }else{
       
-      stop("Numeric groupBy is not currently supported - use pData variables instead.")
+      message("Numeric groupBy is not supported, use pData variables instead. All samples will be grouped together.")
+      grpby <- 1
       
     }
   }

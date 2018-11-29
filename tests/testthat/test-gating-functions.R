@@ -1,15 +1,5 @@
 context("Gating Functions")
 
-test_that(".onLoad set cytoRSuite_interact to TRUE", {
-  
-  cytoRSuite:::.onLoad()
-  expect_true(getOption("cytoRSuite_interact") == interactive())
-  
-  # Set cytoRSuite_interact to FALSE to avoid user input when running tests
-  options("cytoRSuite_interact" = FALSE)
-  
-})
-
 ## -----------------------------------------------------------------------------------
 # drawPolygon -
 

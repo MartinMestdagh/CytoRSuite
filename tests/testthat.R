@@ -1,4 +1,4 @@
 library(testthat)
-library(cytoRSuite)
+library(CytoRSuite)
 
-test_check("cytoRSuite")
+test_check("CytoRSuite")

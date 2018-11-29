@@ -1,9 +1,5 @@
 context("ComputeStats")
 
-## -------------------------------------------------------------------
-# computeStats flowFrame method -
-test_that("computeStats flowFrame method returns the correct statistics",{
-  
   # Sample names -
   nms <- sampleNames(Va2)
   
@@ -13,6 +9,10 @@ test_that("computeStats flowFrame method returns the correct statistics",{
   
   # Extract channels -
   chans <- colnames(Va2)
+  
+## -------------------------------------------------------------------
+# computeStats flowFrame method -
+test_that("computeStats flowFrame method returns the correct statistics",{
     
   # Median -
   sts <- matrix(colMedians(exprs(Va2[[1]])), nrow = 1, ncol = length(chans))
@@ -217,7 +217,7 @@ test_that("computeStats GatingSet method returns the correct statistics",{
   CD4 <- cbind(pData(Va2), CD4)
   CD4 <- CD4[,-1]
   CD4 <- data.frame(CD4)
-  colnames(CD4) <- c("Samples","count","root","Live Cells")
+  colnames(CD4) <- c("OVAConc","count","root","Live Cells")
   
   CD8 <- do.call("cbind", cnts[c(2,3,4)])
   CD8[,2] <- (CD8[,1]/CD8[,2])*100
@@ -225,11 +225,11 @@ test_that("computeStats GatingSet method returns the correct statistics",{
   CD8 <- cbind(pData(Va2), CD8)
   CD8 <- CD8[,-1]
   CD8 <- data.frame(CD8)
-  colnames(CD8) <- c("Samples","count","root","Live Cells")
+  colnames(CD8) <- c("OVAConc","count","root","Live Cells")
   
   sts <- list(CD4, CD8)
   names(sts) <- c("CD4 T Cells","CD8 T Cells")
-  
+
   expect_equal(computeStats(gs, alias = c("CD4 T Cells", "CD8 T Cells"), parent = c("root", "Live Cells"), stat = "freq"), sts, tolerance = 0.01)
   expect_true(checkFile(paste(format(Sys.Date(), "%d%m%y"),"-CD4 T Cells-freq.csv", sep = "")))
   expect_true(checkFile(paste(format(Sys.Date(), "%d%m%y"),"-CD8 T Cells-freq.csv", sep = "")))

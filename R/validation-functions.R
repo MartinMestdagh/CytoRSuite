@@ -95,7 +95,7 @@ setMethod(checkChannels, signature = "flowFrame", definition = function(x, chann
      
       }else if(!channel %in% chans & !channel %in% fr.data$desc){
         
-        stop(paste(channel,"is not a valid channels for this flowFrame."))
+        stop(paste(channel,"is not a valid channel for this flowFrame."))
         
       }
       
@@ -182,7 +182,7 @@ setMethod(checkChannels, signature = "flowSet", definition = function(x, channel
         
       }else if(!channel %in% chans & !channel %in% fr.data$desc){
         
-        stop(paste(channel,"is not a valid channels for this flowFrame."))
+        stop(paste(channel,"is not a valid channel for this flowFrame."))
         
       }
       
@@ -272,7 +272,7 @@ setMethod(checkChannels, signature = "GatingSet", definition = function(x, chann
         
       }else if(!channel %in% chans & !channel %in% fr.data$desc){
         
-        stop(paste(channel,"is not a valid channels for this flowFrame."))
+        stop(paste(channel,"is not a valid channel for this flowFrame."))
         
       }
       
@@ -324,7 +324,7 @@ checkGateType <- function(type, alias){
       
     }else{
       
-      stop(paste(type[type %in% gts == FALSE],"is not a valid type for drawGate!"))
+      stop(paste(type[type %in% gts == FALSE],"is not a valid gate type for drawGate!"))
       
     }
     
@@ -374,7 +374,7 @@ checkGateType <- function(type, alias){
 #' }
 #'
 #' @noRd
-checkAlias <- function(alias, type){
+checkAlias <- function(alias = NULL, type){
   
   if(is.null(alias)){
     

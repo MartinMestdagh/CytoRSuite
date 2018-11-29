@@ -2,10 +2,6 @@ context("plotCyto1d")
 
 # vdiffr::manage_cases() to validate and generate reference images
 
-gt <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
-gt <- gatingTemplate(gt)
-gating(gt,gs)
-
 Va2 <- getData(gs, "T Cells")
 
 intGate <- rectangleGate("PE-A"=c(2.6,4.2))

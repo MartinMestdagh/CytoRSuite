@@ -2,12 +2,6 @@ context("plotCyto2d")
 
 # vdiffr::manage_cases() to validate and generate reference images
 
-gt <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
-gt <- gatingTemplate(gt)
-gating(gt,gs)
-
-Va2 <- getData(gs, "T Cells")
-
 mat <- matrix(c(2,3.5,-0.5,2.5), ncol=2, dimnames=list(c("min", "max"),
                                                          c("Alexa Fluor 700-A", "Alexa Fluor 488-A")))
 rectGate <- rectangleGate(.gate=mat)

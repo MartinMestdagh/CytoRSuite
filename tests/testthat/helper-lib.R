@@ -1,8 +1,15 @@
 ## ----------------------------------------------------------------------
+# Set CytoRSuite_interact to FALSE -
+options("CytoRSuite_interact" = FALSE)
+
+## ----------------------------------------------------------------------
+# Load in CytoRSuiteData -
+library(CytoRSuiteData)
+
 # Load in vdiffr for image comparison -
 library(vdiffr)
 
-# Load in robustbase -
+# Load in robustbase (colMedians) -
 library(robustbase)
 
 ## ----------------------------------------------------------------------
@@ -10,7 +17,7 @@ library(robustbase)
 fs <- Activation
 
 # pData information -
-pData(fs)$Samples <- c("Control","Activated")
+pData(fs)$OVAConc <- c(0,0.005,0.05,0.5)
 chnls <- c("Alexa Fluor 405-A","Alexa Fluor 430-A","APC-Cy7-A", "PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A") 
 markers <- c("Hoechst-405", "Hoechst-430", "CD11c", "Va2", "CD8", "CD4", "CD44", "CD69")
 names(markers) <- chnls
@@ -27,10 +34,11 @@ trans <- estimateLogicle(gs[[2]], getChannels(gs))
 gs <- transform(gs, trans)
 
 # gatingTemplate -
-gt <- gatingTemplate("Example-gatingTemplate.csv")
+gt <- Activation_gatingTemplate
+gtf <- system.file("extdata", "Activation-gatingTemplate.csv", package = "CytoRSuiteData")
 
 # gatingTemplate file -
-gtf <- read.csv("Example-gatingTemplate.csv")
+gtf <- read.csv(system.file("extdata", "Activation-gatingTemplate.csv", package = "CytoRSuiteData"))
 
 # Gating -
 gating(gt, gs)
@@ -141,3 +149,16 @@ colnames(coords) <- c("FSC-A","SSC-A")
 pg8 <- polygonGate(filterId = "H", .gate = coords)
 
 wg <- filters(list(pg1,pg2,pg3,pg4,pg5,pg6,pg7,pg8))
+
+# -----------------------------------------------------------------------
+# Gate Compensation Controls -
+comp <- Compensation
+
+gsc <- GatingSet(comp)
+
+transc <- estimateLogicle(gsc[[1]], c("SSC-A"))
+gsc <- transform(gsc, transc)
+
+gtc <- gatingTemplate("Compensation-gatingTemplate.csv")
+gating(gtc, gsc)
+
