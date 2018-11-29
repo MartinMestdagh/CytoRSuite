@@ -140,13 +140,16 @@ extractGate <- function(parent, alias, gtfile){
 #'   \code{type} is \code{"polygon"}.
 #' @param gtfile name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv") where the gate is saved.
+#' @subSample numeric indicating the number of events to plot, set to 250 000
+#'   events by default.
 #' @param ... additional arguments passed to plotCyto, see ?plotCyto for
 #'   details.
 #'
 #' @return an object of calss \code{GatingSet} with edited gate applied, as well
 #'   as gatingTemplate file with editied gate saved.
 #'
-#' @importFrom flowWorkspace getData getTransformations GatingSet getGate setGate recompute pData
+#' @importFrom flowWorkspace getData getTransformations GatingSet getGate
+#'   setGate recompute pData
 #' @importFrom flowCore parameters filterList
 #' @importFrom openCyto gatingTemplate
 #' @importFrom data.table as.data.table fread fwrite :=
@@ -158,26 +161,26 @@ extractGate <- function(parent, alias, gtfile){
 #' @examples
 #' \dontrun{
 #' fs <- Activation
-#' 
+#'
 #' gs <- GatingSet(fs)
 #' gs <- compensate(gs, fs[[1]]@description$SPILL)
-#' 
+#'
 #' trans <- estimateLogicle(gs[[2]], getChannels(gs))
 #' gs <- transform(gs, trans)
-#' 
+#'
 #' gtfile <- system.file("extdata", "Example-gatingTemplate.csv", package = "cytoRSuite")
 #' gt <- gatingTemplate(gtfile)
-#' 
+#'
 #' gating(gt,gs)
-#' 
+#'
 #' # Edit T Cells gate
 #' editGate(gs, parent = "Live Cells", alias = "T Cells", gtfile = gtfile)
-#' 
+#'
 #' plotCytoGates(gs[[2]])
 #' }
 #'
 #' @export
-editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NULL, type = NULL, gtfile = NULL, ...){
+editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NULL, type = NULL, gtfile = NULL, subSample = 250000, ...){
   
   # Parent
   if(is.null(parent)){
@@ -385,7 +388,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
       
     }
     
-    plotCyto(fr, channels = channels, overlay = overlay, popup = TRUE, legend = FALSE, gates = gates, col.gate = "magenta", transList = transList, labels = FALSE, main = main, lwd.gate = 2.5, ...)
+    plotCyto(fr, channels = channels, overlay = overlay, subSample = subSample, popup = TRUE, legend = FALSE, gates = gates, col.gate = "magenta", transList = transList, labels = FALSE, main = main, lwd.gate = 2.5, ...)
     
     # If no type supplied determine using getGateType
     if(is.null(type)){
