@@ -140,7 +140,7 @@ extractGate <- function(parent, alias, gtfile){
 #'   \code{type} is \code{"polygon"}.
 #' @param gtfile name of the \code{gatingTemplate} csv file (e.g.
 #'   "gatingTemplate.csv") where the gate is saved.
-#' @subSample numeric indicating the number of events to plot, set to 250 000
+#' @param subSample numeric indicating the number of events to plot, set to 250 000
 #'   events by default.
 #' @param ... additional arguments passed to plotCyto, see ?plotCyto for
 #'   details.

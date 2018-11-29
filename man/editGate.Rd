@@ -5,7 +5,8 @@
 \title{Edit Existing Gate(s).}
 \usage{
 editGate(x, select = NULL, parent = NULL, alias = NULL,
-  overlay = NULL, type = NULL, gtfile = NULL, ...)
+  overlay = NULL, type = NULL, gtfile = NULL, subSample = 250000,
+  ...)
 }
 \arguments{
 \item{x}{an object of class \code{GatingSet}.}
@@ -29,6 +30,9 @@ abbreviated as upper or lower case first letters as well. Default
 
 \item{gtfile}{name of the \code{gatingTemplate} csv file (e.g.
 "gatingTemplate.csv") where the gate is saved.}
+
+\item{subSample}{numeric indicating the number of events to plot, set to 250 000
+events by default.}
 
 \item{...}{additional arguments passed to plotCyto, see ?plotCyto for
 details.}
