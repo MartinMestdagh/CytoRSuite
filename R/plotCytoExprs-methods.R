@@ -134,6 +134,7 @@ setMethod(plotCytoExprs, signature = "flowFrame", definition = function(x, chann
 #'   plotting.
 #' @param merge logical indicating whether flowFrames should be merged prior to
 #'   plotting, set to TRUE by default.
+#' @param title a title for the plots, set to the file name of x by default.
 #' @param ... additional arguments passed to \code{\link{plotCyto1d,flowFrame-method}}.
 #'
 #' @importFrom flowCore exprs
@@ -152,7 +153,7 @@ setMethod(plotCytoExprs, signature = "flowFrame", definition = function(x, chann
 #' }
 #'
 #' @export
-setMethod(plotCytoExprs, signature = "flowSet", definition = function(x, channels = NULL, transList = NULL, merge = TRUE, ...){
+setMethod(plotCytoExprs, signature = "flowSet", definition = function(x, channels = NULL, transList = NULL, merge = TRUE, title = NULL, ...){
   
   # Assign x to fs
   fs <- x
@@ -160,7 +161,15 @@ setMethod(plotCytoExprs, signature = "flowSet", definition = function(x, channel
   # Title
   if(is.null(title)){
     
-    title <- "Combined Events"
+    if(merge){
+      
+      title <- "Combined Expression Profile"
+      
+    }else{
+      
+      title <- "Expression Profile"
+      
+    }
     
   }
   
@@ -168,11 +177,18 @@ setMethod(plotCytoExprs, signature = "flowSet", definition = function(x, channel
   if(merge == TRUE){
     
     fr <- as(fs, "flowFrame")
+    
+    if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
+      
+      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      
+    }
+    
     plotCytoExprs(x = fr, channels = channels, title = title, transList = transList, ...)
     
   }else if(merge == FALSE){
   
-    plotCytoExprs(x = fs[[1]], overlay = fs[2:length(fs)], channels = channels, transList = transList, ...)
+    plotCytoExprs(x = fs[[1]], overlay = fs[2:length(fs)], channels = channels, title = title, transList = transList, ...)
   
   }
   
