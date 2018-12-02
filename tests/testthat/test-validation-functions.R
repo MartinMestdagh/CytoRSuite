@@ -115,14 +115,15 @@ test_that("checkOverlay flowFrame method returns list of flowFrames",{
   
 })
 
-test_that("checkOverlay flowFrame method returns list of flowFrames",{
+test_that("checkOverlay flowSet method returns list of flowFrame lists",{
   
   expect_equal(checkOverlay(fs, overlay = fs[[2]]), list(list(fs[[2]]),list(fs[[2]]), list(fs[[2]]), list(fs[[2]])))
   expect_equal(checkOverlay(fs, overlay = list(fs[[2]])), list(list(fs[[2]]),list(fs[[2]]),list(fs[[2]]),list(fs[[2]])))
   expect_equal(checkOverlay(fs, overlay = fs), list(list(fs[[1]]),list(fs[[2]]), list(fs[[3]]), list(fs[[4]])))
   expect_equal(checkOverlay(fs, overlay = list(fs)), list(list(fs[[1]]),list(fs[[2]]), list(fs[[3]]), list(fs[[4]])))
   expect_equal(checkOverlay(fs, overlay = list(fs,fs)), list(list(fs[[1]],fs[[1]]),list(fs[[2]],fs[[2]]), list(fs[[3]],fs[[3]]), list(fs[[4]],fs[[4]])))
-  
+  expect_equal(checkOverlay(fs, overlay = list(fs[[1]],fs[[2]],fs[[3]],fs[[4]])), list(list(fs[[1]]),list(fs[[2]]),list(fs[[3]]),list(fs[[4]])))
+
   expect_error(checkOverlay(fs, overlay = exprs(fs[[1]])), "Overlay should be either a flowFrame, flowSet, list of flowFrames or a list of flowSets.")
   
   expect_equal(nrow(checkOverlay(fs, overlay = fs[[2]], subSample = 100)[[1]][[1]]), 100)
@@ -130,6 +131,11 @@ test_that("checkOverlay flowFrame method returns list of flowFrames",{
   expect_equal(nrow(checkOverlay(fs, overlay = fs, subSample = 100)[[1]][[1]]), 100)
   expect_equal(nrow(checkOverlay(fs, overlay = list(fs), subSample = 100)[[1]][[1]]), 100)
   expect_equal(nrow(checkOverlay(fs, overlay = list(fs,fs), subSample = 100)[[1]][[1]]), 100)
+  expect_equal(nrow(checkOverlay(fs, overlay = list(fs[[1]],fs[[2]],fs[[3]],fs[[4]]), subSample = 100)[[1]][[1]]), 100)
+
+  expect_error(checkOverlay(fs, overlay = list(fs[1:3])), "Each flowSet in supplied list should be of the same length as the supplied flowSet.")
+  expect_error(checkOverlay(fs, overlay = list(fs[[1]],fs[[2]])), "Supplied list of flowFrames should be of the same length as the flowSet.")
+  expect_error(checkOverlay(fs, overlay = list(list(fs[[1]]),list(fs[[2]]))), "Each list of flowFrames should be the same length as the flowSet.")
   
 })
 

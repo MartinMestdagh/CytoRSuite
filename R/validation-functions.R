@@ -738,7 +738,7 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
     overlay <- lapply(overlay, function(x){lapply(seq(1,length(x),1), function(y) x[[y]])})
     overlay <- lapply(seq_along(fs), function(x){lapply(overlay, `[[`, x)})
     
-  }else if(all(as.vector(lapply(overlay, function(x){sapply(x,class)})) == "flowFrame")){
+  }else if(all(do.call("rbind", lapply(overlay, function(x){sapply(x,class)})) == "flowFrame")){
     
     if(all(as.vector(lapply(overlay, function(x){sapply(x,length)})) != length(fs))){
     
