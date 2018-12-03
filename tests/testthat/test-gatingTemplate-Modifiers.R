@@ -22,6 +22,7 @@ test_that("removeGate", {
   expect_equal(basename(gatingTemplate("Activation-gatingTemplate.csv")@nodes), c("root","Cells","Single Cells","Live Cells"))
   
   write.csv(gtf, "Activation-gatingTemplate.csv", row.names = FALSE)
+  
 })
 
 ## -------------------------------------------------------------------------
@@ -55,7 +56,26 @@ test_that("extractGate", {
 
 test_that("editGate", {
   
+  gs3 <- clone(gs)
   
+  expect_error(editGate(gs), "Please supply the name of the parent population.")
+  expect_error(editGate(gs, parent = "Test"), "Supplied parent does not exist in the GatingSet.")
+  expect_error(editGate(gs, parent = "T Cells"), "Please supply the name(s) of the gates to edit to the alias argument.", fixed =  TRUE)
+  expect_error(editGate(gs, parent = "T Cells", alias = "Test"), "Supplied alias does not exist in the GatingSet.")
+  expect_error(editGate(gs, parent = "T Cells", alias = "CD4 T Cells"), "Please supply the name of gatingTemplate to the gtfile argument.")
+  expect_error(editGate(gs, parent = "T Cells", alias = "CD4 T Cells", gtfile = "Test.csv"), "Supplied gatingTemplate does not exist in the current working directory.")
+  
+  editGate(gs3, parent = "root", alias = "Cells", gtfile = "Activation-gatingTemplate.csv")
+  
+  expect_equal(getGate(gs3, "Cells")[[1]], pg)
+  expect_equal(extractGate(parent = "root", alias = "Cells", "Activation-gatingTemplate.csv")[[1]][[1]][[1]], pg)
+  
+  editGate(gs3, parent = "root", alias = "Cells", overlay = "CD4 T Cells", gtfile = "Activation-gatingTemplate.csv", type = "r")
+  
+  expect_equal(getGate(gs3, "Cells")[[1]], rg)
+  expect_equal(extractGate(parent = "root", alias = "Cells", "Activation-gatingTemplate.csv")[[1]][[1]][[1]], rg)
+  
+  write.csv(gtf, "Activation-gatingTemplate.csv", row.names = FALSE)
   
 })
 

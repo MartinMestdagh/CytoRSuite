@@ -148,7 +148,7 @@ extractGate <- function(parent, alias, gtfile){
 #' @param alias name(s) of the gate to edit (e.g. "Single Cells").
 #' @param overlay name(s) of the population(s) to overlay onto the plot.
 #' @param type vector of gate type names used to construct the gates. Multiple
-#'   \code{gate_types} are supported but should be accompanied with an
+#'   \code{types} are supported but should be accompanied with an
 #'   \code{alias} argument of the same length (i.e. one \code{type} per
 #'   \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
 #'   ellipse, threshold, boundary, interval, quadrant and web} which can be
@@ -225,9 +225,12 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     
     stop("Please supply the name of gatingTemplate to the gtfile argument.")
     
-  }else{
+  }
+  
+  # Check gtfile
+  if(checkFile(gtfile) == FALSE){
     
-    checkFile(gtfile)
+    stop("Supplied gatingTemplate does not exist in the current working directory.")
     
   }
   
