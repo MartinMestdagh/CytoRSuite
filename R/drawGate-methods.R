@@ -351,25 +351,13 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   # grouping required
   if(is.numeric(groupBy)){
     
-    if(length(groupBy) > 1){
+    if(groupBy != smp){
       
-      stop("Only a single numeric can be supplied to groupBy.")
-      
-    }else if(groupBy > smp){
-      
-      groupBy <- smp
+      message("Numeric groupBy not supported - all samples will be assigned to the same group.")
       
     }
-    
-    if(groupBy == smp){
-      
-      grps <- list(fs)
-      
-    }else{
-      
-      stop("Numeric groupBy is not currently supported - use pData variables instead.")
-      
-    }
+    groupBy <- smp
+    grps <- list(fs)
     
   }else if(is.character(groupBy)){
     
