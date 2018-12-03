@@ -9,7 +9,7 @@
 #' @return an object of class \code{gatingSet} with gate and children removed,
 #'   as well as gatingTemplate file with population removed.
 #'
-#' @importFrom flowWorkspace getDescendants Rm
+#' @importFrom flowWorkspace getDescendants Rm getNodes
 #' @importFrom utils read.csv write.csv
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
@@ -24,10 +24,24 @@ removeGate <- function(gs, alias = NULL, gtfile = NULL){
     
   }
   
+  # Check Alias
+  if(!all(alias %in% basename(getNodes(gs)))){
+    
+    stop("Supplied alias does not exist in the GatingSet.")
+    
+  }
+  
   # Supply gtfile
   if(is.null(gtfile)){
     
     stop("Please supply the name of the gatingTemplate csv file to remove the gate.")
+    
+  }
+  
+  # Check gtfile
+  if(checkFile(gtfile) == FALSE){
+    
+    stop("Supplied gatingTemplate file does not exist in the current working directory.")
     
   }
   
@@ -711,7 +725,7 @@ getGateType <- function(gates){
         dupl <- pts[pts[,1] == pts[which(duplicated(pts))[1],][1],]
         
         # May be type == "web" need to see if any points are conserved
-        if(length(dupl[,1]) == 4){
+        if(length(dupl[,1]) == length(gates)){
           
           types <- "web"
           
