@@ -131,6 +131,8 @@ extractGate <- function(parent, alias, gtfile){
     
     gm <- getGate(gt, parent, alias)
     gate <- eval(parameters(gm)$gate)
+    names(parameters(gate[[1]][[1]])) <- parameters(gate[[1]][[1]])
+    return(gate)
     
   })
   

@@ -300,7 +300,7 @@ drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", la
       }
     } else if (axis == "y") {
       if (length(channels) == 1) stop("Cannot gate y axis if a single channel is supplied.")
-      coords <- data.frame(x = c(-Inf, Inf), y = coords[, 2])
+      coords <- data.frame(x = c(-Inf, Inf), y = coords[, 1])
       coords <- as.matrix(coords)
       colnames(coords) <- channels
       rownames(coords) <- c("min","max")

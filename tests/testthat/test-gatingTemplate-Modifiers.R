@@ -46,6 +46,8 @@ test_that("extractGate", {
   rownames(coords) <- c("min","max")
   test2 <- rectangleGate(filterId = "CD8 T Cells", .gate = coords)
   
+  expect_equal(gate, list(list(filters(list(test1))), list(filters(list(test2)))), tolerance = 0.01)
+  
 })
 
 ## -------------------------------------------------------------------------
@@ -66,6 +68,7 @@ test_that("getGateType", {
   expect_equal(getGateType(filters(list(pg))), "polygon")
   expect_equal(getGateType(filters(list(igx))), "interval")
   expect_equal(getGateType(filters(list(ig))), "interval")
+  expect_equal(getGateType(filters(list(igy))), "interval")
   expect_equal(getGateType(filters(list(tg))), "threshold")
   expect_equal(getGateType(filters(list(tg1))), "threshold")
   expect_equal(getGateType(filters(list(bg))), "boundary")
@@ -73,6 +76,7 @@ test_that("getGateType", {
   expect_equal(getGateType(filters(list(eg))), "ellipse")
   expect_equal(getGateType(qg), "quadrant")
   expect_equal(getGateType(wg), "web")
+  expect_equal(getGateType(filters(list(ig,tg,bg))), c("interval","threshold","boundary"))
   expect_equal(getGateType(filters(list(eg, eg, eg, eg))), c("ellipse","ellipse","ellipse","ellipse"))
   expect_equal(getGateType(filters(list(igx, igx, igx, igx))), c("interval","interval","interval","interval"))
   expect_equal(getGateType(filters(list(pg, pg, pg, pg))), c("polygon","polygon","polygon","polygon"))
