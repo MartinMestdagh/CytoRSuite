@@ -267,9 +267,9 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   # Get groupBy from gatingTemplate
   grpby <- as.character(gt[gt$parent == parent & gt$alias == alias[1], "groupBy"])
   
-  if(grepl("^[A-Za-z]+$", grpby) == FALSE){
+  if(is.na(grpby)){
     
-    grpby <- as.numeric(grpby)
+    grpby <- length(gs)
     
   }
   
@@ -473,6 +473,13 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   groupBy <- NULL
   preprocessing_method <- NULL
   preprocessing_args <- NULL
+  
+  # Prepare grpby
+  if(grpby == length(gs)){
+    
+    grpby <- NA
+    
+  }
   
   # Modify template
   for(i in 1:length(alias)){

@@ -91,9 +91,6 @@ test_that("drawGate GatingSet methods returns appropriate gates and applies them
   
   expect_equal(basename(getNodes(gs1)), c("root","x","y","z","G","H",'I',"J"))
   
-  expect_error(drawGate(gs1, groupBy = 1, parent = "root", alias = c("G","H","I","J"), channels = c("FSC-A","SSC-A"), type = "q", subSample = 100), "Numeric groupBy is not currently supported - use pData variables instead.")
-  expect_error( drawGate(gs1, groupBy = c(1,2), parent = "root", alias = c("G","H","I","J"), channels = c("FSC-A","SSC-A"), type = "q", subSample = 100), "Only a single numeric can be supplied to groupBy.")
-  
   drawGate(gs1, parent = "root", alias = c("K","L","M"), channels = c("FSC-A","SSC-A"), type = "w", subSample = 100)
   
   expect_equal(basename(getNodes(gs1)), c("root","x","y","z","G","H",'I',"J","K","L","M"))

@@ -330,7 +330,7 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
 #' @seealso \code{\link{drawGate,flowSet-method}}
 #'
 #' @export
-setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = length(x), select = NULL, parent = "root", alias = NULL, channels = NULL, type = "polygon", subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...) {
+setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = NULL, select = NULL, parent = "root", alias = NULL, channels = NULL, type = "polygon", subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5, labels = TRUE, plot = TRUE, ...) {
 
   # Assign x to gs
   gs <- x
@@ -349,13 +349,8 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   fs <- flowWorkspace::getData(x, parent)
 
   # grouping required
-  if(is.numeric(groupBy)){
+  if(is.null(groupBy)){
     
-    if(groupBy != smp){
-      
-      message("Numeric groupBy not supported - all samples will be assigned to the same group.")
-      
-    }
     groupBy <- smp
     grps <- list(fs)
     
@@ -522,6 +517,10 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   if(is.character(groupBy)){
     
     groupBy <- paste(groupBy, collapse = ",")
+    
+  }else if(is.numeric(groupBy)){
+    
+    groupBy <- NA
     
   }
   
