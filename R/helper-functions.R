@@ -137,7 +137,8 @@ setMethod(selectChannels, signature = "flowFrame", definition = function(x){
     
   }else{
     
-    channel <- opts[1]
+    # Tests use PE Cy7 Control -
+    channel <- opts[5]
     
   }
   
@@ -184,7 +185,8 @@ setMethod(selectChannels, signature = "flowSet", definition = function(x){
         
     }else{
         
-      1
+      # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
+      c(4, 7, 11, 12, 5, 2)[match(x, pData(fs)$name)]
         
     }
     
@@ -234,7 +236,8 @@ setMethod(selectChannels, signature = "GatingSet", definition = function(x){
       
     }else{
       
-      1
+      # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
+      c(4, 7, 11, 12, 5, 2)[match(x, pData(gs)$name)]
       
     }
     

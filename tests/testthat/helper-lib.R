@@ -59,6 +59,7 @@ Comp <- flowSet(lapply(1:length(Compensation), function(x){
   Compensation[[x]][1:1000,]
 }))
 sampleNames(Comp) <- sampleNames(Compensation)
+pData(Comp)$name <- sampleNames(Compensation)
 
 # GatingSet -
 gs4 <- GatingSet(Comp)

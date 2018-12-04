@@ -15,9 +15,10 @@ test_that("getChannels returns the correct channels for flowFrames, flowSets and
 
 test_that("selectChannels", {
   
-  expect_equal(selectChannels(fs[[1]]), "Alexa Fluor 488-A")
-  expect_equal(selectChannels(fs), rep("Alexa Fluor 488-A", 4))
-  expect_equal(selectChannels(gs), rep("Alexa Fluor 488-A", 4))
+  print(pData(Comp))
+  expect_equal(selectChannels(Comp[[1]]), "PE-Cy7-A")
+  expect_equal(selectChannels(Comp), c("7-AAD-A", "Alexa Fluor 430-A", "APC-Cy7-A","Unstained", "PE-Cy7-A", "PE-A"))
+  expect_equal(selectChannels(gs4), c("7-AAD-A", "Alexa Fluor 430-A", "APC-Cy7-A","Unstained", "PE-Cy7-A", "PE-A"))
   
 })
 
