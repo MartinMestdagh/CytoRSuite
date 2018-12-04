@@ -477,7 +477,7 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
   # Prepare grpby
   if(grpby == length(gs)){
     
-    grpby <- NA
+    grpby <- as.logical(NA)
     
   }
   
@@ -489,12 +489,12 @@ editGate <- function(x, select = NULL, parent = NULL, alias = NULL, overlay = NU
     gt[parent == prnt & alias == als[i], collapseDataForGating := TRUE]
     gt[parent == prnt & alias == als[i], groupBy := grpby]
     gt[parent == prnt & alias == als[i], preprocessing_method := ppmd]
-    gt[parent == prnt & alias == als[i], preprocessing_args := NA]
+    gt[parent == prnt & alias == als[i], preprocessing_args := as.logical(NA)]
     
   }
-  
+
   # Save updated gatingTemplate
-  data.table::fwrite(gt, gtfile)
+  write.csv(as.data.frame(gt), gtfile, row.names = FALSE)
   
   # Apply new gates to GatingSet by group
   lapply(grps, function(grp){

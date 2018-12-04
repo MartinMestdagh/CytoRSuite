@@ -351,8 +351,15 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   # grouping required
   if(is.null(groupBy)){
     
-    groupBy <- smp
+    groupBy <- NA
     grps <- list(fs)
+    pd$groupby <- rep(1, smp)
+    
+  }else if(is.na(groupBy)){
+    
+    groupBy <- NA
+    grps <- list(fs)
+    pd$groupby <- rep(1, smp)
     
   }else if(is.character(groupBy)){
     
@@ -407,7 +414,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
     channels <- checkChannels(fr, channels = channels, plot = TRUE)
 
     # Main
-    if(is.numeric(groupBy)){
+    if(is.na(groupBy)){
       
       if(parent == "root"){
         
@@ -418,12 +425,8 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
         pnt <- parent
         
       }
-      
-      if(groupBy == length(gs)){
         
-        main <- paste("Combined Events","\n", pnt)
-        
-      }
+      main <- paste("Combined Events","\n", pnt)
       
     }else if(is.character(groupBy)){
       
@@ -486,7 +489,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
   })
   
   # Name gates with groupBy info
-  if(is.numeric(groupBy)){
+  if(is.na(groupBy)){
   
     # group number
     names(fltrsLst) <- unique(pd$groupby)
@@ -509,7 +512,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
     names(gates) <- unique(pd$groupby)
     return(gates)
   })
-  
+
   # Prepare gatingTemplate entries
   pop <- "+"
   
@@ -518,7 +521,7 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
     
     groupBy <- paste(groupBy, collapse = ",")
     
-  }else if(is.numeric(groupBy)){
+  }else if(is.na(groupBy)){
     
     groupBy <- NA
     

@@ -79,6 +79,13 @@ registerPlugins(gate_draw, "drawGate")
 #' @export
 gate_manual <- function(fr, pp_res, channels, gate){
   
+  # pp_res is NULL - no grouping
+  if(is.null(pp_res)){
+    
+    gt <- 1
+    
+  }
+  
   # Index of gate to use
   if(is.numeric(pp_res)){
     
@@ -129,6 +136,13 @@ ppmanualGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...
   # Extract pData information
   pd <- pData(gs)
   
+  # groupBy
+  if(is.character(groupBy) & nchar(groupBy) == 0){
+    
+    groupBy <- NA
+    
+  }
+
   # Add groupBy info to pData gs
   if(!is.na(groupBy) & grepl("^[A-Za-z]+$", groupBy) == TRUE){
     
@@ -157,7 +171,7 @@ ppmanualGate <- function(fs, gs, gm, channels=NA, groupBy=NA, isCollapse=NA, ...
     grpby <- 1
     
   }
-  
+
   return(grpby)
   
 }
