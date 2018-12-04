@@ -6,7 +6,7 @@
 \title{Plot Population Density Distribution in All Channels - flowSet Method}
 \usage{
 \S4method{plotCytoExprs}{flowSet}(x, channels = NULL, transList = NULL,
-  merge = TRUE, ...)
+  merge = TRUE, title = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
@@ -26,6 +26,8 @@ plotting.}
 
 \item{merge}{logical indicating whether flowFrames should be merged prior to
 plotting, set to TRUE by default.}
+
+\item{title}{a title for the plots, set to the file name of x by default.}
 
 \item{...}{additional arguments passed to \code{\link{plotCyto1d,flowFrame-method}}.}
 }

@@ -11,6 +11,17 @@ test_that("getChannels returns the correct channels for flowFrames, flowSets and
 })
 
 ## ------------------------------------------------------------------
+# selectChannels -
+
+test_that("selectChannels", {
+  
+  expect_equal(selectChannels(fs[[1]]), "Alexa Fluor 488-A")
+  expect_equal(selectChannels(fs), rep("Alexa Fluor 488-A", 4))
+  expect_equal(selectChannels(gs), rep("Alexa Fluor 488-A", 4))
+  
+})
+
+## ------------------------------------------------------------------
 # sampleFrame -
 test_that("sampleFrame returns subsetted flowFrame", {
   

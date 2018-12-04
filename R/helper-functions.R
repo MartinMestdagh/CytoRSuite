@@ -130,7 +130,16 @@ setMethod(selectChannels, signature = "flowFrame", definition = function(x){
   
   # Print sample name and select channel
   message(paste("Select a fluorescent channel for the following compensation control:", fr@description$GUID))
-  channel <- opts[menu(choices = opts, graphics = TRUE)]
+  
+  if(getOption("CytoRSuite_interact") == TRUE){
+    
+    channel <- opts[menu(choices = opts, graphics = TRUE)]
+    
+  }else{
+    
+    channel <- opts[1]
+    
+  }
   
   return(channel)
   
@@ -169,7 +178,15 @@ setMethod(selectChannels, signature = "flowSet", definition = function(x){
     
     print(x)
     
-    menu(choices = opts, graphics = TRUE)
+    if(getOption("CytoRSuite_interact") == TRUE){
+        
+      menu(choices = opts, graphics = TRUE)
+        
+    }else{
+        
+      1
+        
+    }
     
   })]
   
@@ -211,7 +228,15 @@ setMethod(selectChannels, signature = "GatingSet", definition = function(x){
     
     print(x)
     
-    menu(choices = opts, graphics = TRUE)
+    if(getOption("CytoRSuite_interact") == TRUE){
+      
+      menu(choices = opts, graphics = TRUE)
+      
+    }else{
+      
+      1
+      
+    }
     
   })]
   

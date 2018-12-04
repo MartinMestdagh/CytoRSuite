@@ -251,6 +251,8 @@ setMethod(plotCytoComp, signature = "flowSet",
   # Assign x to fs
   fs <- x
   
+  class(fs)[]
+  
   # Number of samples
   smp <- length(fs)
   
@@ -263,21 +265,21 @@ setMethod(plotCytoComp, signature = "flowSet",
     if(is.null(spfile)){
       
       spill <- fs[[1]]@description$SPILL
-      fs <- suppressMessages(compensate(fs, spill))
       
     }else if(!is.null(spfile)){
       
       spill <- read.csv(spfile, header = TRUE, row.names = 1)
       colnames(spill) <- rownames(spill)
       
-      if(class(fs)[1] == "ncdfFlowSet"){
+      if(inherits(fs, "ncdfFlowSet") == TRUE){
         
-        spill <- lapply(1:length(fs), function(x) spill)
-        names(spill) <- pData(fs)$name
+        fs <- suppressMessages(ncfsApply(fs, function(fr) {compensate(fr, spill)}))
+        
+      }else if(inherits(fs, "flowSet")){
+        
+        fs <- suppressMessages(fsApply(fs, function(fr) {compensate(fr, spill)}))
         
       }
-      
-      fs <- suppressMessages(compensate(fs, spill))
       
     }
     
@@ -504,6 +506,9 @@ setMethod(plotCytoComp, signature = "flowSet",
 setMethod(plotCytoComp, signature = "GatingSet", 
           definition = function(x, parent = NULL, cmfile = NULL, compensate = FALSE, spfile = NULL, transList = NULL, overlay = TRUE, mfrow, popup = FALSE, ...){            
   
+  # Assign x to gs
+  gs <- x  
+  
   # Parent
   if(is.null(parent)){
               
@@ -512,14 +517,11 @@ setMethod(plotCytoComp, signature = "GatingSet",
               
   }
   
-  # Assign x to gs
-  gs <- x
-  
   # Extract channels
   channels <- getChannels(gs)
   
   # Extract parent
-  fs <- getData(gs, parent)  
+  fs <- getData(gs, parent)
   
   # Compensation
   if(compensate == TRUE){
@@ -527,21 +529,21 @@ setMethod(plotCytoComp, signature = "GatingSet",
     if(is.null(spfile)){
       
       spill <- fs[[1]]@description$SPILL
-      fs <- suppressMessages(compensate(fs, spill))
       
     }else if(!is.null(spfile)){
       
       spill <- read.csv(spfile, header = TRUE, row.names = 1)
       colnames(spill) <- rownames(spill)
       
-      if(class(fs)[1] == "ncdfFlowSet"){
+      if(inherits(fs, "ncdfFlowSet") == TRUE){
         
-        spill <- lapply(1:length(fs), function(x) spill)
-        names(spill) <- pData(fs)$name
+        fs <- suppressMessages(ncfsApply(fs, function(fr) {compensate(fr, spill)}))
+        
+      }else if(inherits(fs, "flowSet")){
+        
+        fs <- suppressMessages(fsApply(fs, function(fr) {compensate(fr, spill)}))
         
       }
-      
-      fs <- suppressMessages(compensate(fs, spill))
       
     }
     

@@ -87,19 +87,13 @@ test_that("drawGate GatingSet methods returns appropriate gates and applies them
   
   expect_equal(basename(getNodes(gs1)), c("root","x","y","z"))
   
-  drawGate(gs1, groupBy = 8, parent = "root", alias = c("G","H","I","J"), channels = c("FSC-A","SSC-A"), type = "q", subSample = 100, gtfile = "gatingTemplate.csv")
-  
-  expect_equal(basename(getNodes(gs1)), c("root","x","y","z","G","H",'I',"J"))
-  
   drawGate(gs1, parent = "root", alias = c("K","L","M"), channels = c("FSC-A","SSC-A"), type = "w", subSample = 100)
   
-  expect_equal(basename(getNodes(gs1)), c("root","x","y","z","G","H",'I',"J","K","L","M"))
+  expect_equal(basename(getNodes(gs1)), c("root","x","y","z","K","L","M"))
   
   gby <- drawGate(gs1, groupBy = "OVAConc", parent = "root", alias = c("X"), channels = c("FSC-A","SSC-A"), type = "p", subSample = 100)
 
-  expect_equal(basename(getNodes(gs1)), c("root","x","y","z","G","H",'I',"J","K","L","M","X"))
-  
-  
+  expect_equal(basename(getNodes(gs1)), c("root","x","y","z","K","L","M","X"))
   
 })
 unlink("gatingTemplate.csv")

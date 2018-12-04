@@ -9,10 +9,15 @@ library(CytoRSuiteData)
 # Load in vdiffr for image comparison -
 library(vdiffr)
 
+# Load in grDevices for recordPlot() -
+library(grDevices)
+
 # Load in robustbase (colMedians) -
 library(robustbase)
 
 ## ----------------------------------------------------------------------
+# Activation GatingSet -
+
 # Assign Activation dataset to fs -
 fs <- Activation
 
@@ -45,6 +50,26 @@ gating(gt, gs)
 
 # Extract populations -
 Va2 <- getData(gs, "T Cells")
+
+## --------------------------------------------------------------------
+# Compensation GatingSet -
+
+# Sample for speed -
+Comp <- flowSet(lapply(1:length(Compensation), function(x){
+  Compensation[[x]][1:1000,]
+}))
+sampleNames(Comp) <- sampleNames(Compensation)
+
+# GatingSet -
+gs4 <- GatingSet(Comp)
+
+# Transformations -
+trans2 <- estimateLogicle(gs4[[1]], c("SSC-A", "SSC-H", "SSC-W", getChannels(gs)), m = 4.5)
+gs4 <- transform(gs4, trans2)
+
+# Gating -
+gtc <- gatingTemplate("Compensation-gatingTemplate.csv")
+gating(gtc, gs4)
 
 ## --------------------------------------------------------------------
 # Construct gate objects -
