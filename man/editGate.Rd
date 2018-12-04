@@ -21,7 +21,7 @@ plotting.}
 \item{overlay}{name(s) of the population(s) to overlay onto the plot.}
 
 \item{type}{vector of gate type names used to construct the gates. Multiple
-\code{gate_types} are supported but should be accompanied with an
+\code{types} are supported but should be accompanied with an
 \code{alias} argument of the same length (i.e. one \code{type} per
 \code{alias}). Supported \code{gate_types} are \code{polygon, rectangle,
 ellipse, threshold, boundary, interval, quadrant and web} which can be

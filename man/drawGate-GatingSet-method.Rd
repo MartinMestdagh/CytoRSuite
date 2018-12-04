@@ -5,7 +5,7 @@
 \alias{drawGate,GatingSet-method}
 \title{drawGate GatingSet Method}
 \usage{
-\S4method{drawGate}{GatingSet}(x, groupBy = length(x), select = NULL,
+\S4method{drawGate}{GatingSet}(x, groupBy = NULL, select = NULL,
   parent = "root", alias = NULL, channels = NULL, type = "polygon",
   subSample = 250000, gtfile = NULL, axis = "x", adjust = 1.5,
   labels = TRUE, plot = TRUE, ...)

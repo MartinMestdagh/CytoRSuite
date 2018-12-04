@@ -168,9 +168,9 @@ extractGate <- function(parent, alias, gtfile){
 #'   setGate recompute pData
 #' @importFrom flowCore parameters filterList
 #' @importFrom openCyto gatingTemplate
-#' @importFrom data.table as.data.table fread fwrite :=
+#' @importFrom data.table as.data.table fread :=
 #' @importFrom methods as
-#' @importFrom utils select.list
+#' @importFrom utils select.list write.csv
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
