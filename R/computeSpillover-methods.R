@@ -239,9 +239,14 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
     plotCyto(NIL, channels = chan, overlay = fr, offset = 0, transList = transList, popup = TRUE, fill = c("red","dodgerblue"), legend = FALSE, alpha = 0.6, main = nms[x], ...)
     
     # Call drawGate on each flowFrame using interval gate on selected channel
-    gt <- drawGate(x = fr, alias = paste(chan,"+"), channels = chan, type = "interval", adjust = 1.5, plot = FALSE)
-    fr <- Subset(fr, gt[[1]])
+    if(getOption("CytoRSuite_interact") == TRUE){
+      
+      gt <- drawGate(x = fr, alias = paste(chan,"+"), channels = chan, type = "interval", adjust = 1.5, plot = FALSE)
+      fr <- Subset(fr, gt[[1]])
+      
+    }
     
+    return(fr)
   })
   names(pops) <- nms
   pops <- flowSet(pops)

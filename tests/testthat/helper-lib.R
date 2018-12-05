@@ -65,12 +65,18 @@ pData(Comp)$name <- sampleNames(Compensation)
 gs4 <- GatingSet(Comp)
 
 # Transformations -
-trans2 <- estimateLogicle(gs4[[1]], c("SSC-A", "SSC-H", "SSC-W", getChannels(gs)), m = 4.5)
+trans2 <- estimateLogicle(gs4[[1]], c("SSC-A", "SSC-H", "SSC-W"))
 gs4 <- transform(gs4, trans2)
 
 # Gating -
 gtc <- gatingTemplate("Compensation-gatingTemplate.csv")
 gating(gtc, gs4)
+
+## --------------------------------------------------------------------
+# Spillover Matrix -
+
+spill <- read.csv("Spillover Matrix.csv", header = TRUE, row.names = 1)
+colnames(spill) <- rownames(spill)
 
 ## --------------------------------------------------------------------
 # Construct gate objects -

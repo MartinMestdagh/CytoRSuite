@@ -147,3 +147,5 @@ test_that("checkStat stops computeStats if supplied stat is not supported", {
   expect_error(checkStat("average"), "Supplied statistic not supported.")
   
 })
+
+graphics.off()
