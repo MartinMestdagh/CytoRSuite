@@ -36,7 +36,22 @@ test_that("plotCyto2d flowFrame method returns appropriate plots", {
   p7 <- function() plotCyto2d(Va2[[1]], channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"), gates = filters(list(rectGate,polyGate)), transList = trans)
   expect_doppelganger("plotCyto2d fr gates", p7)
   
-  })
+  # 1D gate in 2D
+  p8 <- function() plotCyto2d(Va2[[1]], channels = c("FSC-A","SSC-A"), gates = filters(list(igx)), transList = trans)
+  expect_doppelganger("plotCyto2d fr gates 1D", p8)
+  
+  expect_error(plotCyto2d(Va2[[1]], channels = c("SSC-H","SSC-A"), gates = filters(list(igx)), transList = trans), "Channels used to construct the plot do not match those of the supplied gate.")
+  
+  sqrcut <- matrix(c(-Inf,Inf,Inf,-Inf,-Inf,-Inf,Inf,Inf),ncol=2,nrow=4)
+  colnames(sqrcut) <- c("Alexa Fluor 700-A","Alexa Fluor 488-A")
+  polyGate <- polygonGate(.gate = sqrcut)
+  
+  p9 <- function() plotCyto2d(Va2[[1]], channels = c("Alexa Fluor 700-A","Alexa Fluor 488-A"), gates = list(polyGate))
+  expect_doppelganger("plotCyto2d fr gates pg", p9)
+  
+  expect_error(plotCyto2d(Va2[[1]], channels = c("FSC-A","SSC-A"), gates = list(polyGate)), "Channels used to construct the plot do not match those of the supplied gate.")
+  
+})
 
 ## ----------------------------------------------------------------------------------
 # flowSet -

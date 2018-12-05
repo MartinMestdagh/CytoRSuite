@@ -205,30 +205,33 @@ setMethod(plotGates, signature = "polygonGate", definition = function(x, channel
   if(!all(is.finite(gt@boundaries))){
     
     cnt <- 0
-    lapply(1:ncol(gt@boundaries), function(x){
+    lapply(1:length(channels), function(x){
       
-      cnt <<- cnt + 1
-      if(any(!is.finite(gt@boundaries[,x]) & any(gt@boundaries[,x] < 0))){
+      cnt <<-  cnt + 1
+      
+      if(any(!is.finite(gt@boundaries[,channels[x]]) & any(gt@boundaries[,channels[x]] < 0))){
         
         if(cnt == 1){
           
-          gt@boundaries[,x][which(gt@boundaries[,x] < 0)] <<- par("usr")[1]
+          gt@boundaries[,channels[x]][which(gt@boundaries[, channels[x]] < 0)] <<- par("usr")[1]
           
         }else if(cnt == 2){
           
-          gt@boundaries[,x][which(gt@boundaries[,x] < 0)] <<- par("usr")[3]
+          gt@boundaries[,channels[x]][which(gt@boundaries[,channels[x]] < 0)] <<- par("usr")[3]
           
         }
         
-      }else if(any(!is.finite(gt@boundaries[,x]) & any(!gt@boundaries[,x] < 0))){
+      }
+      
+      if(any(!is.finite(gt@boundaries[,channels[x]]) & any(!gt@boundaries[,channels[x]] < 0))){
         
         if(cnt == 1){
           
-          gt@boundaries[,x][which(!is.finite(gt@boundaries[,x]) & !gt@boundaries[,x] < 0)] <<- par("usr")[2]
+          gt@boundaries[,channels[x]][which(!is.finite(gt@boundaries[,channels[x]]) & !gt@boundaries[,channels[x]] < 0)] <<- par("usr")[2]
           
         }else if(cnt == 2){
           
-          gt@boundaries[,x][which(!is.finite(gt@boundaries[,x]) & !gt@boundaries[,x] < 0)] <<- par("usr")[4]
+          gt@boundaries[,channels[x]][which(!is.finite(gt@boundaries[,channels[x]]) & !gt@boundaries[,channels[x]] < 0)] <<- par("usr")[4]
           
         }
         
