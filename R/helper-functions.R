@@ -35,7 +35,10 @@ setGeneric(name="getChannels",
 #' @export
 setMethod(getChannels, signature = "flowFrame", definition = function(x){
   
-  colnames(x@description$SPILL)
+  channels <- unname(BiocGenerics::colnames(x))
+  channels <- channels[!channels %in% c("FSC-A","FSC-H","FSC-W","SSC-A","SSC-H","SSC-W", "Time","Original")]
+  
+  return(channels)
   
 })
 
@@ -59,7 +62,7 @@ setMethod(getChannels, signature = "flowFrame", definition = function(x){
 #' @export
 setMethod(getChannels, signature = "flowSet", definition = function(x){
   
-  colnames(x[[1]]@description$SPILL)
+  getChannels(x[[1]])
   
 })
 
@@ -84,7 +87,8 @@ setMethod(getChannels, signature = "flowSet", definition = function(x){
 #' @export
 setMethod(getChannels, signature = "GatingSet", definition = function(x){
   
-  colnames(x@data[[1]]@description$SPILL)
+  fr <- getData(x[[1]], "root")
+  getChannels(fr)
   
 })
 
