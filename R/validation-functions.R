@@ -598,6 +598,8 @@ setGeneric(name = "checkOverlay",
 #'   plotting speed on less powerful machines.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @importFrom flowCore sampleFilter
 #'
 #' @noRd
 setMethod(checkOverlay, signature = "flowFrame", definition = function(x, overlay, subSample = NULL){
@@ -669,6 +671,8 @@ setMethod(checkOverlay, signature = "flowFrame", definition = function(x, overla
 #'   plotting speed on less powerful machines.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @importFrom flowCore sampleFilter
 #'
 #' @noRd
 setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay, subSample = NULL){
@@ -763,6 +767,112 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
   
   # return is a list of flowFrame lists to overlay -  1 flowFrame list per flowFrame in fs
   return(overlay)
+  
+})
+
+#' Check Overlays Supplied to plotCyto
+#'
+#' \code{checkOverlay} will check whether the supplied overlay is supported and
+#' convert it into an appropriate format for use in \code{\link{plotCyto}}. This
+#' flowSet method will return a list of flowFrame lists to overlay.
+#'
+#' @param x object of class \code{GatingHierarchy}.
+#' @param overlay object to overlay.
+#' @param subSample  numeric indicating the number of events to plot, set to all
+#'   events by default. Reducing the sample size can significantly increase
+#'   plotting speed on less powerful machines.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @importFrom flowWorkspace getData
+#'
+#' @noRd
+setMethod(checkOverlay, signature = "GatingHierarchy", definition = function(x, overlay, subSample = NULL){
+  
+  # Assign x to gh
+  gh <- x
+  
+  # Extract flowFrame
+  fr <- getData(gh, "root")
+  
+  # Overlay should be character vector of population names
+  if(inherits(overlay, "flowFrame") | inherits(overlay, "flowSet") | inherits(overlay, "list")){
+    
+  }else if(inherits(overlay, "character")){
+    
+    if(!all(overlay %in% basename(getNodes(gh)))){
+      
+      stop("Supplied population(s) for overlay does not exist in the GatingHierarchy.")
+      
+    }else{
+      
+      nms <- overlay
+      overlay <- lapply(overlay, function(x){
+        
+        getData(gh, x)
+        
+      })
+      names(overlay) <- nms
+    
+    }
+    
+  }
+  
+  # checkOverlay to convert overlay to correct format
+  checkOverlay(fr, overlay = overlay, subSample = subSample)
+  
+})
+
+#' Check Overlays Supplied to plotCyto
+#'
+#' \code{checkOverlay} will check whether the supplied overlay is supported and
+#' convert it into an appropriate format for use in \code{\link{plotCyto}}. This
+#' flowSet method will return a list of flowFrame lists to overlay.
+#'
+#' @param x object of class \code{GatingSet}.
+#' @param overlay object to overlay.
+#' @param subSample  numeric indicating the number of events to plot, set to all
+#'   events by default. Reducing the sample size can significantly increase
+#'   plotting speed on less powerful machines.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' 
+#' @importFrom flowWorkspace getData
+#'
+#' @noRd
+setMethod(checkOverlay, signature = "GatingSet", definition = function(x, overlay, subSample = NULL){
+  
+  # Assign x to gh
+  gs <- x
+  
+  # Extract flowFrame
+  fs <- getData(gs, "root")
+  
+  # Overlay should be character vector of population names
+  if(inherits(overlay, "flowFrame") | inherits(overlay, "flowSet") | inherits(overlay, "list")){
+    
+  }else if(inherits(overlay, "character")){
+    
+    if(!all(overlay %in% basename(getNodes(gs)))){
+      
+      stop("Supplied population(s) for overlay does not exist in the GatingHierarchy.")
+      
+    }else{
+      
+      nms <- overlay
+      overlay <- lapply(overlay, function(x){
+        
+        getData(gs, x)
+        
+      })
+      names(overlay) <- nms
+      
+    }
+    
+  }
+  
+  # checkOverlay to convert overlay to correct format
+  checkOverlay(fs, overlay = overlay, subSample = subSample)
   
 })
 
