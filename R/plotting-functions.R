@@ -606,6 +606,8 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   # merge all samples
   if(length(mergeBy) == 1 & mergeBy[1] == "all"){
     
+    pd$merge <- rep("all", length(x))
+    
     fr <- as(fs, "flowFrame")
     
     if("Original" %in% BiocGenerics::colnames(fr)){
@@ -655,6 +657,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
     })
     
   }
+  names(fr.lst) <- unique(pd$merge)
   
   return(fr.lst)
   
