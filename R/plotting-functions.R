@@ -569,11 +569,12 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
 #' @param parent name of the parent population to extract from GatingSet object.
 #' @param mergeBy names of pData variables to use for merging. Set to "all" to
 #'   merge all samples in the flowSet.
+#' @param subSample number of events to include in each group.
 #'   
 #' @return list containing merged flowFrames, named with group.
 #'
 #' @noRd
-.mergeBy <- function(x, parent = "root", mergeBy = "all"){
+.mergeBy <- function(x, parent = "root", mergeBy = "all", subSample = NULL){
   
   # check x
   if(inherits(x, "flowFrame") | inherits(x, "GatingHierarchy")){
@@ -616,6 +617,12 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
       
     }
     
+    if(!is.null(subSample)){
+      
+      fr <- Subset(fr, sampleFilter(size = subSample))
+      
+    }
+    
     fr.lst <- list(fr)
     
   # merge by one variable
@@ -630,6 +637,12 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
       if("Original" %in% BiocGenerics::colnames(fr)){
         
         fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+        
+      }
+      
+      if(!is.null(subSample)){
+        
+        fr <- Subset(fr, sampleFilter(size = subSample))
         
       }
       
@@ -649,6 +662,12 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
       if("Original" %in% BiocGenerics::colnames(fr)){
         
         fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+        
+      }
+      
+      if(!is.null(subSample)){
+        
+        fr <- Subset(fr, sampleFilter(size = subSample))
         
       }
       
