@@ -529,7 +529,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
       fr.lst <- lapply(ov, `[[`, x)
       
       # if same flowFrame return first only
-      if(length(unique(fr.lst)) == 1){
+      if(length(unique(fr.lst)) == 1 | length(unique(sapply(fr.lst, function(x){x@description$GUID}))) == 1){
         
         fr <- fr.lst[[1]]
         
@@ -560,5 +560,102 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   })
   
   return(overlay)
+  
+}
+
+#' Merge samples by pData
+#'
+#' @param x flowSet or GatingSet object
+#' @param parent name of the parent population to extract from GatingSet object.
+#' @param mergeBy names of pData variables to use for merging. Set to "all" to
+#'   merge all samples in the flowSet.
+#'   
+#' @return list containing merged flowFrames, named with group.
+#'
+#' @noRd
+.mergeBy <- function(x, parent = "root", mergeBy = "all"){
+  
+  # check x
+  if(inherits(x, "flowFrame") | inherits(x, "GatingHierarchy")){
+    
+    stop("x must be either a flowSet or a GtaingSet object.")
+    
+  }
+  
+  # check mergeBy
+  if(all(!mergeBy %in% c("all", colnames(pData(x))))){
+    
+    stop("mergeBy should be the name of pData variables or 'all'.")
+    
+  }
+  
+  # Extract pData information
+  pd <- pData(x)
+  
+  # flowSet for merging
+  if(inherits(x, "GatingSet")){
+    
+    fs <- getData(x, parent)
+    
+  }else{
+    
+    fs <- x
+    
+  }
+  
+  # merge all samples
+  if(length(mergeBy) == 1 & mergeBy[1] == "all"){
+    
+    fr <- as(fs, "flowFrame")
+    
+    if("Original" %in% BiocGenerics::colnames(fr)){
+      
+      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      
+    }
+    
+    fr.lst <- list(fr)
+    
+  # merge by one variable
+  }else if(length(mergeBy) == 1){
+    
+    pd$merge <- pd[, mergeBy]
+    
+    fr.lst <- lapply(unique(pd$merge), function(x){
+      
+      fr <- as(fs[pd$merge == x], "flowFrame")
+      
+      if("Original" %in% BiocGenerics::colnames(fr)){
+        
+        fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+        
+      }
+      
+      return(fr)
+      
+    })
+    
+  # merge by multiple variables  
+  }else{
+    
+    pd$merge <- do.call("paste", pd[, mergeBy])
+    
+    fr.lst <- lapply(unique(pd$merge), function(x){
+      
+      fr <- as(fs[pd$merge == x], "flowFrame")
+      
+      if("Original" %in% BiocGenerics::colnames(fr)){
+        
+        fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+        
+      }
+      
+      return(fr)
+      
+    })
+    
+  }
+  
+  return(fr.lst)
   
 }
