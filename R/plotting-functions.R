@@ -243,306 +243,322 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   
 }
 
-#' Get Axes Limits for plotCyto
-#'
-#' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
-#'   \code{\link[flowCore:flowSet-class]{flowSet}}.
-#' @param ... additional arguments.
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#'
-#' @noRd
-setGeneric(name = "axesLimits",
-           def = function(x, ...){standardGeneric("axesLimits")}
-)
-
-#' Get Axes Limits for plotCyto - flowFrame Method
+#' Get Axes Limits
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.
+#' @param parent name of the parental node to extract from GatingHierarchy or
+#'   GatingSet.
 #' @param channels name of the channels or markers to be used to construct the
 #'   plot.
 #' @param overlay a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
 #'   \code{list of flowSets} or \code{list of flowFrame lists} containing
-#'   populations to be overlayed onto the plot(s).
-#' @param upper logical indicating whether the upper limit of the data should be
-#'   used for axes limits, set to TRUE by default.
+#'   populations to be overlayed onto the plot(s). Data for overlays will be
+#'   merged with \code{x} prior to axis limit calculation to ensure that the
+#'   axes limits are set based on all the data to be included in the plot.
+#' @param limits indicates whether the limits of the "data" or limits of the
+#'   "machine" should be returned. This argument will only influence the upper
+#'   limit. The lower limit will always be set to 0, unless the data contains
+#'   values below this limit. In such cases the lower limit of the data will be
+#'   used instead. This argument is set to "machine" by default.
 #'
-#' @importFrom flowCore exprs flowSet
+#' @importFrom flowCore exprs flowSet parameters
+#' @importFrom flowWorkspace pData
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-setMethod(axesLimits, signature = "flowFrame", definition = function(x, channels, overlay = NULL, upper = TRUE){
+.getAxisLimits <- function(x, parent = "root", channels, overlay = NULL, limits = "machine"){
+  
+  # Missing channels
+  if(missing(channels)){
+    
+    stop("Please supply the names of the channel(s) to calculate axes limits.")
+    
+  }else{
+    
+    checkChannels(x = x, channels = channels, plot = FALSE)
+    
+  }
+  
+  # Incorrect limits argument
+  if(!limits %in% c("data","machine")){
+    
+    stop("Limits argument should be either 'data' or 'machine'.")
+    
+  }
+  
+  # x is a flowFrame
+  if(inherits(x, "flowFrame")){
+    
+    fr <- x
+    
+  # x is a flowSet
+  }else if(inherits(x, "flowSet")){
+    
+    fr <- as(x, "flowSet")
+    
+    if("Original" %in% BiocGenerics::colnames(fr)){
+      
+      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      
+    }
+    
+  # x is a GatingHierarchy  
+  }else if(inherits(x, "GatingHierarchy")){
+    
+    fr <- getData(x, parent)
+    
+  # x is a GatingSet  
+  }else if(inherits(x, "GatingSet")){
+    
+    fr <- as(getData(x, parent), "flowFrame")
+    
+    if("Original" %in% BiocGenerics::colnames(fr)){
+      
+      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+      
+    }
+    
+  }
   
   # Assign x to fr
   fr <- x
 
-  # No overlay
-  if(is.null(overlay)){
+  # Extract summary stats
+  sm <- pData(parameters(fr))
+  
+  lms <- lapply(channels, function(channel){
     
-  # overlay
-  }else if(!is.null(overlay)){
+    # Extract machine limits
+    mlms <- vector()
+    mlms[1] <- sm[sm$name == channel, "minRange"]
+    mlms[2] <- sm[sm$name == channel, "maxRange"]
     
-    # flowFrame
-    if(class(overlay) == "flowFrame"){
-      
-      fr <- as(flowSet(list(fr,overlay)),"flowFrame")
-      
-    # flowSet  
-    }else if(class(overlay) == "flowSet"){
-      
-      ov <- as(overlay, "flowFrame")
-      
-      if(is.na(match("Original", BiocGenerics::colnames(ov))) == FALSE){
+    if(mlms[1] > 0){
         
-          ov <- ov[, -match("Original", BiocGenerics::colnames(ov))]
+      mlms <- c(0, mlms[2])
+      
+    }
+    
+    # Machine limits
+    if(limits == "machine"){
+
+      lms <- mlms
+    
+    # Data limits
+    }else if(limits == "data"){
+    
+      # No overlay
+      if(is.null(overlay)){
+    
+       # overlay
+      }else if(!is.null(overlay)){
+    
+         # Get merged flowFrame to calculate axes limits
+         # flowFrame
+         if(class(overlay) == "flowFrame"){
+      
+          fr <- as(flowSet(list(fr,overlay)),"flowFrame")
+      
+         # flowSet  
+         }else if(class(overlay) == "flowSet"){
+      
+           ov <- as(overlay, "flowFrame")
+      
+           if(is.na(match("Original", BiocGenerics::colnames(ov))) == FALSE){
+        
+               ov <- ov[, -match("Original", BiocGenerics::colnames(ov))]
           
-      }
-      fr <- as(flowSet(list(fr,ov)),"flowFrame")
+           }
+           fr <- as(flowSet(list(fr,ov)),"flowFrame")
       
-    # list 
-    }else if(class(overlay) == "list"){
+         # list 
+         }else if(class(overlay) == "list"){
       
-      # list of flowFrames
-      if(all(as.vector(sapply(overlay, function(x) {class(x)})) == "flowFrame"))
+           # list of flowFrames
+          if(all(as.vector(sapply(overlay, function(x) {class(x)})) == "flowFrame"))
       
-        fr <- as(flowSet(c(list(fr),overlay)),"flowFrame")
+            fr <- as(flowSet(c(list(fr),overlay)),"flowFrame")
         
-      # list of flowSets
-      }else if(all(as.vector(sapply(overlay, function(x) {class(x)})) == "flowFrame")){
+           # list of flowSets
+           }else if(all(as.vector(sapply(overlay, function(x) {class(x)})) == "flowFrame")){
        
-        ov <- lapply(overlay, function(x){as(x,"flowFrame")})
+             ov <- lapply(overlay, function(x){as(x,"flowFrame")})
         
-        if(is.na(match("Original", BiocGenerics::colnames(ov[[1]]))) == FALSE){
+            if(is.na(match("Original", BiocGenerics::colnames(ov[[1]]))) == FALSE){
           
-          ov <- lapply(ov,function(fr){
+               ov <- lapply(ov,function(fr){
             
-            fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
+                 fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
             
-            return(fr)
+                 return(fr)
             
-          })
+               })
         
-        }
-        fr <- as(flowSet(c(list(fr), ov)),"flowFrame")
+             }
+             fr <- as(flowSet(c(list(fr), ov)),"flowFrame")
         
-      # list of lists   
-      }else if(all(as.vector(sapply(overlay, function(x) {class(x)})) == "list")){
+           # list of lists   
+           }else if(all(as.vector(sapply(overlay, function(x) {class(x)})) == "list")){
         
-        # flowFrame lists
-        if(all(as.vector(sapply(overlay, function(x) {sapply(x,class)})) == "flowFrame")){
+             # flowFrame lists
+             if(all(as.vector(sapply(overlay, function(x) {sapply(x,class)})) == "flowFrame")){
           
-          fr.lst <- lapply(overlay, function(x){
+               fr.lst <- lapply(overlay, function(x){
             
-            as(flowSet(x),"flowFrame")
+                as(flowSet(x),"flowFrame")
             
-          })
+               })
           
-          if(is.na(match("Original", BiocGenerics::colnames(fr.lst[[1]]))) == FALSE){
+               if(is.na(match("Original", BiocGenerics::colnames(fr.lst[[1]]))) == FALSE){
             
-            ov <- lapply(fr.lst,function(fr){
+                 ov <- lapply(fr.lst,function(fr){
               
-              fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
+                   fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
               
-              return(fr)
+                   return(fr)
               
-            })
+                 })
             
-          }
-          fr <- as(flowSet(c(list(fr),ov)),"flowFrame")
+               }
+               fr <- as(flowSet(c(list(fr),ov)),"flowFrame")
           
-        }
+             }
         
-        # flowSet lists
-        if(all(as.vector(sapply(overlay, function(x) {sapply(x,class)})) == "flowSet")){
+              # flowSet lists
+             if(all(as.vector(sapply(overlay, function(x) {sapply(x,class)})) == "flowSet")){
           
-          fr.lst <- lapply(overlay, function(x){
+               fr.lst <- lapply(overlay, function(x){
             
-            as(x,"flowFrame")
+                 as(x,"flowFrame")
             
-          })
+               })
           
-          if(is.na(match("Original", BiocGenerics::colnames(fr.lst[[1]]))) == FALSE){
+               if(is.na(match("Original", BiocGenerics::colnames(fr.lst[[1]]))) == FALSE){
             
-            ov <- lapply(fr.lst,function(fr){
+                 ov <- lapply(fr.lst,function(fr){
               
-              fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
+                   fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
               
-              return(fr)
+                   return(fr)
               
-            })
+                  })
           
-          fr <- as(flowSet(c(list(fr),ov)),"flowFrame")
+               fr <- as(flowSet(c(list(fr),ov)),"flowFrame")
           
+               }
+          
+            }
+    
          }
-          
-      }
+    
+       }
+  
+     # Limits from flowFrame
+     lms <- range(exprs(fr)[,channel])
+     lms <- c(mlms[1], lms[2])
     
     }
     
-  }
-  
-  # Limits from flowFrame
-  lim <- lapply(channels, function(channel){
-    
-    range(exprs(fr)[,channel])
+    return(lms)
     
   })
-  names(lim) <- channels
   
-  # xlim & ylim
-  xlim <- lim[[1]]
+  names(lms) <- channels
   
-  if(length(channels) == 2){
-    
-    ylim <- lim[[2]]
-    
-  }
-  
-  # X axis limits
-  if(all(xlim > -5 & xlim < 5)){
-      
-    # Data on transformed scale
-    if(xlim[1] > -0.5){
-        
-      xlim[1] <- -0.5
-        
-    }
-      
-    if(upper == FALSE){
-      
-      if(xlim[2] < 4.5){
-        
-        xlim[2] <- 4.5
-        
-      }
-      
-    }
-      
-  }else if(all(xlim > -1000 & xlim < 270000)){
-      
-    # Data on linear scale
-    if(xlim[1] > -1000){
-        
-      xlim[1] <- -1000
-        
-    }
-      
-    if(upper == FALSE){
-      
-      if(xlim[2] < 265000){
-        
-        xlim[2] <- 260000
-        
-      }
-      
-    }
-      
-  }
-    
-  # Y axis limits
-  if(length(channels) == 2){
-      
-    if(all(ylim > -5 & ylim < 5)){
-      
-      # Data on transformed scale
-      if(ylim[1] > -0.5){
-        
-        ylim[1] <- -0.5
-        
-      }
-      
-      if(upper == FALSE){
-        
-        if(ylim[2] < 4.5){
-        
-           ylim[2] <- 4.5
-        
-        }
-        
-      }
-      
-    }else if(all(ylim > -1000 & ylim < 270000)){
-      
-      # Data on linear scale
-      if(ylim[1] > -1000){
-        
-        ylim[1] <- -1000
-        
-      }
-      
-      if(upper == FALSE){
-        
-        if(ylim[2] < 265000){
-        
-           ylim[2] <- 260000
-        
-        }
-        
-      }
-      
-    }
-      
-  }
-  
-  if(length(channels) == 1){
-    
-    xlim <- list(xlim)
-    names(xlim) <- channels[1]
-    return(xlim)
-    
-  }else if(length(channels) == 2){
-    
-    lim <- list(xlim,ylim)
-    names(lim) <- channels
-    return(lim)
-    
-  }
-  
-})
-           
-#' Get Axes Limits for plotCyto - flowFrame Method
-#' 
-#' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}}.
-#' @param channels name of the channels or markers to be used to construct the
-#'   plot.
-#' @param overlay a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
-#'   \code{list of flowSets} or \code{list of flowFrame lists} containing
-#'   populations to be overlayed onto the plot(s).
-#' @param upper logical indicating whether the upper limit of the data should be
-#'   used for axes limits, set to TRUE by default.
+  return(lms)
+
+}
+
+#' Merge overlay for merged data
 #'
-#' @importFrom methods as
-#'
-#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#' @param x flowSet data to be merged.
+#' @param overlay object generated by checkOverlay flowSet method (list of
+#'   flowFrame lists).
+#' @param mergeBy pData variables of x used to merge the data. To merge all
+#'   samples set mergeBy to "all".
+#' @param subSample numeric indicating the number of events to include.
 #'
 #' @noRd
-setMethod(axesLimits, signature = "flowSet", definition = function(x, channels, overlay = NULL, upper = TRUE){
+.mergeOverlay <- function(x, overlay, mergeBy = "all", subSample = NULL){
   
-  # Assign x to fs
-  fs <- x
-  
-  if(length(fs) > 1){
+  # x is flowSet prior to merging
+  if(!class(x)[1] %in% c("flowSet","GatingSet") | length(overlay) != length(x)){
     
-    # Coerce to flowFrame
-    fr <- as(fs, "flowFrame")
-    
-    if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
-      
-      fr <- fr[, -match("Original", BiocGenerics::colnames(fr))]
-      
-    }
-    
-  # Call to axesLimits
-  lim <- axesLimits(x = fr, channels = channels, overlay = overlay, upper = upper)
-  
-  }else{
-    
-    # Call to axesLimits
-    lim <- axesLimits(x = fs[[1]], channels = channels, overlay = overlay, upper = upper)
+    stop("Supply the original data prior to merging.")
     
   }
   
-  return(lim)
+  # Extract pData
+  pd <- pData(x)
   
-})
+  # List of group indicies - ind
+  if(length(mergeBy) == 1 & mergeBy[1] == "all"){
+    
+    grps <- list(1:length(x))
+    
+  }else{
+    
+    # Groups
+    if(length(mergeBy) == 1){
+      
+      pd$mrg <- pd[, mergeBy]
+      
+    }else{
+      
+      pd$mrg <- do.call("paste", pd[, mergeBy])
+      
+    }
+    
+    # Get a list of indices per group
+    grps <- lapply(unique(pd$mrg), function(x){
+      
+      which(pd$mrg == x)
+      
+    })
+    
+  }
+  
+  # Subset overlay, merge & subSample
+  overlay <- lapply(grps, function(x){
+      
+    ov <- overlay[x]
+    
+    lapply(seq(1,length(ov[[1]]),1), function(x){
+        
+      fr.lst <- lapply(ov, `[[`, x)
+      
+      # if same flowFrame return first only
+      if(length(unique(fr.lst)) == 1){
+        
+        fr <- fr.lst[[1]]
+        
+      }else{
+      
+        fs <- flowSet()
+      
+        fr <- as(fs, "flowFrame")
+        
+        if("Original" %in% BiocGenerics::colnames(fr)){
+        
+          fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
+          
+        }
+        
+      }
+      
+      if(!is.null(subSample)){
+          
+        fr <- Subset(fr, sampleFilter(size = subSample))
+          
+      }
+      
+      return(fr)
+        
+    })
+      
+  })
+  
+  return(overlay)
+  
+}
