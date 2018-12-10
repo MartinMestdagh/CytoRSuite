@@ -267,7 +267,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.getAxisLimits <- function(x, parent = "root", channels, overlay = NULL, limits = "machine"){
+.getAxesLimits <- function(x, parent = "root", channels, overlay = NULL, limits = "machine"){
   
   # Missing channels
   if(missing(channels)){
@@ -295,7 +295,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   # x is a flowSet
   }else if(inherits(x, "flowSet")){
     
-    fr <- as(x, "flowSet")
+    fr <- as(x, "flowFrame")
     
     if("Original" %in% BiocGenerics::colnames(fr)){
       
@@ -321,9 +321,6 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
     
   }
   
-  # Assign x to fr
-  fr <- x
-
   # Extract summary stats
   sm <- pData(parameters(fr))
   
@@ -535,7 +532,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
         
       }else{
       
-        fs <- flowSet()
+        fs <- flowSet(fr.lst)
       
         fr <- as(fs, "flowFrame")
         
@@ -680,4 +677,121 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   
   return(fr.lst)
   
+}
+
+#' Set plot margins
+#'
+#' @param x flowFrame or flowSet object to be plotted (post merging).
+#' @param overlay object return by checkOverlay.
+#' @param legend logical indicating whether a legend should be included in the
+#'   plot.
+#' @param text.legend text to be used in the legend, used to calculate required
+#'   space.
+#' @param main if NULL remove excess space above plot.
+#' @param type name of the plotting function used (e.g. "plotCyto1d").
+#'
+#' @noRd
+.setPlotMargins <- function(x, overlay = NULL, legend = NULL, text.legend = NULL, main = NULL, type = NULL){
+  
+  if(type == "plotCyto1d"){
+    
+    if(inherits(x, "flowFrame")){
+      
+      # plot margins
+      if(!is.null(overlay) & legend == TRUE){
+          
+        mrgn <- 7 + max(nchar(text.legend))*0.32
+        
+        # Remove excess sapce above if no main  
+        if(is.null(main)){
+          
+          par(mar = c(5, 5, 2, mrgn) + 0.1)
+          
+        }else{
+        
+          par(mar = c(5, 5, 4, mrgn) + 0.1)
+        
+        }
+        
+      }else{
+        
+        # Remove excess space above if no main
+        if(is.null(main)){
+          
+          par(mar = c(5, 5, 2, 2) + 0.1)
+          
+        }else{
+          
+          par(mar = c(5, 5, 4, 2) + 0.1)
+          
+        }
+        
+      }
+      
+    }else if(inherits(x, "flowSet")){
+      
+      
+      
+    }
+    
+  }
+  
+}
+
+#' Set plot layout
+#' 
+#' @param x object to be plotted.
+#' @param mfrow grid dimensions c(nr, nc), NULL or FALSE.
+#' @param stack number of samples to include in a plot.
+#' 
+#' @noRd
+.setPlotLayout <- function(x, mfrow = NULL, stack = c(0,1)){
+  
+  # Number of samples
+  smp <- length(x)
+  
+  # Stackig
+  if(stack[1] != 0){
+    
+    if(length(stack) == 1){
+      smp <- ceiling(smp/smp)
+    }else{
+      smp <- ceiling(smp/stack[2])
+    }
+    
+  }
+  
+  # Plot layout
+  if(is.null(mfrow)){
+    
+    if(smp > 1){
+      mfrw <- c(grDevices::n2mfrow(smp)[2], grDevices::n2mfrow(smp)[1])
+      par(mfrow = mfrw)
+    }else{
+      mfrw <- c(1,1)
+      par(mfrow = mfrw)
+    }
+    
+  }else if(!is.null(mfrow)){
+    
+    if(mfrow[1] == FALSE){
+      
+      # Do nothing
+      
+    }else{
+      
+      par(mfrow = mfrow)
+      
+    }
+    
+  }
+  
+  if(is.null(mfrow)){
+    return(mfrw)
+  }else if(mfrow[1] == FALSE){
+    return(FALSE)
+  }else{
+    return(mfrow)
+  }
+
 }

@@ -143,16 +143,8 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
   
   # Axes limits
   if(is.null(xlim)){
-    
-    if(limits == "data"){
       
-      xlim <- suppressWarnings(axesLimits(x = fr, channels = channel, overlay = overlay, upper = TRUE)[[1]])
-      
-    }else if(limits == "machine"){
-      
-      xlim <- suppressWarnings(axesLimits(x = fr, channels = channel, overlay = overlay, upper = FALSE)[[1]])
-      
-    }
+    xlim <- suppressWarnings(.getAxesLimits(x = fr, channels = channel, overlay = overlay, limits = limits)[[1]])
     
   }
   
@@ -176,6 +168,7 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
   if(!is.null(overlay)){
     
     overlay <- checkOverlay(x = fr, overlay = overlay)
+    
   }
   
   # Merge fr with overlay if supplied - named list of fr & overlay
@@ -257,11 +250,6 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
   if(missing(main)){
     
     main <- fr@description$GUID
-    
-  }else if(is.null(main)){
-    
-    # Remove excess space above plot
-    par(mar = c(5, 4, 2, 2) + 0.1)
     
   }
   
@@ -407,38 +395,15 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
     
   }
   
-  # plot margins
-  if(!is.null(overlay) & legend == TRUE){
+  # Legend text
+  if(missing(text.legend)){
     
-    if(missing(text.legend)){
-      
-      mrgn <- 7 + max(nchar(names(frs)))*0.32
-      
-    }else{
-      
-      mrgn <- 7 + max(nchar(text.legend))*0.32
-      
-    }
-    
-    par(mar = c(5, 5, 4, mrgn) + 0.1)
-    
-    if(is.null(main)){
-      
-      par(mar = c(5, 5, 2, mrgn) + 0.1)
-
-    }
-    
-  }else{
-    
-    par(mar = c(5, 5, 4, 2) + 0.1)
-    
-    if(is.null(main)){
-      
-      par(mar = c(5, 5, 2, 2) + 0.1)
-      
-    }
+    text.legend <- names(frs)
     
   }
+  
+  # Plot margins
+  .setPlotMargins(x = fr, overlay = overlay, legend = legend, text.legend = text.legend, main = main, type = "plotCyto1d")
 
   # Set up empty plot
   if(is.null(xlabels) & ylabels == FALSE){
@@ -507,15 +472,7 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
     legend.y <- mean(par("usr")[c(3,4)]) + (((par("usr")[4])/21)*0.5*length(frs.dens))
     
     # Legend labels
-    if(missing(text.legend)){
-      
-      text.legend <- names(frs)[length(frs):1]
-        
-    }else{
-      
-      text.legend <- text.legend[length(text.legend):1]
-      
-    }
+    text.legend <- text.legend[length(text.legend):1]
     
     # Legend with lines
     if(!missing(col.legend) & missing(fill.legend)){
@@ -581,8 +538,9 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
 #'   are appropriately transformed. The transList will NOT be applied to the
 #'   flowFrame internally and should be applied to the flowFrame prior to
 #'   plotting.
-#' @param merge logical indicating whether the flowFrames should be merged prior
-#'   to plotting to yield a single plot, set to FALSE by default.
+#' @param mergeBy a vector of pData variables tomerge samples into groups, set
+#'   to NULL by default to prevent merging. To merge all samples set this
+#'   argument to "all".
 #' @param overlay a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
 #'   \code{list of flowSets} or \code{list of flowFrame lists} containing
 #'   populations to be overlaid onto the plot(s).
@@ -604,6 +562,8 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
 #'   \href{https://www.xquartz.org/}{XQuartz} for this functionality.
 #' @param main vector of titles to use for each plot, set to name of the sample
 #'   by default.
+#' @param text.legend vector of names to use in the legend if legend is set to
+#'   TRUE.
 #' @param ... additional arguments passed to
 #'   \code{\link{plotCyto1d,flowFrame-method}}.
 #'
@@ -626,7 +586,10 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, transList = NULL, merge = FALSE, overlay = NULL, stack = c(0,1), offset = 0.5, limits = "machine", xlim = NULL, mfrow, popup = FALSE, main,  ...){
+setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, transList = NULL, mergeBy = NULL, overlay = NULL, stack = c(0,1), offset = 0.5, limits = "machine", xlim = NULL, mfrow = NULL, popup = FALSE, main = NULL, text.legend = NULL, ...){
+    
+  # Prevent scientific notation
+  options(scipen = 999)
   
   # Assign x to fs
   fs <- x
@@ -635,59 +598,102 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
   # Check channel
   channel <- checkChannels(x = fs, channels = channel, plot = TRUE)
   
-  # Prevent scientific notation
-  options(scipen = 999)
-
   # Axes limits
   if(is.null(xlim)){
-    
-    if(limits == "data"){
       
-      xlim <- suppressWarnings(axesLimits(x = fs, channels = channel, overlay = overlay, upper = TRUE)[[1]])
-      
-    }else if(limits == "machine"){
-      
-      xlim <- suppressWarnings(axesLimits(x = fs, channels = channel, overlay = overlay, upper = FALSE)[[1]])
-      
-    }
+    xlim <- suppressWarnings(.getAxesLimits(x = fs, channels = channel, overlay = overlay, limits = limits)[[1]])
     
   }
   
-  # Merge?
-  if(merge == TRUE){
+  # MergeBy
+  if(!is.null(mergeBy)){
     
-    fr <- as(fs, "flowFrame")
-    
-    if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
-      
-      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
-      
-    }
-    
-    if(missing(main)){
-      
-      main <- "Combined Events"
-      
-    }
+    # Return list of merge flowFrames
+    fr.lst <- .mergeBy(x = fs, mergeBy = mergeBy)
     
     # Check overlay
     if(!is.null(overlay)){
       
-      overlay <- checkOverlay(x = fr, overlay = overlay)
+      overlay <- checkOverlay(x = fs, overlay = overlay)
+      
+      # list of flowFrame lists to overlay (1 per group)
+      overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy)
       
     }
     
-    # mfrow
-    if(missing(mfrow)){
+    # Plot(s)
+    if(is.null(overlay) & stack[1] == 0){
       
-      mfrow <-c(1,1)
+      # Plot layout - each group separate panel - no stacking
+      mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
+      
+      # Main
+      if(is.null(main)){
+        main <- names(fr.lst)
+      }
+      
+      mapply(function(fr, main){
+        plotCyto1d(x = fr, channel = channel, transList = transList, offset = offset, main = main, xlim = xlim, popup = popup, mfrow = mfrow, ...)
+      }, fr.lst, main)
+      
+    }else if(!is.null(overlay) & stack[1] == 0){
+      
+      # Plot layout - separate panel with overlay
+      mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
+      
+      # Main
+      if(is.null(main)){
+        main <- names(fr.lst)
+      }
+      
+      # Legend text
+      if(is.null(text.legend)){
+        
+        text.legend <- c("Base","Overlay")
+        
+      }
+      
+      mapply(function(fr, main, overlay){
+        plotCyto1d(x = fr, channel = channel, overlay = overlay, transList = transList, offset = offset, main = main, xlim = xlim, popup = popup, mfrow = mfrow, text.legend = text.legend, ...)
+      }, fr.lst, main, overlay)
+      
+    }else if(is.null(overlay) & stack[1] != 0){
+      
+      # Plot layout - stacking
+      mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
+      
+      # Split fr.lst by stack[2]
+      if(length(stack == 1)){
+        stack[2] <- length(fr.lst)
+      }
+      sp <- rep(1:length(fr.lst), each = stack[2], length.out = length(fr.lst))
+      
+      lapply(unique(sp), function(x){
+        
+        # Main
+        if(is.null(main)){
+          main <- paste(mergeBy, sep = "-")
+        }
+        
+        # Legend text
+        if(is.null(text.legend)){
+          
+          text.legend <- names(fr.lst[sp == x])
+          
+        }
+        
+        # Plot
+        plotCyto1d(x = fr.lst[sp == x][[1]], overlay = fr.lst[sp == x][2:length(fr.lst[sp == x])], channel = channel, transList = transList, offset = stack[1], main = main, xlim = xlim, popup = popup, mfrow = mfrow, text.legend = text.legend, ...)
+      
+      })
+      
+    }else if(!is.null(overlay) & stack[1] != 0){
+      
+      stop("Overlays and stacking are not currently supported. Please remove stacking.")
       
     }
     
-    # Plot
-    plotCyto1d(x = fr, channel = channel, transList = transList, overlay = overlay, offset = offset, main = main, xlim = xlim, popup = popup, mfrow = mfrow, ...)
-    
-  }else if(merge == FALSE){
+  }else if(is.null(mergeBy)){
 
   # Stacking
   if(stack[1] != 0){
@@ -727,25 +733,8 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
       
     }
     
-    # Grid layout
-    if(missing(mfrow)){
-      
-      mfrow <- c(n2mfrow(smp)[2], n2mfrow(smp)[1])
-      par(mfrow = mfrow)
-      
-    }else if(!missing(mfrow)){
-      
-      if(mfrow[1] == FALSE){
-        
-        # Do nothing
-        
-      }else{
-        
-        par(mfrow = mfrow)
-        
-      }
-      
-    }
+    # Plot layout
+    mfrow <- .setPlotLayout(x = fs,mfrow = mfrow, stack = stack)
 
     # Plot space
     np <- mfrow[1] * mfrow[2]
@@ -812,34 +801,8 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
       
     })
     
-    # mfrow length(fs)/stack
-    if(missing(mfrow)){
-      
-      smp <- ceiling(length(fs)/stack[2])
-      mfrow <- c(n2mfrow(smp)[2], n2mfrow(smp)[1])
-      par(mfrow = mfrow)
-      
-    }else if(!missing(mfrow)){
-      
-      if(mfrow[1] == FALSE){
-        
-        # Do nothing
-        
-      }else{
-        
-        par(mfrow = mfrow)
-        
-      }
-      
-    }
-
-    
-    # Main
-    if(missing(main)){
-      
-      main <- NULL
-      
-    }
+    # Plot layout
+    mfrow <- .setPlotLayout(x = fs,mfrow = mfrow, stack = stack)
     
     # Pass first frame to .plotCyto1d with others as list of frames - popup?
     lapply(fs.lsts, function(fs.lst){
@@ -855,7 +818,7 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
   }
   
   # Return mfrow to default
-  if(!missing(mfrow) & mfrow[1] != FALSE){
+  if(mfrow[1] != FALSE){
     
     par(mfrow = c(1,1))
     

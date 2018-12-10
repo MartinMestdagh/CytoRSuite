@@ -6,8 +6,9 @@
 \title{plotCyto1d - flowSet Method}
 \usage{
 \S4method{plotCyto1d}{flowSet}(x, channel, transList = NULL,
-  merge = FALSE, overlay = NULL, stack = c(0, 1), offset = 0.5,
-  limits = "machine", xlim = NULL, mfrow, popup = FALSE, main, ...)
+  mergeBy = NULL, overlay = NULL, stack = c(0, 1), offset = 0.5,
+  limits = "machine", xlim = NULL, mfrow = NULL, popup = FALSE,
+  main = NULL, text.legend = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
@@ -25,8 +26,9 @@ are appropriately transformed. The transList will NOT be applied to the
 flowFrame internally and should be applied to the flowFrame prior to
 plotting.}
 
-\item{merge}{logical indicating whether the flowFrames should be merged prior
-to plotting to yield a single plot, set to FALSE by default.}
+\item{mergeBy}{a vector of pData variables tomerge samples into groups, set
+to NULL by default to prevent merging. To merge all samples set this
+argument to "all".}
 
 \item{overlay}{a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
 \code{list of flowSets} or \code{list of flowFrame lists} containing
@@ -56,6 +58,9 @@ graphic device prior to plotting. Mac users will need to install
 
 \item{main}{vector of titles to use for each plot, set to name of the sample
 by default.}
+
+\item{text.legend}{vector of names to use in the legend if legend is set to
+TRUE.}
 
 \item{...}{additional arguments passed to
 \code{\link{plotCyto1d,flowFrame-method}}.}
