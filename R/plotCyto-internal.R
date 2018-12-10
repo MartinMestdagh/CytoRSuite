@@ -403,7 +403,7 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
   }
   
   # Plot margins
-  .setPlotMargins(x = fr, overlay = overlay, legend = legend, text.legend = text.legend, main = main, type = "plotCyto1d")
+  .setPlotMargins(x = fr, overlay = overlay, legend = legend, text.legend = text.legend, main = main)
 
   # Set up empty plot
   if(is.null(xlabels) & ylabels == FALSE){
@@ -491,26 +491,34 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
     
   }
   
-  # Gates
-  if(!is.null(gates)){
+  # Gates - no overlay
+  if(is.null(overlay)){
     
-    plotGates(gates, channels = channel, col.gate = col.gate, lwd.gate = lwd.gate, lty.gate = lty.gate)
+    if(!is.null(gates)){
     
-  }
-  
-  # Labels
-  if(!is.null(gates) & labels == TRUE){
+      plotGates(gates, channels = channel, col.gate = col.gate, lwd.gate = lwd.gate, lty.gate = lty.gate)
     
-    # Population names missing - show percantage only
-    if(missing(text.labels)){
-    
-      plotLabels(x = fr, channels = channel, alias = NA, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
-    
-    }else if(!missing(text.labels)){
-      
-      plotLabels(x = fr, channels = channel, alias = text.labels, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
-      
     }
+  
+    # Labels
+    if(!is.null(gates) & labels == TRUE){
+    
+      # Population names missing - show percantage only
+      if(missing(text.labels)){
+    
+        plotLabels(x = fr, channels = channel, alias = NA, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
+    
+      }else if(!missing(text.labels)){
+      
+        plotLabels(x = fr, channels = channel, alias = text.labels, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
+      
+      }
+    
+    }
+    
+  }else{
+    
+    .gateOverlay(x = fr, channel = channel, overlay = overlay, gates = gates, offset = offset, alias = text.labels, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
     
   }
 
@@ -624,28 +632,28 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
     # Plot(s)
     if(is.null(overlay) & stack[1] == 0){
       
-      # Plot layout - each group separate panel - no stacking
-      mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
-      
       # Main
       if(is.null(main)){
         main <- names(fr.lst)
       }
       
+      # Plot layout - each group separate panel - no stacking
+      mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
+
       mapply(function(fr, main){
         plotCyto1d(x = fr, channel = channel, transList = transList, offset = offset, main = main, xlim = xlim, popup = popup, mfrow = mfrow, ...)
       }, fr.lst, main)
       
     }else if(!is.null(overlay) & stack[1] == 0){
       
-      # Plot layout - separate panel with overlay
-      mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
-      
       # Main
       if(is.null(main)){
         main <- names(fr.lst)
       }
       
+      # Plot layout - separate panel with overlay
+      mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
+
       # Legend text
       if(is.null(text.legend)){
         
@@ -659,6 +667,11 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
       
     }else if(is.null(overlay) & stack[1] != 0){
       
+      # Main
+      if(is.null(main)){
+        main <- paste(mergeBy, sep = "-")
+      }
+      
       # Plot layout - stacking
       mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
       
@@ -669,11 +682,6 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
       sp <- rep(1:length(fr.lst), each = stack[2], length.out = length(fr.lst))
       
       lapply(unique(sp), function(x){
-        
-        # Main
-        if(is.null(main)){
-          main <- paste(mergeBy, sep = "-")
-        }
         
         # Legend text
         if(is.null(text.legend)){
@@ -968,6 +976,9 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
                                                                      col.gate = "red", lwd.gate = 2.5, lty.gate = 1, labels = TRUE, text.labels, format.labels = c("alias","percent"), cex.labels = 0.8, font.labels = 2, 
                                                                      col.labels = "black", alpha.labels = 0.6,...){
   
+  # Prevent scientific notation
+  options(scipen = 999)
+  
   # Assign x to fr
   fr <- x
   fr.channels <- BiocGenerics::colnames(fr)
@@ -975,36 +986,17 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
   
-  # Prevent scientific notation
-  options(scipen = 999)
-  
   # X axis limits
   if(is.null(xlim)){
     
-    if(limits == "data"){
-      
-      xlim <- suppressWarnings(axesLimits(x = fr, channels = channels, overlay = overlay, upper = TRUE)[[1]])
-      
-    }else if(limits == "machine"){
-      
-      xlim <- suppressWarnings(axesLimits(x = fr, channels = channels, overlay = overlay, upper = FALSE)[[1]])
-      
-    }
+    xlim <- suppressWarnings(.getAxesLimits(x = fr, channels = channels, overlay = overlay, limits = limits)[[1]])
     
   }
   
   # Y axis limits
   if(is.null(ylim)){
     
-    if(limits == "data"){
-      
-      ylim <- suppressWarnings(axesLimits(x = fr, channels = channels, overlay = overlay, upper = TRUE)[[2]])
-      
-    }else if(limits == "machine"){
-      
-      ylim <- suppressWarnings(axesLimits(x = fr, channels = channels, overlay = overlay, upper = FALSE)[[2]])
-      
-    }
+    ylim <- suppressWarnings(.getAxesLimits(x = fr, channels = channels, overlay = overlay, limits = limits)[[2]])
     
   }
   
@@ -1209,38 +1201,7 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
   }
   
   #Plot margins
-  if(!is.null(overlay) & legend == TRUE){
-    
-    if(missing(text.legend)){
-      
-      mrgn <- 7 + max(nchar(c(fr@description$GUID,names(overlay))))*0.32
-      
-    }else{
-      
-      mrgn <- 7 + max(nchar(text.legend))*0.32
-      
-    }
-    
-    par(mar = c(5,5,4,mrgn) + 0.1)
-    
-    if(is.null(main)){
-      
-      par(mar = c(5,5,2,mrgn) + 0.1)
-      
-    }
-    
-    
-  }else{
-    
-    par(mar = c(5,5,4,2) + 0.1)
-    
-    if(is.null(main)){
-      
-      par(mar = c(5,5,2,2) + 0.1)
-      
-    }
-    
-  }
+  .setPlotMargins(x = fr, overlay = overlay, legend = legend, text.legend = text.legend, main = main)
   
   # Plot
   if (nrow(fr) < 2){
@@ -1460,30 +1421,14 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
   # X axis limits
   if(is.null(xlim)){
     
-    if(limits == "data"){
-      
-      xlim <- suppressWarnings(axesLimits(x = fs, channels = channels, overlay = overlay, upper = TRUE)[[1]])
-      
-    }else if(limits == "machine"){
-      
-      xlim <- suppressWarnings(axesLimits(x = fs, channels = channels, overlay = overlay, upper = FALSE)[[1]])
-      
-    }
+    xlim <- suppressWarnings(.getAxesLimits(x = fs, channels = channels, overlay = overlay, limits = limits)[[1]])
     
   }
   
   # Y axis limits
   if(is.null(ylim)){
-    
-    if(limits == "data"){
       
-      ylim <- suppressWarnings(axesLimits(x = fs, channels = channels, overlay = overlay, upper = TRUE)[[2]])
-      
-    }else if(limits == "machine"){
-      
-      ylim <- suppressWarnings(axesLimits(x = fs, channels = channels, overlay = overlay, upper = FALSE)[[2]])
-      
-    }
+    ylim <- suppressWarnings(.getAxesLimits(x = fs, channels = channels, overlay = overlay, limits = limits)[[2]])
     
   }
   

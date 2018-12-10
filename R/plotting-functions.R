@@ -688,54 +688,41 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
 #' @param text.legend text to be used in the legend, used to calculate required
 #'   space.
 #' @param main if NULL remove excess space above plot.
-#' @param type name of the plotting function used (e.g. "plotCyto1d").
 #'
 #' @noRd
-.setPlotMargins <- function(x, overlay = NULL, legend = NULL, text.legend = NULL, main = NULL, type = NULL){
-  
-  if(type == "plotCyto1d"){
-    
-    if(inherits(x, "flowFrame")){
+.setPlotMargins <- function(x, overlay = NULL, legend = NULL, text.legend = NULL, main = NULL){
       
-      # plot margins
-      if(!is.null(overlay) & legend == TRUE){
+  # plot margins
+  if(!is.null(overlay) & legend == TRUE){
           
-        mrgn <- 7 + max(nchar(text.legend))*0.32
+    mrgn <- 7 + max(nchar(text.legend))*0.32
         
-        # Remove excess sapce above if no main  
-        if(is.null(main)){
+    # Remove excess sapce above if no main  
+    if(is.null(main)){
           
-          par(mar = c(5, 5, 2, mrgn) + 0.1)
+      par(mar = c(5, 5, 2, mrgn) + 0.1)
           
-        }else{
+    }else{
         
-          par(mar = c(5, 5, 4, mrgn) + 0.1)
+      par(mar = c(5, 5, 4, mrgn) + 0.1)
         
-        }
-        
-      }else{
-        
-        # Remove excess space above if no main
-        if(is.null(main)){
-          
-          par(mar = c(5, 5, 2, 2) + 0.1)
-          
-        }else{
-          
-          par(mar = c(5, 5, 4, 2) + 0.1)
-          
-        }
-        
-      }
-      
-    }else if(inherits(x, "flowSet")){
-      
-      
-      
     }
-    
+        
+  }else{
+        
+    # Remove excess space above if no main
+    if(is.null(main)){
+          
+      par(mar = c(5, 5, 2, 2) + 0.1)
+          
+    }else{
+          
+      par(mar = c(5, 5, 4, 2) + 0.1)
+          
+    }
+        
   }
-  
+    
 }
 
 #' Set plot layout
@@ -794,4 +781,110 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
     return(mfrow)
   }
 
+}
+
+#' Gate 1D with overlays
+#'
+#' @param x flowFrame (base).
+#' @param channel used in the plot.
+#' @param overlay list of flowFrames to overlay.
+#' @param gates gate object(s).
+#' @param offset degree of stacking.
+#' @param ... additional arguments passed to plotLabels.
+#' 
+#' @noRd
+.gateOverlay <- function(x, channel = NULL, overlay = NULL, gates = NULL, offset = NULL, alias = NA, format.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6, ...){
+  
+  if(!inherits(x, "flowFrame")){
+    
+    stop("x should be a flowFrame object.")
+    
+  }
+  
+  # Samples
+  smp <- length(overlay) + 1
+  
+  # checkChannel
+  channel <- checkChannels(x = fr, channels = channel, plot = TRUE)
+  
+  # list of gates
+  if(inherits(gates, "filters")){
+    
+    # Convert to list of gates
+    gates <- lapply(1:length(gates), function(gate) gates[[gate]])
+    
+    # Must be rectangleGates for 1D plots
+    if(!all(as.vector(sapply(gates, class)) == "rectangleGate")){
+      
+      stop("Only rectangleGate gates are supported in 1-D plots.")
+      
+    }
+    
+  }else if(inherits(gates, "list")){
+    
+    # Must be rectangleGates for 1D plots
+    if(!all(as.vector(sapply(gates, class)) == "rectangleGate")){
+      
+      stop("Only rectangleGate gates are supported in 1-D plots.")
+      
+    }
+    
+  }else if(inherits(gates, "rectangleGate")){
+    
+    gates <- list(gates)
+    
+  }else{
+    
+    stop("Supplied gate(s) should be of class filters, list or rectangleGate.")
+    
+  }
+  
+  # rectangleGates should be in 1D only
+  if(any(lapply(gates, function(x) length(flowCore::parameters(x))) == 2)){
+        
+     # Some gates are in 2D - construct 1D gate
+     ind <- unname(which(lapply(gates, function(x) length(flowCore::parameters(x))) == 2))
+        
+     # Convert these gates to 1D gates
+     gts <- lapply(ind, function(x){
+          
+       # Extract gate for channel
+       gates[[x]][channel]
+          
+     })
+     gates[ind] <- gts
+        
+  }
+  
+  # Find center x co-ord for label position in each gate
+  txt.x <- lapply(gates, function(x){
+    
+    (unname(x@min) + unname(x@max))/2
+    
+  })
+  
+  # Find y co-ord for each sample
+  txt.y <- sapply(1:smp, function(x){
+    
+    (0.5*offset*100) + ((x-1)*offset*100)
+    
+  })
+  
+  # Plot gates
+  plotGates(gates, channels = channel)
+  
+  # List of flowFrames for plotLabels
+  fr.lst <- c(list(x), overlay)
+
+  # Plot labels
+  lapply(1:length(gates), function(x){
+    
+    lapply(1:length(fr.lst), function(y){
+      
+      plotLabels(x = fr.lst[[y]], channels = channel, gates = gates[[x]], x.text = txt.x[[x]], y.text = txt.y[y], alias = alias, format.text = format.text, font.text = font.text, col.text = col.text, cex.text = cex.text, alpha = alpha)
+      
+    })
+    
+  })
+  
 }
