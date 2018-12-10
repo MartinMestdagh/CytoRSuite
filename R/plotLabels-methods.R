@@ -83,6 +83,13 @@ setMethod(plotLabels, signature = c("flowFrame", "rectangleGate"),
     
   }
   
+  # 2D gate in 1D plot
+  if(length(channels) == 1 & length(parameters(gates)) == 2){
+    
+    gates <- gates[channels]
+    
+  }
+  
   # Alias
   if(is.na(alias) & is.null(format.text)){
     

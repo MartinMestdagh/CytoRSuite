@@ -73,6 +73,13 @@ setMethod(plotGates, signature = "rectangleGate", definition = function(x, chann
     
   }
   
+  # 2D gatre in 1D
+  if(length(channels) == 1 & length(parameters(gt)) == 2){
+    
+    gt <- gt[channels]
+    
+  }
+  
   if(!all(as.vector(parameters(gt)) %in% channels)){
     
     stop("Channels used to construct the plot do not match those of the supplied gate.")
