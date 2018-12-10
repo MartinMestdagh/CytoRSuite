@@ -676,9 +676,10 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
       mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
       
       # Split fr.lst by stack[2]
-      if(length(stack == 1)){
+      if(length(stack) == 1){
         stack[2] <- length(fr.lst)
       }
+      
       sp <- rep(1:length(fr.lst), each = stack[2], length.out = length(fr.lst))
       
       lapply(unique(sp), function(x){

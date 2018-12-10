@@ -805,7 +805,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   smp <- length(overlay) + 1
   
   # checkChannel
-  channel <- checkChannels(x = fr, channels = channel, plot = TRUE)
+  channel <- checkChannels(x = x, channels = channel, plot = TRUE)
   
   # list of gates
   if(inherits(gates, "filters")){
