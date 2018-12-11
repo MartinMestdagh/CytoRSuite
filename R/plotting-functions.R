@@ -275,8 +275,8 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
     stop("Please supply the names of the channel(s) to calculate axes limits.")
     
   }else{
-    
-    checkChannels(x = x, channels = channels, plot = FALSE)
+
+    channels <- checkChannels(x = x, channels = channels, plot = FALSE)
     
   }
   
@@ -336,6 +336,10 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
       mlms <- c(0, mlms[2])
       
     }
+    
+    # Add 10% buffer on lower limit
+    rng <- 0.1*(mlms[2] - mlms[1])
+    mlms <- c(mlms[1]- rng, mlms[2])
     
     # Machine limits
     if(limits == "machine"){
@@ -453,7 +457,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   
      # Limits from flowFrame
      lms <- range(exprs(fr)[,channel])
-     lms <- c(mlms[1], lms[2])
+     lms <- c(mlms[1], lms[2] + (0.1*(lms[2] - mlms[1])))
     
     }
     
