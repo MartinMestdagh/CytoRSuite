@@ -1,9 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-**CytoRSuite** [![Travis build status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/CytoRSuite) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/CytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/CytoRSuite) [![Coverage status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)<img src="inst/extdata/figs/CytoRSuite HexSticker.png" height="100"/>
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+**CytoRSuite** <img src="inst/extdata/figs/CytoRSuite HexSticker.png" align="right" width="120" />
+--------------------------------------------------------------------------------------------------
 
 Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
+
+[![Travis build status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/CytoRSuite) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/CytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/CytoRSuite) [![Coverage status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
 
 **Installation**
 ----------------
