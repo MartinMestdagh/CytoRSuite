@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-## **CytoRSuite** [![Travis build status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/CytoRSuite) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/CytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/CytoRSuite) [![Coverage status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)
+## **CytoRSuite** [![Travis build status](https://travis-ci.org/DillonHammill/CytoRSuite.svg?branch=master)](https://travis-ci.org/DillonHammill/CytoRSuite) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/DillonHammill/CytoRSuite?branch=master&svg=true)](https://ci.appveyor.com/project/DillonHammill/CytoRSuite) [![Coverage status](https://codecov.io/gh/DillonHammill/CytoRSuite/branch/master/graph/badge.svg)](https://codecov.io/github/DillonHammill/CytoRSuite?branch=master)<img src="inst/extdata/figs/CytoRSuite HexSticker.png" height="100"/>
 
 Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
 
