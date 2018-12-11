@@ -1361,8 +1361,9 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
 #'   are appropriately transformed. The transList will NOT be applied to the
 #'   flowFrame internally and should be applied to the flowFrame prior to
 #'   plotting.
-#' @param merge logical indicating whether the flowFrames should be merged prior
-#'   to plotting to yield a single plot, set to FALSE by default.
+#' @param mergeBy a vector of pData variables tomerge samples into groups, set
+#'   to NULL by default to prevent merging. To merge all samples set this
+#'   argument to "all".
 #' @param overlay a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
 #'   \code{list of flowSets} or \code{list of flowFrame lists} containing
 #'   populations to be overlayed onto the plot(s).
@@ -1404,7 +1405,7 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, transList = NULL, merge = FALSE, overlay = NULL, subSample = NULL, mfrow, popup = FALSE, limits = "machine", xlim = NULL, ylim = NULL, main,  ...){
+setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, transList = NULL, mergeBy = NULL, overlay = NULL, subSample = NULL, mfrow = NULL, popup = FALSE, limits = "machine", xlim = NULL, ylim = NULL, main,  ...){
   
   # Assign x to fs
   fs <- x
@@ -1433,41 +1434,47 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
     
   }
   
-  # Merge?
-  if(merge == TRUE){
+  # MergeBy?
+  if(!is.null(mergeBy)){
     
-    fr <- as(fs, "flowFrame")
-    
-    if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
-      
-      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
-      
-    }
+    # Return a list of merged flowFrames
+    fr.lst <- .mergeBy(x = fs, mergeBy = mergeBy)
     
     if(missing(main)){
       
-      main <- "Combined Events"
+      main <- names(fr.lst)
       
     }
     
     # overlay
     if(!is.null(overlay)){
       
-      overlay <- checkOverlay(x = fr, overlay = overlay, subSample = subSample)
+      overlay <- checkOverlay(x = fs, overlay = overlay, subSample = subSample)
+      
+      # list of flowFrame lists to overlay (1 per group)
+      overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy, subSample = subSample)
       
     }
     
-    # mfrow
-    if(missing(mfrow)){
+    # Plot layout
+    mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow)
+    
+    # Plots
+    if(is.null(overlay)){
       
-      mfrow <-c(1,1)
+      mapply(function(fr, main){
+        plotCyto2d(x = fr, channels = channels, subSample = subSample, transList = transList, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
+      }, fr.lst, main)
+      
+    }else{
+      
+      mapply(function(fr, main, overlay){
+        plotCyto2d(x = fr, channels = channels, subSample = subSample, transList = transList, overlay = overlay, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
+      }, fr.lst, main, overlay)
       
     }
-    
-    # Plot
-    plotCyto2d(x = fr, channels = channels, subSample = subSample, transList = transList, overlay = overlay, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = mfrow, ...)
-    
-  }else if(merge == FALSE){
+      
+  }else if(is.null(mergeBy)){
   
   # Number of samples
   smp <- length(fs)
@@ -1582,26 +1589,9 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
     
   }
   
-  # mfrow
-  if(missing(mfrow)){
-    
-    mfrow <- c(n2mfrow(smp)[2], n2mfrow(smp)[1])
-    par(mfrow = mfrow)
-    
-  }else if(!missing(mfrow)){
-    
-    if(mfrow[1] == FALSE){
-      
-      # Do nothing
-      
-    }else{
-      
-      par(mfrow = mfrow)
-      
-    }
-    
-  }
-  
+  # Plot layout
+  mfrow <- .setPlotLayout(x = fs, mfrow = mfrow)
+
   # Number of plots in window
   np <- mfrow[1] * mfrow[2]
   
@@ -1652,14 +1642,10 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
   }
   
   # Return mfrow to default
-  if(!missing(mfrow)){
-    
-    if(mfrow[1] != FALSE){
+  if(mfrow[1] != FALSE){
     
       par(mfrow = c(1,1))
       
-    }
-    
   }
   
   # Return options to default

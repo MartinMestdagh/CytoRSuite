@@ -6,7 +6,7 @@
 \title{plotCyto2d - flowSet Method}
 \usage{
 \S4method{plotCyto2d}{flowSet}(x, channels, transList = NULL,
-  merge = FALSE, overlay = NULL, subSample = NULL, mfrow,
+  mergeBy = NULL, overlay = NULL, subSample = NULL, mfrow = NULL,
   popup = FALSE, limits = "machine", xlim = NULL, ylim = NULL,
   main, ...)
 }
@@ -26,8 +26,9 @@ are appropriately transformed. The transList will NOT be applied to the
 flowFrame internally and should be applied to the flowFrame prior to
 plotting.}
 
-\item{merge}{logical indicating whether the flowFrames should be merged prior
-to plotting to yield a single plot, set to FALSE by default.}
+\item{mergeBy}{a vector of pData variables tomerge samples into groups, set
+to NULL by default to prevent merging. To merge all samples set this
+argument to "all".}
 
 \item{overlay}{a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
 \code{list of flowSets} or \code{list of flowFrame lists} containing
