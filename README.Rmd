@@ -28,15 +28,15 @@ Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data
 
 ```{r, eval = FALSE}
 library(devtools)
-install_github("DillonHammill/cytoRSuite")
+install_github("DillonHammill/CytoRSuite")
 
 # Data for vignettes and examples
-install_github("DillonHammill/cytoRSuiteData")
+install_github("DillonHammill/CytoRSuiteData")
 ```
 
 ## **Overview**
 
-**cytoRSuite** provides an interactive interface for analysis of flow cytometry data. Some key features include:
+**CytoRSuite** provides an interactive interface for analysis of flow cytometry data. Some key features include:
 
 * user guided automatic compensation using **computeSpillover**
 * interactively modify spillover matrices using **editSpillover**
