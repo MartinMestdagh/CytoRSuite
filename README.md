@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-**CytoRSuite** <img src="inst/extdata/figs/CytoRSuite HexSticker.png" align="right" width="120" />
---------------------------------------------------------------------------------------------------
+**CytoRSuite** <img src="inst/extdata/figs/CytoRSuite HexSticker.png" align="right" width="120"/>
+-------------------------------------------------------------------------------------------------
 
 Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
 
