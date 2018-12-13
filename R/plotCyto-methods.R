@@ -165,12 +165,19 @@ setMethod(plotCyto, signature = "flowSet",
 #'   are appropriately transformed. The transList will NOT be applied to the
 #'   flowFrame internally and should be applied to the flowFrame prior to
 #'   plotting.
-#' @param merge logical indicating whether the flowFrames should be merged prior
-#'   to plotting to yield a single plot, set to FALSE by default.
+#' @param mergeBy a vector of pData variables tomerge samples into groups, set
+#'   to NULL by default to prevent merging. To merge all samples set this
+#'   argument to "all".
 #' @param overlay name(s) of the populations to overlay or a \code{flowFrame},
 #'   \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
 #'   \code{list of flowFrame lists} containing populations to be overlayed onto
 #'   the plot(s).
+#' @param subSample  numeric indicating the number of events to plot, set to all
+#'   events by default. Reducing the sample size can significantly increase
+#'   plotting speed on less powerful machines.
+#' @param stack vector of length 2 indicating offset for samples and number of
+#'   samples per plot. Set to \code{c(0,1)} to plot each sample in a separate
+#'   panel.
 #' @param text.labels vector of names to use in population labels, set to
 #'   \code{alias} by default.
 #' @param main title to use for the plot, set to the name of the sample and the
@@ -205,7 +212,7 @@ setMethod(plotCyto, signature = "flowSet",
 #'
 #' @export
 setMethod(plotCyto, signature = "GatingSet", 
-          definition = function(x, parent, alias = NULL, channels, transList = NULL, merge = FALSE, overlay = NULL, text.labels, text.legend, main, mfrow = NULL, ...){
+          definition = function(x, parent, alias = NULL, channels, transList = NULL, mergeBy = NULL, overlay = NULL, subSample = NULL, stack = c(0,1), text.labels, text.legend, main, mfrow = NULL,  ...){
   
   # No Parent Supplied
   if(missing(parent)){
@@ -229,27 +236,18 @@ setMethod(plotCyto, signature = "GatingSet",
   gs <- x
   smp <- length(gs)
   
+  # Extract pData info
+  pd <- pData(gs)
+  
   # transList
   if(is.null(transList)){
     
-    trns <- getTransformations(gs[[1]], only.function = TRUE)
-    
-    if(!length(trns) == 0){
-      
-      transList <- transformList(names(trns), trns)
-      
-    }
-    
-    if(length(trns) == 0){
-      
-      transList <- NULL
-      
-    }
+    transList <- .getCompleteTransList(x = gs, transList = transList)
     transList <- checkTransList(transList, inverse = FALSE)
     
   }else{
     
-    trasnList <- checkTransList(transList, inverse = FALSE)
+    transList <- checkTransList(transList, inverse = FALSE)
     
   }
   
@@ -275,11 +273,48 @@ setMethod(plotCyto, signature = "GatingSet",
     
   }
   
-  # Merge?
-  if(merge == FALSE){
+  # MergeBy?
+  if(!is.null(mergeBy)){
   
+    # check mergeBy
+    if(all(!mergeBy %in% c("all", colnames(pData(gs))))){
+      
+      stop("mergeBy should be the name of pData variables or 'all'.")
+      
+    }
+    
+    # Add merge column to pd - to get gates
+    if(mergeBy == "all"){
+      
+      pd$merge <- rep("all", length(gs))
+      
+    }else if(length(mergeBy) == 1){
+      
+      pd$merge <- pd[, mergeBy]
+      
+    }else{
+      
+      pd$merge <- do.call("paste", pd[, mergeBy])
+      
+    }
+    
+    # List of merged flowFrames
+    fs <- getData(gs, parent)
+    fr.lst <- .mergeBy(gs, parent = parent, mergeBy = mergeBy, subSample = subSample)
+    
+    # Merged names
+    nms <- names(fr.lst)
+    
+    # Overlay
+    if(!is.null(overlay)){
+      
+      overlay <- checkOverlay(x = gs, overlay = overlay, subSample = subSample)
+      overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy, subSample = subSample)
+      
+    }
+    
     # Plot titles
-    if(missing(main)){
+    if(missing(main)){ 
       
       if(parent == "root"){
         prnt <- "All Events"
@@ -287,87 +322,107 @@ setMethod(plotCyto, signature = "GatingSet",
         prnt <- parent
       }
       
-      main <- sampleNames(gs)
-      main <- lapply(main, function(x){paste(x,"\n",prnt,sep = " ")})
+      main <- names(fr.lst)
+      main <- lapply(main, function(x){
+        
+        if(x == "all"){
+          x <- "Combined Events"
+        }
+        
+        paste(x,"\n",prnt,sep = " ")
+        
+        })
       
     }
     
-    # Set mfrow
-    if(is.null(mfrow)){
+    # Plot Layout
+    mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow)
     
-      mfrow <- c(n2mfrow(smp)[2], n2mfrow(smp)[1])
-      par(mfrow = mfrow)
+    # Labels text
+    if(missing(text.labels) & !is.null(alias)){
+      
+      text.labels <- alias
+      
+    }
     
-    }else if(!is.null(mfrow)){
+    # Make calls to plotCyto
+    if(!is.null(overlay)){
+      
+      mapply(function(fr, overlay, main, nm){
     
-      if(mfrow[1] == FALSE){
+        # Extract gates
+        gts <- lapply(alias, function(x){
       
-        # Do nothing
+          getGate(gs[[match(nm, pd$merge)]], x)
       
-      }else{
+        })
+        
+        plotCyto(fr, channels = channels, overlay = overlay, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
       
-        par(mfrow = mfrow)
+      }, fr.lst, overlay, main, nms)
       
-      }
-    
+    }else{
+      
+      mapply(function(fr, main, nm){
+        
+        # Extract gates
+        gts <- lapply(alias, function(x){
+          
+          getGate(gs[[match(nm, pd$merge)]], x)
+          
+        })
+        
+        plotCyto(fr, channels = channels, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
+        
+      }, fr.lst, main, nms)
+      
     }
   
-    # Convert gs to list of gh
-    gs.lst <- lapply(1:length(gs), function(x) gs[[x]])
-  
-    # Make calls to plotCyto gh method
-    mapply(function(gh, main){
+  }else if(is.null(mergeBy)){
     
-      plotCyto(gh, parent = parent, alias = alias, channels = channels, overlay = overlay, transList = transList, main = main, text.labels = text.labels, text.legend = text.legend, ...)
-    
-    }, gs.lst, main)
-  
-  }else if(merge == TRUE){
-    
-    # Group-specific merging not yet supported - samples must have same gates
     # Extract population
     fs <- getData(gs, parent)
     
-    # Merge into flowFrame
-    fr <- as(fs, "flowFrame")
-    
-    # Remove "original" introduced by coercion
-    if(is.na(match("Original", BiocGenerics::colnames(fr))) == FALSE){
-      
-      fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
-      
-    }
-    
-    # Plot title
+    # Plot titles
     if(missing(main)){
       
-      if(parent == "root"){
-        prnt <- "All Events"
-      }else{
-        prnt <- parent
+      main <- sapply(1:length(gs), function(gh){
+        
+        if(parent == "root"){
+          
+          parent <- "All Events"
+          
+        }
+        
+        paste(sampleNames(gs)[gh],"\n",parent)
+        
+      })
+      
+      if(length(channels) == 1 & stack[1] != 0){
+        
+        main <- parent
+        
       }
-      main <- paste("Combined Events \n",prnt)
       
     }
     
-    # Set mfrow
-    if(is.null(mfrow)){
-
-      par(mfrow = c(1,1))
+    # Legend Text
+    if(!is.null(overlay)){
       
-    }else if(!is.null(mfrow)){
-      
-      if(mfrow[1] == FALSE){
+      if(class(overlay) == "character"){
         
-        # Do nothing
-        
-      }else{
-        
-        par(mfrow = mfrow)
+        if(missing(text.legend)){
+          
+          text.legend <- c(parent, overlay)
+          
+        }
         
       }
       
     }
+    
+    # Plot Layout
+    mfrow <- .setPlotLayout(x = fs, mfrow = mfrow)
     
     # Gates
     if(!is.null(alias) & is.character(alias)){
@@ -383,7 +438,7 @@ setMethod(plotCyto, signature = "GatingSet",
     }
     
     # Call to plotCyto flowFrame method
-    plotCyto(fr, channels = channels, overlay = overlay, transList = transList, main = main, text.labels = text.labels, text.legend = text.legend, gates = gates, ...)
+    plotCyto(fs, channels = channels, overlay = overlay, transList = transList, main = main, text.labels = text.labels, text.legend = text.legend, gates = gates, ...)
     
   }
   

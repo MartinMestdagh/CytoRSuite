@@ -6,8 +6,9 @@
 \title{plotCyto - GatingSet Method}
 \usage{
 \S4method{plotCyto}{GatingSet}(x, parent, alias = NULL, channels,
-  transList = NULL, merge = FALSE, overlay = NULL, text.labels,
-  text.legend, main, mfrow = NULL, ...)
+  transList = NULL, mergeBy = NULL, overlay = NULL,
+  subSample = NULL, stack = c(0, 1), text.labels, text.legend, main,
+  mfrow = NULL, ...)
 }
 \arguments{
 \item{x}{object of class
@@ -33,13 +34,22 @@ are appropriately transformed. The transList will NOT be applied to the
 flowFrame internally and should be applied to the flowFrame prior to
 plotting.}
 
-\item{merge}{logical indicating whether the flowFrames should be merged prior
-to plotting to yield a single plot, set to FALSE by default.}
+\item{mergeBy}{a vector of pData variables tomerge samples into groups, set
+to NULL by default to prevent merging. To merge all samples set this
+argument to "all".}
 
 \item{overlay}{name(s) of the populations to overlay or a \code{flowFrame},
 \code{flowSet}, \code{list of flowFrames}, \code{list of flowSets} or
 \code{list of flowFrame lists} containing populations to be overlayed onto
 the plot(s).}
+
+\item{subSample}{numeric indicating the number of events to plot, set to all
+events by default. Reducing the sample size can significantly increase
+plotting speed on less powerful machines.}
+
+\item{stack}{vector of length 2 indicating offset for samples and number of
+samples per plot. Set to \code{c(0,1)} to plot each sample in a separate
+panel.}
 
 \item{text.labels}{vector of names to use in population labels, set to
 \code{alias} by default.}

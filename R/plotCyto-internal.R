@@ -633,8 +633,10 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
     if(is.null(overlay) & stack[1] == 0){
       
       # Main
-      if(is.null(main)){
+      if(is.null(main) & !mergeBy == "all"){
         main <- names(fr.lst)
+      }else if(is.null(main) & mergeBy == "all"){
+        main <- "Combined Events"
       }
       
       # Plot layout - each group separate panel - no stacking
@@ -1440,9 +1442,13 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
     # Return a list of merged flowFrames
     fr.lst <- .mergeBy(x = fs, mergeBy = mergeBy)
     
-    if(missing(main)){
+    if(missing(main) & !mergeBy == "all"){
       
       main <- names(fr.lst)
+      
+    }else if(missing(main) & mergeBy == "all"){
+      
+      main <- "Combined Events"
       
     }
     
@@ -1480,13 +1486,13 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
   smp <- length(fs)
   
   # Convert fs to list of flowFrames
-  fs.lst <- lapply(seq(1,length(fs),1), function(x) fs[[x]])
-  names(fs.lst) <- fsnms
+  fr.lst <- lapply(seq(1,length(fs),1), function(x) fs[[x]])
+  names(fr.lst) <- fsnms
   
   # subSample flowFrames
   if(!missing(subSample)){
 
-    fs.lst <- lapply(fs.lst, function(x){
+    fr.lst <- lapply(fr.lst, function(x){
       
       sampleFrame(x, subSample)
       
@@ -1495,90 +1501,9 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
   }
   
   # Overlays
-  if(is.null(overlay)){
-    
-    
-  }else if(class(overlay) == "flowFrame"){
-    
-    # One flowFrame to be overlayed on all plots - add to list
-    overlay <- list(overlay)
-    
-    # Repeat flowFrame in list fs.lst times - overlay is list of flowFrames
-    overlay <- rep(overlay, length(fs))
-    names(overlay) <- as.vector(sapply(overlay, function(x) x@description$GUID))
-    
-  }else if(class(overlay) == "flowSet"){
-    
-    # overlay must be same length as fs.lst
-    if(length(overlay) != smp){
-      
-      stop("The number of flowFrames to overlay does not match the number of flowFrames in x.")
-      
-    }
-    
-    # One flowFrame to be overlaid per flowFrame in fs.lst - convert into list of flowFrames
-    overlay <- lapply(seq(1,length(overlay),1), function(x) overlay[[x]])
-    names(overlay) <- sampleNames(overlay)
-    
-  }else if(class(overlay) == "list"){
-    
-    # list of flowFrames
-    if(all(as.vector(sapply(overlay, class)) == "flowFrame")){
-      
-      if(length(overlay) != smp){
-        
-        stop("Supplied list of flowFrames is not of the same length of x.")
-        
-      }else{
-        
-        names(overlay) <- as.vector(sapply(overlay, function(x) x@description$GUID))
-        
-      }
-      
-      # list of flowSets 
-    }else if(all(as.vector(sapply(overlay,class)) == "flowSet")){
-      
-      # list of flowSets - each of length smp
-      if(all(as.vector(sapply(overlay,length)) == smp)){
-        
-        # List of flowSets each of length smp - makes lists of a list of flowFrames
-        overlay <- lapply(overlay, function(fs){
-          
-          lapply(seq(1,smp,1), function(x){
-            
-            fs[[x]]
-            
-          })
-          
-        })
-        overlay <- lapply(1:smp, function(x){lapply(overlay, `[[`, x)})
-        nms <- as.vector(sapply(overlay, function(x){sapply(x, function(y){y@description$GUID})}))
-        lapply(1:length(overlay), function(x){names(overlay[[x]]) <<- nms[x]})
+  if(!is.null(overlay)){
 
-        # listsed flowSets not correct length  
-      }else{
-        
-        stop("The length of each flowSet in overlay list is not equal to the number of flowFrames in x.")
-        
-      }
-      
-      # list of frame lists
-    }else if(all(as.vector(sapply(overlay, class)) == "list")){
-      
-      # List of Frame lists - check each element of list == smp
-      if(all(as.vector(sapply(overlay,length)) == smp)){
-        
-        overlay <- lapply(1:smp, function(x){lapply(overlay, `[[`, x)})
-        nms <- sapply(overlay, function(x){sapply(x, function(y){y@description$GUID})})
-        lapply(1:length(overlay), function(x){names(overlay[[x]]) <<- nms[,x]})
-        
-      }else{
-        
-        stop("The length of flowFrame list in overlay list is not equal to the number of flowFrames in x.")
-        
-      }
-      
-    }
+    overlay <- checkOverlay(x = fs, overlay = overlay, subSample = subSample)
     
   }
   
@@ -1612,13 +1537,13 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
 
       plotCyto2d(x = fr, channels = channels, transList = transList, overlay = o, main = main, xlim = xlim, ylim = ylim, ...)
       
-      if(popup == TRUE & cnt %% np == 0 & length(fs.lst) > cnt){
+      if(popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt){
         
         checkOSGD()
         
       } 
       
-    }, fs.lst, overlay, main)
+    }, fr.lst, overlay, main)
     
   }else{
     
@@ -1629,13 +1554,13 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
       
       plotCyto2d(x = fr, channels = channels, transList = transList, main = main, xlim = xlim, ylim = ylim, ...)
       
-      if(popup == TRUE & cnt %% np == 0 & length(fs.lst) > cnt){
+      if(popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt){
         
         checkOSGD()
         
       }
       
-    }, fs.lst, main)
+    }, fr.lst, main)
     
   }
   

@@ -532,13 +532,51 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, pa
       
     }else if(inherits(x, "GatingSet")){
       
-      fs <- flowWorkspace::getData(x, "root")
-      fr <- as(fs, "flowFrame")
-      fs <- flowCore::flowSet(fr)
-      gs <- flowWorkspace::GatingSet(fs)
+      # GatingSet contains all transformations
+      if(all(channels %in% names(x@transformation[[1]]))){
+        
+        # Some transforms found - replace these entries in transList
+        trnsfrms <- lapply(channels, function(channel){getTransformations(x[[1]], channel, only.function = FALSE)})
+        names(trnsfrms) <- channels
+        
+        # Remove NULL transforms
+        trnsfrms[sapply(trnsfrms, is.null)] <- NULL
+        transList <- transformerList(names(trnsfrms), trnsfrms)
+        
+        return(transList)
+        
+      }else if(length(names(x@transformation[[1]])) == 0){
+        
+        # GatingSet is not transformed
+        fs <- flowWorkspace::getData(x, "root")
+        fr <- as(fs, "flowFrame")
+        fs <- flowCore::flowSet(fr)
+        gs <- suppressMessages(flowWorkspace::GatingSet(fs))
       
-      transList <- flowCore::estimateLogicle(gs[[1]], channels)
-      return(transList)
+        transList <- flowCore::estimateLogicle(gs[[1]], channels)
+        return(transList)
+        
+      }else{
+        
+        # GatingSet contains some transformations
+        trnsfrms <- lapply(channels, function(channel){getTransformations(x[[1]], channel, only.function = FALSE)})
+        names(trnsfrms) <- channels
+        
+        # Remove NULL transforms
+        trnsfrms[sapply(trnsfrms, is.null)] <- NULL
+        trnsLst <- transformerList(names(trnsfrms), trnsfrms)
+        
+        # Get remaining transformations with estimateLogicle
+        fs <- flowWorkspace::getData(x, "root")
+        fr <- as(fs, "flowFrame")
+        fs <- flowCore::flowSet(fr)
+        gs <- suppressMessages(flowWorkspace::GatingSet(fs))
+        
+        transList <- flowCore::estimateLogicle(gs[[1]], channels[!channels %in% names(trnsLst)])
+        transList <- c(trnsLst, transList)
+        return(transList)
+        
+      }
       
     }
     
@@ -627,19 +665,29 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, pa
     if(length(x@transformation) == 0){
       
       # No transformations found in GatingSet
+      transList <- transList
       
     }else{
       
       # Some transforms found - replace these entries in transList
-      trnsfrms <- lapply(channels, function(channel){getTransformations(gs[[1]], channel, only.function = FALSE)})
+      trnsfrms <- lapply(channels, function(channel){getTransformations(x[[1]], channel, only.function = FALSE)})
       names(trnsfrms) <- channels
       
       # Remove NULL transforms
       trnsfrms[sapply(trnsfrms, is.null)] <- NULL
       trnsLst <- transformerList(names(trnsfrms), trnsfrms)
       
-      # Replace entries in transList with trnsLst
-      transList <- c(trnsLst, transformerList(channels[!channels %in% names(trnsLst)], transList[channels[!channels %in% names(trnsLst)]]))
+      # All channels are transformed in GatingSet
+      if(length(channels[!channels %in% names(trnsLst)]) == 0){
+      
+        transList <- trnsLst
+        
+      }else{
+      
+        # Replace entries in transList with trnsLst
+        transList <- c(trnsLst, transformerList(channels[!channels %in% names(trnsLst)], transList[channels[!channels %in% names(trnsLst)]]))
+      
+      }
       
     }
     
