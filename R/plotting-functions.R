@@ -493,8 +493,8 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   # Extract pData
   pd <- pData(x)
   
-  # Sort pd by mergeBy colnames
-  if(mergeBy != "all"){
+  # Sort pd by mergeBy column names
+  if(mergeBy[1] != "all"){
       
     pd <- pd[do.call("order", pd[mergeBy]), ]
       
@@ -610,7 +610,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   # Sort pd by mergeBy colnames
   if(!is.null(mergeBy)){
     
-    if(mergeBy != "all"){
+    if(mergeBy[1] != "all"){
       
       pd <- pd[do.call("order", pd[mergeBy]), ]
       

@@ -284,13 +284,13 @@ setMethod(plotCyto, signature = "GatingSet",
     }
     
     # Add merge column to pd - to get gates
-    if(mergeBy == "all"){
+    if(length(mergeBy) == 1){
       
-      pd$merge <- rep("all", length(gs))
-      
-    }else if(length(mergeBy) == 1){
-      
-      pd$merge <- pd[, mergeBy]
+      if(mergeBy == "all"){
+        pd$merge <- rep("all", length(gs))
+      }else{
+        pd$merge <- pd[, mergeBy]
+      }
       
     }else{
       
