@@ -493,6 +493,19 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   # Extract pData
   pd <- pData(x)
   
+  # Sort pd by mergeBy colnames
+  if(mergeBy != "all"){
+      
+    pd <- pd[do.call("order", pd[mergeBy]), ]
+      
+  }
+  
+  # Find new indicies
+  ind <- match(sampleNames(fs), pd$name)
+    
+  # Reorder overlays based on merge levels
+  overlay <- overlay[ind]
+  
   # List of group indicies - ind
   if(length(mergeBy) == 1 & mergeBy[1] == "all"){
     
@@ -594,6 +607,17 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
   # Extract pData information
   pd <- pData(x)
   
+  # Sort pd by mergeBy colnames
+  if(!is.null(mergeBy)){
+    
+    if(mergeBy != "all"){
+      
+      pd <- pd[do.call("order", pd[mergeBy]), ]
+      
+    }
+    
+  }
+  
   # flowSet for merging
   if(inherits(x, "GatingSet")){
     
@@ -633,7 +657,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
     
     fr.lst <- lapply(unique(pd$merge), function(x){
       
-      fr <- as(fs[pd$merge == x], "flowFrame")
+      fr <- as(fs[pd$name][pd$merge == x], "flowFrame")
       
       if("Original" %in% BiocGenerics::colnames(fr)){
         
@@ -658,7 +682,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun){
     
     fr.lst <- lapply(unique(pd$merge), function(x){
       
-      fr <- as(fs[pd$merge == x], "flowFrame")
+      fr <- as(fs[pd$name][pd$merge == x], "flowFrame")
       
       if("Original" %in% BiocGenerics::colnames(fr)){
         
