@@ -410,6 +410,8 @@ setMethod(plotCyto, signature = "GatingSet",
     if(!is.null(overlay)){
       
       if(class(overlay) == "character"){
+          
+        overlay <- checkOverlay(x = gs, overlay = overlay, subSample = subSample)
         
         if(missing(text.legend)){
           

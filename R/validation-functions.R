@@ -744,9 +744,9 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
     
   }else if(all(do.call("rbind", lapply(overlay, function(x){sapply(x,class)})) == "flowFrame")){
     
-    if(all(as.vector(lapply(overlay, function(x){sapply(x,length)})) != length(fs))){
+    if(length(overlay) != length(fs)){
     
-      stop("Each list of flowFrames should be the same length as the flowSet.")
+      stop("Overlay should be a list of flowFrames lists to overlay on each flowFrame in the flowSet.")
       
     }
       
@@ -755,9 +755,6 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
       overlay <- lapply(overlay, function(x) {lapply(x, function(y){Subset(y, sampleFilter(size = subSample))})})
       
     }
-    
-    # list of flowFrame lists
-    overlay <- lapply(seq_along(fs), function(x){lapply(overlay, `[[`, x)})
     
   }else{
     
