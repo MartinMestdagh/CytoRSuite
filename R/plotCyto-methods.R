@@ -348,33 +348,57 @@ setMethod(plotCyto, signature = "GatingSet",
     # Make calls to plotCyto
     if(!is.null(overlay)){
       
-      mapply(function(fr, overlay, main, nm){
-    
-        # Extract gates
-        gts <- lapply(alias, function(x){
-      
-          getGate(gs[[match(nm, pd$merge)]], x)
-      
-        })
+      if(!is.null(alias)){
         
-        plotCyto(fr, channels = channels, overlay = overlay, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
+        mapply(function(fr, overlay, main, nm){
+    
+          # Extract gates
+          gts <- lapply(alias, function(x){
       
-      }, fr.lst, overlay, main, nms)
+            getGate(gs[[match(nm, pd$merge)]], x)
+      
+          })
+        
+          plotCyto(fr, channels = channels, overlay = overlay, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
+      
+        }, fr.lst, overlay, main, nms)
+        
+      }else{
+        
+        mapply(function(fr, overlay, main, nm){
+          
+          plotCyto(fr, channels = channels, overlay = overlay, transList = transList, main = main, text.legend = text.legend, ...)
+          
+        }, fr.lst, overlay, main, nms)
+        
+      }
       
     }else{
       
-      mapply(function(fr, main, nm){
+      if(!is.null(alias)){
         
-        # Extract gates
-        gts <- lapply(alias, function(x){
+        mapply(function(fr, main, nm){
+        
+          # Extract gates
+          gts <- lapply(alias, function(x){
           
-          getGate(gs[[match(nm, pd$merge)]], x)
+            getGate(gs[[match(nm, pd$merge)]], x)
           
-        })
+          })
         
-        plotCyto(fr, channels = channels, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
+          plotCyto(fr, channels = channels, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
         
-      }, fr.lst, main, nms)
+        }, fr.lst, main, nms)
+      
+      }else{
+        
+        mapply(function(fr, main, nm){
+        
+          plotCyto(fr, channels = channels, transList = transList, main = main, text.legend = text.legend, ...)
+          
+        }, fr.lst, main, nms)
+        
+      }
       
     }
   
