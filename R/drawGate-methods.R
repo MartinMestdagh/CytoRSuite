@@ -229,15 +229,15 @@ setMethod(drawGate, signature = "flowSet", definition = function(x, select = NUL
   if (plot == TRUE) {
     if(getOption("CytoRSuite_interact") == FALSE){
       if(length(channels) == 2){
-        plotCyto(fs, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, ...)
+        plotCyto(fs, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, mergeBy = "all", ...)
       }else{
-        plotCyto(fs, channels = channels, popup = FALSE, legend = FALSE, merge = TRUE, ...)
+        plotCyto(fs, channels = channels, popup = FALSE, legend = FALSE, mergeBy = "all", ...)
       }
     }else {
       if(length(channels) == 2){
-        plotCyto(fs, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, ...)
+        plotCyto(fs, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, mergeBy = "all", ...)
       }else{
-        plotCyto(fs, channels = channels, popup = TRUE, legend = FALSE, merge = TRUE, ...)
+        plotCyto(fs, channels = channels, popup = TRUE, legend = FALSE, mergeBy = "all", ...)
       }
     }
   }
@@ -444,19 +444,19 @@ setMethod(drawGate, signature = "GatingSet", definition = function(x, groupBy = 
       
     }
   
-    # Make one call to drawPlot
+    # Make one call to plotCyto
     if (plot == TRUE) {
       if(getOption("CytoRSuite_interact") == FALSE){
         if(length(channels) == 2){
-          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, merge = TRUE, main = main, ...)
+          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = FALSE, legend = FALSE, mergeBy = "all", main = main, ...)
         }else{
-          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, popup = FALSE, legend = FALSE, merge = TRUE, main = main, ...)
+          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, popup = FALSE, legend = FALSE, mergeBy = "all", main = main, ...)
         }
       }else{
         if(length(channels) == 2){
-          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, merge = TRUE, main = main, ...)
+          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, subSample = subSample, popup = TRUE, legend = FALSE, mergeBy = "all", main = main, ...)
         }else{
-          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, popup = TRUE, legend = FALSE, merge = TRUE, main = main, ...)
+          plotCyto(x = gs[sampleNames(fs)], parent = parent, channels = channels, popup = TRUE, legend = FALSE, mergeBy = "all", main = main, ...)
         }
       }
     }
