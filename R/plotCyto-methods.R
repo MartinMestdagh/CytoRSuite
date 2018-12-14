@@ -447,13 +447,21 @@ setMethod(plotCyto, signature = "GatingSet",
       
     }
     
+    # Label text
+    if(missing(text.labels) & !is.null(alias)){
+      text.labels <- alias
+    }
+    
     # Plot Layout
     mfrow <- .setPlotLayout(x = fs, mfrow = mfrow)
     
+    # Plots
+    mapply(function(x, main){
+      
     # Gates
     if(!is.null(alias) & is.character(alias)){
       
-      gates <- lapply(alias, function(pop) getGate(gs[[1]], pop))
+      gates <- lapply(alias, function(pop) getGate(gs[[x]], pop))
       names(gates) <- alias
       gates <- filters(gates)
       
@@ -462,9 +470,15 @@ setMethod(plotCyto, signature = "GatingSet",
       gates <- NULL
       
     }
-    
+      
     # Call to plotCyto flowFrame method
-    plotCyto(fs, channels = channels, overlay = overlay, transList = transList, main = main, text.labels = text.labels, text.legend = text.legend, gates = gates, ...)
+    if(is.null(alias)){
+      plotCyto(getData(gs[[x]], parent), channels = channels, overlay = overlay, transList = transList, main = main, text.legend = text.legend, gates = gates, ...)
+    }else{
+      plotCyto(getData(gs[[x]], parent), channels = channels, overlay = overlay, transList = transList, main = main, text.legend = text.legend, text.labels = text.labels, gates = gates, ...)
+    }
+    
+    }, 1:length(gs), main)
     
   }
   
