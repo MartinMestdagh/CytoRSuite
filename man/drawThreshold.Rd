@@ -4,19 +4,19 @@
 \alias{drawThreshold}
 \title{Draw Threshold(s) to Gate Flow Cytometry Populations.}
 \usage{
-drawThreshold(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
+drawThreshold(fr, alias = NULL, channels, plot = TRUE, labels = TRUE,
   ...)
 }
 \arguments{
 \item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 containing the flow cytometry data for plotting and gating.}
 
-\item{channels}{vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.}
-
 \item{alias}{the name(s) of the populations to be gated. Multiple
 \code{threshold} gates are not currently supported. \code{alias} is
 \code{NULL} by default which will halt the gating routine.}
+
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
 \item{plot}{logical indicating whether the data should be plotted. This
 feature allows for constructing gates of different types over existing
@@ -39,6 +39,38 @@ in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 threshold gates are supported, for 2-D threshold gates all events above the
 select x and y coordinates are included in the gate. Multiple threshold gates
 are not currently supported.
+}
+\examples{
+\dontrun{
+library(CytoRSuiteData)
+
+# Load in samples to flowSet
+fs <- Activation
+
+# Transform fluorescent channels
+fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+
+# Extract a flowFrame
+fr <- fs[[1]]
+
+# Get 1-D threshold gate using drawThreshold
+tg <- drawThreshold(fr, 
+                    alias = "Cells", 
+                    channels = c("PE-A"))
+
+# tg is a filters object - extract rectangleGate using `[[`
+tg[[1]]
+
+#' # Get 2-D threshold gate using drawThreshold
+tg <- drawThreshold(fr, 
+                    alias = "Cells", 
+                    channels = c("PE-A", "Alexa Fluor 700-A"))
+
+# tg is a filters object - extract rectangleGate using `[[`
+tg[[1]]
+
+}
+
 }
 \seealso{
 \code{\link{plotCyto1d,flowFrame-method}}

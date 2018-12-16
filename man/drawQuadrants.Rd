@@ -4,18 +4,18 @@
 \alias{drawQuadrants}
 \title{Draw Quadrants to Gate Multiple Flow Cytometry Populations.}
 \usage{
-drawQuadrants(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
+drawQuadrants(fr, alias = NULL, channels, plot = TRUE, labels = TRUE,
   ...)
 }
 \arguments{
 \item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 containing the flow cytometry data for plotting and gating.}
 
-\item{channels}{vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.}
-
 \item{alias}{the name(s) of the 4 populations to be gated. \code{alias} is
 \code{NULL} by default which will halt the gating routine.}
+
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
 \item{plot}{logical indicating whether the data should be plotted. This
 feature allows for constructing gates of different types over existing
@@ -45,6 +45,29 @@ top left.
 \code{\link{plotCyto2d,flowFrame-method}}
 
 \code{\link{drawGate}}
+
+#' @examples 
+\dontrun{
+library(CytoRSuiteData)
+
+# Load in samples to flowSet
+fs <- Activation
+
+# Transform fluorescent channels
+fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+
+# Extract a flowFrame
+fr <- fs[[1]]
+
+# Get quadrant gates using drawQuadrants
+qg <- drawQuadrants(fr, 
+                    alias = c("A","B","C","D"),
+                    channels = c("PE-A", "Alexa Fluor 488-A"))
+
+# qg is a filters object - extract each rectangleGate using `[[`
+qg[[4]]
+
+}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

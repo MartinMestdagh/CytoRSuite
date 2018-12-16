@@ -36,8 +36,31 @@
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #' @seealso \code{\link{drawGate}}
 #'
+#' @examples 
+#' \dontrun{
+#' library(CytoRSuiteData)
+#' 
+#' # Load in samples to flowSet
+#' fs <- Activation
+#' 
+#' # Transform fluorescent channels
+#' fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+#' 
+#' # Extract a flowFrame
+#' fr <- fs[[1]]
+#' 
+#' # Get polygonGate using drawPolygon
+#' pg <- drawPolygon(fr, 
+#'                   alias = "Cells", 
+#'                   channels = c("FSC-A","SSC-A"))
+#' 
+#' # pg is a filters object - extract polygonGate using `[[`
+#' pg[[1]]
+#' 
+#' }
+#'
 #' @export
-drawPolygon <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...) {
+drawPolygon <- function(fr, alias = NULL, channels, plot = TRUE, labels = TRUE, ...) {
 
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
@@ -137,8 +160,31 @@ drawPolygon <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #' @seealso \code{\link{drawGate}}
 #'
+#' @examples 
+#' \dontrun{
+#' library(CytoRSuiteData)
+#' 
+#' # Load in samples to flowSet
+#' fs <- Activation
+#' 
+#' # Transform fluorescent channels
+#' fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+#' 
+#' # Extract a flowFrame
+#' fr <- fs[[1]]
+#' 
+#' # Get polygonGate using drawRectangle
+#' rg <- drawRectangle(fr, 
+#'                     alias = "Cells", 
+#'                     channels = c("FSC-A","SSC-A"))
+#' 
+#' # rg is a filters object - extract rectangleGate using `[[`
+#' rg[[1]]
+#' 
+#' }
+#'
 #' @export
-drawRectangle <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...) {
+drawRectangle <- function(fr, alias = NULL, channels, plot = TRUE, labels = TRUE, ...) {
 
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
@@ -232,8 +278,39 @@ drawRectangle <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #' @seealso \code{\link{drawGate}}
 #'
+#' @examples 
+#' \dontrun{
+#' library(CytoRSuiteData)
+#' 
+#' # Load in samples to flowSet
+#' fs <- Activation
+#' 
+#' # Transform fluorescent channels
+#' fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+#' 
+#' # Extract a flowFrame
+#' fr <- fs[[1]]
+#' 
+#' # Get 1-D interval gate using drawInterval
+#' ig <- drawInterval(fr, 
+#'                    alias = "Cells", 
+#'                    channels = "PE-A")
+#' 
+#' # ig is a filters object - extract rectangleGate using `[[`
+#' ig[[1]]
+#' 
+#' # Get 2-D interval gate on y axis using drawInterval
+#' ig <- drawInterval(fr, 
+#'                    alias = "Cells", 
+#'                    channels = c("PE-A", "Alexa Fluor 488-A"), axis = "y")
+#' 
+#' # ig is a filters object - extract rectangleGate using `[[`
+#' ig[[1]]
+#' 
+#' }
+#'
 #' @export
-drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", labels = TRUE, ...) {
+drawInterval <- function(fr, alias = NULL, channels, plot = TRUE, axis = "x", labels = TRUE, ...) {
 
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
@@ -357,8 +434,39 @@ drawInterval <- function(fr, channels, alias = NULL, plot = TRUE, axis = "x", la
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #' @seealso \code{\link{drawGate}}
 #'
+#' @examples 
+#' \dontrun{
+#' library(CytoRSuiteData)
+#' 
+#' # Load in samples to flowSet
+#' fs <- Activation
+#' 
+#' # Transform fluorescent channels
+#' fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+#' 
+#' # Extract a flowFrame
+#' fr <- fs[[1]]
+#' 
+#' # Get 1-D threshold gate using drawThreshold
+#' tg <- drawThreshold(fr, 
+#'                     alias = "Cells", 
+#'                     channels = c("PE-A"))
+#' 
+#' # tg is a filters object - extract rectangleGate using `[[`
+#' tg[[1]]
+#' 
+#' #' # Get 2-D threshold gate using drawThreshold
+#' tg <- drawThreshold(fr, 
+#'                     alias = "Cells", 
+#'                     channels = c("PE-A", "Alexa Fluor 700-A"))
+#' 
+#' # tg is a filters object - extract rectangleGate using `[[`
+#' tg[[1]]
+#' 
+#' }
+#'
 #' @export
-drawThreshold <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...) {
+drawThreshold <- function(fr, alias = NULL, channels, plot = TRUE, labels = TRUE, ...) {
 
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
@@ -457,8 +565,39 @@ drawThreshold <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #' @seealso \code{\link{drawGate}}
 #'
+#' @examples 
+#' \dontrun{
+#' library(CytoRSuiteData)
+#' 
+#' # Load in samples to flowSet
+#' fs <- Activation
+#' 
+#' # Transform fluorescent channels
+#' fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+#' 
+#' # Extract a flowFrame
+#' fr <- fs[[1]]
+#' 
+#' # Get 1-D boundary gate using drawBoundary
+#' bg <- drawBoundary(fr, 
+#'                    alias = "Cells",
+#'                    channels = c("PE-A"))
+#' 
+#' # bg is a filters object - extract rectangleGate using `[[`
+#' bg[[1]]
+#' 
+#' #' # Get 2-D boundary gate using drawBoundary
+#' tg <- drawBoundary(fr, 
+#'                    alias = "Cells", 
+#'                    channels = c("PE-A", "Alexa Fluor 700-A"))
+#' 
+#' # bg is a filters object - extract rectangleGate using `[[`
+#' bg[[1]]
+#' 
+#' }
+#'
 #' @export
-drawBoundary <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...) {
+drawBoundary <- function(fr, alias = NULL, channels, plot = TRUE, labels = TRUE, ...) {
 
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
@@ -555,8 +694,31 @@ drawBoundary <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #' @seealso \code{\link{drawGate}}
 #'
+#'#' @examples 
+#' \dontrun{
+#' library(CytoRSuiteData)
+#' 
+#' # Load in samples to flowSet
+#' fs <- Activation
+#' 
+#' # Transform fluorescent channels
+#' fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+#' 
+#' # Extract a flowFrame
+#' fr <- fs[[1]]
+#' 
+#' # Get ellipsoidGate using drawEllipse
+#' eg <- drawEllipse(fr, 
+#'                   alias = "Cells", 
+#'                   channels = c("PE-A", "Alexa Fluor 700-A"))
+#' 
+#' # eg is a filters object - extract ellipsoidGate using `[[`
+#' eg[[1]]
+#' 
+#' }
+#'
 #' @export
-drawEllipse <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...) {
+drawEllipse <- function(fr, alias = NULL, channels, plot = TRUE, labels = TRUE, ...) {
 
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
@@ -695,8 +857,31 @@ drawEllipse <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, 
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #' @seealso \code{\link{drawGate}}
 #'
+#'#' @examples 
+#' \dontrun{
+#' library(CytoRSuiteData)
+#' 
+#' # Load in samples to flowSet
+#' fs <- Activation
+#' 
+#' # Transform fluorescent channels
+#' fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+#' 
+#' # Extract a flowFrame
+#' fr <- fs[[1]]
+#' 
+#' # Get quadrant gates using drawQuadrants
+#' qg <- drawQuadrants(fr, 
+#'                     alias = c("A","B","C","D"),
+#'                     channels = c("PE-A", "Alexa Fluor 488-A"))
+#' 
+#' # qg is a filters object - extract each rectangleGate using `[[`
+#' qg[[4]]
+#' 
+#' }
+#'
 #' @export
-drawQuadrants <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...) {
+drawQuadrants <- function(fr, alias = NULL, channels, plot = TRUE, labels = TRUE, ...) {
 
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
@@ -825,8 +1010,31 @@ drawQuadrants <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #' @seealso \code{\link{drawGate}}
 #'
+#' @examples 
+#' \dontrun{
+#' library(CytoRSuiteData)
+#' 
+#' # Load in samples to flowSet
+#' fs <- Activation
+#' 
+#' # Transform fluorescent channels
+#' fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+#' 
+#' # Extract a flowFrame
+#' fr <- fs[[1]]
+#' 
+#' # Get web gates using drawWeb
+#' wg <- drawWeb(fr, 
+#'               alias = c("A","B","C"),
+#'               channels = c("PE-A", "Alexa Fluor 488-A"))
+#' 
+#' # wg is a filters object - extract each polygonGate using `[[`
+#' wg[[4]]
+#' 
+#' }
+#'
 #' @export
-drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...) {
+drawWeb <- function(fr, alias = NULL, channels, plot = TRUE, labels = TRUE, ...) {
 
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
@@ -857,7 +1065,7 @@ drawWeb <- function(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
     center <- list(c(120627.9), c(147367.9))
     names(center) <- c("x", "y")
 
-    # Number of populations for tests set to 3
+    # Number of populations for tests set to 8
     alias <- c("A", "B", "C", "D", "E", "F", "G", "H")
   }
   

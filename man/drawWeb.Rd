@@ -4,19 +4,19 @@
 \alias{drawWeb}
 \title{Draw Web to Gate Multiple Flow Cytometry Populations.}
 \usage{
-drawWeb(fr, channels, alias = NULL, plot = TRUE, labels = TRUE, ...)
+drawWeb(fr, alias = NULL, channels, plot = TRUE, labels = TRUE, ...)
 }
 \arguments{
 \item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 containing the flow cytometry data for plotting and gating.}
 
-\item{channels}{vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.}
-
 \item{alias}{the name(s) of the populations to be gated. If multiple
 population names are supplied (e.g. \code{c("CD3","CD4")}) multiple gates
 will be returned. \code{alias} is \code{NULL} by default which will halt
 the gating routine. Recommended for 3 or more populations.}
+
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
 \item{plot}{logical indicating whether the data should be plotted. This
 feature allows for constructing gates of different types over existing
@@ -40,6 +40,30 @@ the center point and surrounding divider points on plot edge. \code{drawWeb}
 will contruct the \code{\link[flowCore:polygonGate-class]{polygonGate}}
 objects and store them in a \code{\link[flowCore:filters-class]{filters}}
 list.
+}
+\examples{
+\dontrun{
+library(CytoRSuiteData)
+
+# Load in samples to flowSet
+fs <- Activation
+
+# Transform fluorescent channels
+fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+
+# Extract a flowFrame
+fr <- fs[[1]]
+
+# Get web gates using drawWeb
+wg <- drawWeb(fr, 
+              alias = c("A","B","C"),
+              channels = c("PE-A", "Alexa Fluor 488-A"))
+
+# wg is a filters object - extract each polygonGate using `[[`
+wg[[4]]
+
+}
+
 }
 \seealso{
 \code{\link{plotCyto1d,flowFrame-method}}

@@ -4,20 +4,20 @@
 \alias{drawRectangle}
 \title{Draw Rectangles to Gate Flow Cytometry Populations.}
 \usage{
-drawRectangle(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
+drawRectangle(fr, alias = NULL, channels, plot = TRUE, labels = TRUE,
   ...)
 }
 \arguments{
 \item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 containing the flow cytometry data for plotting and gating.}
 
-\item{channels}{vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.}
-
 \item{alias}{the name(s) of the populations to be gated. If multiple
 population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
 will be returned. \code{alias} is \code{NULL} by default which will halt
 the gating routine.}
+
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
 \item{plot}{logical indicating whether the data should be plotted. This
 feature allows for constructing gates of different types over existing
@@ -40,6 +40,30 @@ click) which are constructed into
 \code{\link[flowCore:rectangleGate-class]{rectangleGate}} objects and stored
 in a \code{\link[flowCore:filters-class]{filters}} list. Simply select 2
 diagonal co-ordinates to construct the rectangleGate(s).
+}
+\examples{
+\dontrun{
+library(CytoRSuiteData)
+
+# Load in samples to flowSet
+fs <- Activation
+
+# Transform fluorescent channels
+fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+
+# Extract a flowFrame
+fr <- fs[[1]]
+
+# Get polygonGate using drawRectangle
+rg <- drawRectangle(fr, 
+                    alias = "Cells", 
+                    channels = c("FSC-A","SSC-A"))
+
+# rg is a filters object - extract rectangleGate using `[[`
+rg[[1]]
+
+}
+
 }
 \seealso{
 \code{\link{plotCyto1d,flowFrame-method}}

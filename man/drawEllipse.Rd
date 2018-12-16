@@ -4,20 +4,20 @@
 \alias{drawEllipse}
 \title{Draw Ellipse(s) to Gate Flow Cytometry Populations.}
 \usage{
-drawEllipse(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
+drawEllipse(fr, alias = NULL, channels, plot = TRUE, labels = TRUE,
   ...)
 }
 \arguments{
 \item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 containing the flow cytometry data for plotting and gating.}
 
-\item{channels}{vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.}
-
 \item{alias}{the name(s) of the populations to be gated. If multiple
 population names are supplied (e.g. \code{c("CD3","CD4")}) multiple gates
 will be returned. \code{alias} is \code{NULL} by default which will halt
 the gating routine.}
+
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
 \item{plot}{logical indicating whether the data should be plotted. This
 feature allows for constructing gates of different types over existing
@@ -45,6 +45,29 @@ object and stored in a \code{\link[flowCore:filters-class]{filters}} list.
 \code{\link{plotCyto2d,flowFrame-method}}
 
 \code{\link{drawGate}}
+
+#' @examples 
+\dontrun{
+library(CytoRSuiteData)
+
+# Load in samples to flowSet
+fs <- Activation
+
+# Transform fluorescent channels
+fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+
+# Extract a flowFrame
+fr <- fs[[1]]
+
+# Get ellipsoidGate using drawEllipse
+eg <- drawEllipse(fr, 
+                  alias = "Cells", 
+                  channels = c("PE-A", "Alexa Fluor 700-A"))
+
+# eg is a filters object - extract ellipsoidGate using `[[`
+eg[[1]]
+
+}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

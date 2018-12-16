@@ -4,20 +4,20 @@
 \alias{drawPolygon}
 \title{Draw Polygon(s) to Gate Flow Cytometry Populations.}
 \usage{
-drawPolygon(fr, channels, alias = NULL, plot = TRUE, labels = TRUE,
+drawPolygon(fr, alias = NULL, channels, plot = TRUE, labels = TRUE,
   ...)
 }
 \arguments{
 \item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 containing the flow cytometry data for plotting and gating.}
 
-\item{channels}{vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.}
-
 \item{alias}{the name(s) of the populations to be gated. If multiple
 population names are supplied (e.g. \code{c("CD3","CD4")}) multiple gates
 will be returned. \code{alias} is \code{NULL} by default which will halt
 the gating routine.}
+
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
 \item{plot}{logical indicating whether the data should be plotted. This
 feature allows for constructing gates of different types over existing
@@ -39,6 +39,30 @@ selection of the co-ordinates of a ploygon gate(s) (through mouse click)
 which are constructed into
 \code{\link[flowCore:polygonGate-class]{polygonGate}} objects and stored in a
 \code{\link[flowCore:filters-class]{filters}} list.
+}
+\examples{
+\dontrun{
+library(CytoRSuiteData)
+
+# Load in samples to flowSet
+fs <- Activation
+
+# Transform fluorescent channels
+fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+
+# Extract a flowFrame
+fr <- fs[[1]]
+
+# Get polygonGate using drawPolygon
+pg <- drawPolygon(fr, 
+                  alias = "Cells", 
+                  channels = c("FSC-A","SSC-A"))
+
+# pg is a filters object - extract polygonGate using `[[`
+pg[[1]]
+
+}
+
 }
 \seealso{
 \code{\link{plotCyto1d,flowFrame-method}}

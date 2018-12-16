@@ -4,20 +4,20 @@
 \alias{drawInterval}
 \title{Draw Interval(s) to Gate Flow Cytometry Populations.}
 \usage{
-drawInterval(fr, channels, alias = NULL, plot = TRUE, axis = "x",
+drawInterval(fr, alias = NULL, channels, plot = TRUE, axis = "x",
   labels = TRUE, ...)
 }
 \arguments{
 \item{fr}{a \code{\link[flowCore:flowFrame-class]{flowFrame}} object
 containing the flow cytometry data for plotting and gating.}
 
-\item{channels}{vector of channel names to use for plotting, can be of length
-1 for 1-D density histogram or length 2 for 2-D scatter plot.}
-
 \item{alias}{the name(s) of the populations to be gated. If multiple
 population names are supplied (e.g. \code{c("CD3,"CD4)}) multiple gates
 will be returned. \code{alias} is \code{NULL} by default which will halt
 the gating routine.}
+
+\item{channels}{vector of channel names to use for plotting, can be of length
+1 for 1-D density histogram or length 2 for 2-D scatter plot.}
 
 \item{plot}{logical indicating whether the data should be plotted. This
 feature allows for constructing gates of different types over existing
@@ -44,6 +44,38 @@ is constructed into a
 in a \code{\link[flowCore:filters-class]{filters}} list. Both 1-D and 2-D
 interval gates are supported, for 2-D interval gates an additional argument
 \code{axis} must be supplied to indicate which axis should be gated.
+}
+\examples{
+\dontrun{
+library(CytoRSuiteData)
+
+# Load in samples to flowSet
+fs <- Activation
+
+# Transform fluorescent channels
+fs <- transform(fs, estimateLogicle(fs[[4]], getChannels(fs)))
+
+# Extract a flowFrame
+fr <- fs[[1]]
+
+# Get 1-D interval gate using drawInterval
+ig <- drawInterval(fr, 
+                   alias = "Cells", 
+                   channels = "PE-A")
+
+# ig is a filters object - extract rectangleGate using `[[`
+ig[[1]]
+
+# Get 2-D interval gate on y axis using drawInterval
+ig <- drawInterval(fr, 
+                   alias = "Cells", 
+                   channels = c("PE-A", "Alexa Fluor 488-A"), axis = "y")
+
+# ig is a filters object - extract rectangleGate using `[[`
+ig[[1]]
+
+}
+
 }
 \seealso{
 \code{\link{plotCyto1d,flowFrame-method}}
