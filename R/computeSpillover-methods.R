@@ -32,8 +32,11 @@
 #'   Annals of the New York Academy of Sciences, 677:167-184.
 #'
 #' @export
-setGeneric(name="computeSpillover",
-           def=function(x, ...){standardGeneric("computeSpillover")}
+setGeneric(
+  name = "computeSpillover",
+  def = function(x, ...) {
+    standardGeneric("computeSpillover")
+  }
 )
 
 #' Compute Spillover Matrix - flowSet Method
@@ -99,7 +102,6 @@ setGeneric(name="computeSpillover",
 #' 
 #' # Apply spillover matrix
 #' fs <- compensate(fs, spill)
-#' 
 #' }
 #' 
 #' @importFrom flowCore estimateLogicle transform each_col fsApply
@@ -119,116 +121,107 @@ setGeneric(name="computeSpillover",
 #'   Annals of the New York Academy of Sciences, 677:167-184.
 #'
 #' @export
-setMethod(computeSpillover, signature = "flowSet", definition = function(x, transList = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...){
-  
+setMethod(computeSpillover, signature = "flowSet", definition = function(x, transList = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...) {
+
   # Assign x to fs
   fs <- x
-  
+
   # Extract pData information
   pd <- pData(fs)
-  
+
   # Extract fluorescent channels
   channels <- getChannels(fs)
-  
+
   # Select a fluorescent channel for each compensation control
-  if(is.null(cmfile)){
-    
+  if (is.null(cmfile)) {
     pd$channel <- paste(selectChannels(fs))
     write.csv(pd, "Compensation Channels.csv", row.names = FALSE)
-    
-  }else{
-    
+  } else {
     cm <- read.csv(cmfile, header = TRUE, row.names = 1)
     chans <- cm$channel[match(sampleNames(fs), row.names(cm))]
     pd$channel <- paste(chans)
-    
   }
-  
+
   # Merge files for use with estimateLogicle
   fr <- as(fs, "flowFrame")
-  
+
   # Extract summary statistics
   sm <- pData(parameters(fs[[1]]))
-  
+
   # Get complete transformList object
   transList <- .getCompleteTransList(fr, transList = transList)
-  
+
   # Get transformed data - all fluorescent channels transformed
   fs <- .getTransformedData(fs, transList = transList)
-  
+
   # Extract unstained control based on selected channels in pData(fs)
   NIL <- fs[[match("Unstained", pd$channel)]]
   fs <- fs[-match("Unstained", pd$channel)]
-  
+
   # Names
   nms <- sampleNames(fs)
-  
+
   # Samples
   smp <- length(fs)
-  
+
   # Remove NIL from pd
-  pd <- pd[!pd$channel == "Unstained",]
-  
+  pd <- pd[!pd$channel == "Unstained", ]
+
   # Gate positive populations
-  pops <- lapply(seq(1,smp,1), function(x){
-    
+  pops <- lapply(seq(1, smp, 1), function(x) {
+
     # Extract flowFrame
     fr <- fs[[x]]
-    
+
     # Channel
     chan <- pd$channel[x]
-    
+
     # Plot
-    plotCyto(NIL, channels = chan, overlay = fr, offset = 0, transList = transList, popup = TRUE, fill = c("red","dodgerblue"), legend = FALSE, alpha = 0.6, main = nms[x], ...)
-    
+    plotCyto(NIL, channels = chan, overlay = fr, offset = 0, transList = transList, popup = TRUE, fill = c("red", "dodgerblue"), legend = FALSE, alpha = 0.6, main = nms[x], ...)
+
     # Call drawGate on each flowFrame using interval gate on selected channel
-    if(getOption("CytoRSuite_interact") == TRUE){
-      
-      gt <- drawGate(x = fr, alias = paste(chan,"+"), channels = chan, type = "interval", adjust = 1.5, plot = FALSE)
+    if (getOption("CytoRSuite_interact") == TRUE) {
+      gt <- drawGate(x = fr, alias = paste(chan, "+"), channels = chan, type = "interval", adjust = 1.5, plot = FALSE)
       fr <- Subset(fr, gt[[1]])
-      
     }
-    
+
     return(fr)
   })
   names(pops) <- nms
   pops <- flowSet(pops)
-  
+
   # Inverse logicle transformation
-  inv <-  checkTransList(transList = transList, inverse = TRUE)
+  inv <- checkTransList(transList = transList, inverse = TRUE)
   pops <- suppressMessages(transform(pops, inv))
   NIL <- suppressMessages(transform(NIL, inv))
-  
+
   # Calculate MedFI for all channels for unstained control
   neg <- each_col(NIL, median)[channels]
-  
+
   # Calculate MedFI for all channels for all stained controls
-  pos <- fsApply(pops, each_col, median)[,channels]
-  
+  pos <- fsApply(pops, each_col, median)[, channels]
+
   # Subtract background fluorescence
   signal <- sweep(pos, 2, neg)
-  
+
   # Construct spillover matrix - only include values for which there is a control
-  spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))  
+  spill <- diag(x = 1, nrow = length(channels), ncol = length(channels))
   colnames(spill) <- channels
   rownames(spill) <- channels
-  
+
   # Normalise each row to stained channel
-  lapply(seq(1,nrow(signal),1), function(x){
-    
-    signal[x, ] <<- signal[x, ]/signal[x, match(pd$channel[x], colnames(spill))]
-    
-  }) 
-  
+  lapply(seq(1, nrow(signal), 1), function(x) {
+    signal[x, ] <<- signal[x, ] / signal[x, match(pd$channel[x], colnames(spill))]
+  })
+
   # Insert values into appropriate rows
   rws <- match(pd$channel, rownames(spill))
-  spill[rws,] <- signal
-  
+  spill[rws, ] <- signal
+
   # write spillover matrix to csv file
   write.csv(spill, spfile)
-  
+
   return(spill)
-  
 })
 
 #' Compute Spillover Matrix - GatingSet Method
@@ -298,10 +291,11 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
 #' 
 #' # Gate controls using drawGate
 #' drawGate(gs,
-#'          parent = "root",
-#'          alias = "Single Cells",
-#'          channels = c("FSC-A","FSC-H"),
-#'          gtfile = "Compensation-gatingTemplate.csv")
+#'   parent = "root",
+#'   alias = "Single Cells",
+#'   channels = c("FSC-A", "FSC-H"),
+#'   gtfile = "Compensation-gatingTemplate.csv"
+#' )
 #' 
 #' # Find 'Compensation-gatingTemplate.csv' in working directory
 #' 
@@ -312,9 +306,8 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
 #' 
 #' # Apply spillover matrix
 #' gs <- compensate(gs, spill)
-#' 
 #' }
-#'
+#' 
 #' @importFrom flowCore estimateLogicle transform each_col fsApply
 #'   inverseLogicleTransform flowSet
 #' @importFrom flowWorkspace getData pData getTransformations GatingSet
@@ -330,578 +323,469 @@ setMethod(computeSpillover, signature = "flowSet", definition = function(x, tran
 #'   Annals of the New York Academy of Sciences, 677:167-184.
 #'
 #' @export
-setMethod(computeSpillover, signature = "GatingSet", definition = function(x, parent = NULL, transList = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...){
-  
+setMethod(computeSpillover, signature = "GatingSet", definition = function(x, parent = NULL, transList = NULL, cmfile = NULL, spfile = "Spillover Matrix.csv", ...) {
   gs <- x
-  
+
   # Extract Population for Downstream Analyses
-  if(!is.null(parent)){
-    
+  if (!is.null(parent)) {
     fs <- getData(gs, parent)
-    
-  }else if(is.null(parent)){
-    
+  } else if (is.null(parent)) {
     fs <- getData(gs, getNodes(gs)[length(getNodes(gs))])
-    
   }
-  
+
   # Merge files for use with estimateLogicle
   fr <- as(fs, "flowFrame")
   fs.m <- flowSet(fr)
   gs.m <- suppressMessages(GatingSet(fs.m))
-  
+
   # Extract fluorescent channels
   channels <- getChannels(gs)
-  
+
   # Get complete transformerList
   transList <- .getCompleteTransList(gs, transList = transList)
 
   # Get complete transformList
   transList <- checkTransList(transList = transList, inverse = FALSE)
-  
+
   computeSpillover(x = fs, transList = transList, cmfile = cmfile, spfile = spfile, ...)
-  
 })
 
-#' .getCompleteTransList 
+#' .getCompleteTransList
 #' return complete (all fluorescent channels) transList
 #' for flowFrame, flowSet or GatingSet
 #' @noRd
-.getCompleteTransList <- function(x, transList = NULL){
-  
+.getCompleteTransList <- function(x, transList = NULL) {
+
   # Check class of transList
-  if(!is.null(transList)){
-    
-    if(!class(transList)[1] %in% c("transformList","transformerList")){
-      
+  if (!is.null(transList)) {
+    if (!class(transList)[1] %in% c("transformList", "transformerList")) {
       stop("Supplied transList should be of class transformList or transformerList.")
-      
     }
-    
   }
-  
+
   # Extract fluorescent channels
   channels <- getChannels(x)
-  
+
   # If NULL transList get all transformations
-  if(is.null(transList)){
-    
-    if(inherits(x, "flowFrame")){
-      
-      if(.checkDataTransform(x) == TRUE){
+  if (is.null(transList)) {
+    if (inherits(x, "flowFrame")) {
+      if (.checkDataTransform(x) == TRUE) {
         stop("Looks like the data is already transformed. Please supply the transList used.")
       }
-      
+
       transList <- flowCore::estimateLogicle(x, channels)
       return(transList)
-      
-    }else if(inherits(x, "flowSet")){
-      
-      if(.checkDataTransform(x) == TRUE){
+    } else if (inherits(x, "flowSet")) {
+      if (.checkDataTransform(x) == TRUE) {
         stop("Looks like the data is already transformed. Please supply the transList used.")
       }
-      
+
       transList <- flowCore::estimateLogicle(as(x, "flowFrame"), channels)
       return(transList)
-      
-    }else if(inherits(x, "GatingSet")){
-      
-      if(.checkDataTransform(x) == TRUE & length(x@transformation) == 0){
+    } else if (inherits(x, "GatingSet")) {
+      if (.checkDataTransform(x) == TRUE & length(x@transformation) == 0) {
         stop("Looks like the data is already transformed. No transformations found in GatingSet.")
       }
-      
+
       # GatingSet is not transformed
-      if(length(x@transformation) == 0){
-        
+      if (length(x@transformation) == 0) {
+
         # GatingSet is not transformed
         fs <- flowWorkspace::getData(x, "root")
         fr <- as(fs, "flowFrame")
         fs <- flowCore::flowSet(fr)
         gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-      
+
         transList <- flowCore::estimateLogicle(gs[[1]], channels)
         return(transList)
-        
-      # GatingSet contains transformations
-      }else if(length(x@transformation) != 0){
-        
+
+        # GatingSet contains transformations
+      } else if (length(x@transformation) != 0) {
         chans <- names(x@transformation[[1]])
-        
-        if(any(chans %in% channels)){
-          
-          #Extract transformations from GatingSet
-          trnsfrms <- lapply(channels[chans %in% channels], function(channel){getTransformations(x[[1]], channel, only.function = FALSE)})
+
+        if (any(chans %in% channels)) {
+
+          # Extract transformations from GatingSet
+          trnsfrms <- lapply(channels[chans %in% channels], function(channel) {
+            getTransformations(x[[1]], channel, only.function = FALSE)
+          })
           names(trnsfrms) <- channels[chans %in% channels]
-          
+
           # Remove NULL transforms
           trnsfrms[sapply(trnsfrms, is.null)] <- NULL
           transList <- transformerList(names(trnsfrms), trnsfrms)
-          
-          if(all(channels %in% names(transList))){
-            
+
+          if (all(channels %in% names(transList))) {
+
             # GatingSet contains all transformations
             return(transList)
-            
-          }else{
-            
+          } else {
+
             # Get remaining transformations with estimateLogicle
             fs <- flowWorkspace::getData(x, "root")
             fr <- as(fs, "flowFrame")
             fs <- flowCore::flowSet(fr)
             gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-            
+
             trnsLst <- flowCore::estimateLogicle(gs[[1]], channels[!channels %in% names(transList)])
             transList <- c(trnsLst, transList)
             transList <- flowWorkspace::transformerList(names(transList), transList)
-            
+
             return(transList)
-            
           }
-          
-        }else{
-          
+        } else {
+
           # GatingSet does not contain transformations for fluorescent channels
           fs <- flowWorkspace::getData(x, "root")
           fr <- as(fs, "flowFrame")
           fs <- flowCore::flowSet(fr)
           gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-          
+
           trnsLst <- flowCore::estimateLogicle(gs[[1]], channels)
           transList <- c(trnsLst, transList)
           transList <- flowWorkspace::transformerList(names(transList), transList)
-          
+
           return(transList)
-          
         }
-        
       }
-      
     }
-      
-  }else if(!is.null(transList)){
-  
+  } else if (!is.null(transList)) {
+
     # flowFrame or flowSet return transformList
-    if(inherits(x, "flowFrame") | inherits(x, "flowSet")){
-    
+    if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
+
       # Run checkTransList to get transformList
       transList <- checkTransList(transList = transList, inverse = FALSE)
-    
+
       # Check which channels have been transformed
       chans <- names(transList@transforms)
-    
+
       # TransList contains transformations for all fluorescent channels
-      if(all(channels %in% chans)){
-      
+      if (all(channels %in% chans)) {
+
         # TransList is complete
         return(transList)
-     
-      # Some fluorescent channels don't have transformations 
-      }else{
-      
+
+        # Some fluorescent channels don't have transformations
+      } else {
+
         # Convert x to flowSet
-        if(inherits(x, "flowFrame")){
-        
+        if (inherits(x, "flowFrame")) {
           fs <- flowCore::flowSet(x)
-        
-        }else if(inherits(x, "flowSet")){
-        
+        } else if (inherits(x, "flowSet")) {
           fs <- x
-        
         }
-    
+
         # Generate merged flowFrame for use with estimateLogicle
         fr <- as(fs, "flowFrame")
-    
+
         # Find channels excluded from transList
         excl <- channels[!channels %in% chans]
-      
+
         # Get transformations for these channels using estimateLogicle
         trans <- flowCore::estimateLogicle(fr, excl)
-      
+
         # Combine supplied transList with add transformations
         nms <- c(names(transList@transforms), excl)
         transList <- c(transList, trans)
         names(transList@transforms) <- nms
-      
+
         return(transList)
-      
       }
-    
-    # GatingSet return transformerList
-    }else if(inherits(x, "GatingSet")){
-      
+
+      # GatingSet return transformerList
+    } else if (inherits(x, "GatingSet")) {
+
       # Supplied transList is a transformList - convert to transformerList
-      if(inherits(transList, "transformList")){
-            
+      if (inherits(transList, "transformList")) {
+
         # Get transform functions
-        trans <- lapply(1:length(transList@transforms), function(x){transList@transforms[[x]]@f})
+        trans <- lapply(1:length(transList@transforms), function(x) {
+          transList@transforms[[x]]@f
+        })
         names(trans) <- names(transList@transforms)
-            
+
         # Convert to transform objects
         trans <- lapply(1:length(trans), function(x) {
-              
           t <- new("transform", .Data = trans[[1]])
           t@transformationId <- names(trans)[x]
-              
+
           return(t)
-              
         })
-            
-        trans <- lapply(trans, function(t){
+
+        trans <- lapply(trans, function(t) {
           inv <- flowCore::inverseLogicleTransform(trans = t)
           flowWorkspace::flow_trans("logicle", t@.Data, inv@.Data)
         })
         names(trans) <- names(transList@transforms)
         transList <- flowWorkspace::transformerList(names(trans), trans)
-            
       }
-          
+
       # check which channels are covered by transList
       chans <- names(transList)
-          
+
       # gatingSet contains some transformations
-      if(length(x@transformation) != 0){
-        
-        trnsfrms <- lapply(channels, function(channel){getTransformations(x[[1]], channel, only.function = FALSE)})
+      if (length(x@transformation) != 0) {
+        trnsfrms <- lapply(channels, function(channel) {
+          getTransformations(x[[1]], channel, only.function = FALSE)
+        })
         names(trnsfrms) <- channels
-        
+
         # Remove NULL transforms
         trnsfrms[sapply(trnsfrms, is.null)] <- NULL
         trnsLst <- transformerList(names(trnsfrms), trnsfrms)
-        
+
         # GatingSet contains some transformations
-        if(any(channels %in% names(trnsLst))){
-          
+        if (any(channels %in% names(trnsLst))) {
+
           # GatingSet contains all transformations
-          if(all(channels %in% names(trnsLst))){
-            
+          if (all(channels %in% names(trnsLst))) {
             return(trnsLst)
-            
-          }else{
-            
+          } else {
+
             # GatingSet contains some transformations
             trnsLst <- trnsLst[names(trnsLst) %in% channels]
-            
+
             # See if transList has any additional transformations
-            if(any(names(transList) %in% channels[!channels %in% names(trnsLst)])){
-              
+            if (any(names(transList) %in% channels[!channels %in% names(trnsLst)])) {
               transList <- flowWorkspace::transformerList(names(transList[names(transList) %in% channels[!channels %in% names(trnsLst)]]), transList[names(transList) %in% channels[!channels %in% names(trnsLst)]])
               trnsLst <- c(trnsLst, transList)
               trnsLst <- flowWorkspace::transformerList(names(trnsLst), trnsLst)
-              
             }
-            
+
             # See if all transformations are now present
-            if(all(channels %in% names(trnsLst))){
-              
+            if (all(channels %in% names(trnsLst))) {
               return(trnsLst)
-              
-            }else{
-              
+            } else {
+
               # Some channels are still missing transformations
               fs <- flowWorkspace::getData(x, "root")
               fr <- as(fs, "flowFrame")
               fs <- flowCore::flowSet(fr)
               gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-            
+
               transList <- flowCore::estimateLogicle(gs[[1]], channels[!channels %in% names(trnsLst)])
               transList <- c(trnsLst, transList)
               transList <- flowWorkspace::transformerList(names(transList), transList)
-            
-              return(transList)
-            
-              
-            }
 
+              return(transList)
+            }
           }
-          
         }
-        
-      # GatingSet has no transformations 
-      }else if(length(x@transformation) == 0){
-        
+
+        # GatingSet has no transformations
+      } else if (length(x@transformation) == 0) {
+
         # transList contains all transformations
-        if(all(channels %in% chans)){
-          
+        if (all(channels %in% chans)) {
           return(transList)
-         
-        # Get remaining transformations from GatingSet using estimateLogicle   
-        }else{
-          
+
+          # Get remaining transformations from GatingSet using estimateLogicle
+        } else {
+
           # Get remaining transformations with estimateLogicle
           fs <- flowWorkspace::getData(x, "root")
           fr <- as(fs, "flowFrame")
           fs <- flowCore::flowSet(fr)
           gs <- suppressMessages(flowWorkspace::GatingSet(fs))
-          
+
           trnsLst <- flowCore::estimateLogicle(gs[[1]], channels[!channels %in% chans])
           transList <- c(trnsLst, transList)
           transList <- flowWorkspace::transformerList(names(transList), transList)
-          
+
           return(transList)
-          
         }
-        
       }
-      
     }
-    
   }
-  
 }
 
 #' .getTransformedData
 #' return data which is appropriately transformed (fluorescent channels) - flowFrame/flowSet/GatingSet
 #' @noRd
-.getTransformedData <- function(x, transList = NULL){
-  
+.getTransformedData <- function(x, transList = NULL) {
+
   # Only flowFrame/flowSet/GatingSet
-  if(!class(x)[1] %in% c("flowFrame", "flowSet", "GatingSet")){
-    
+  if (!class(x)[1] %in% c("flowFrame", "flowSet", "GatingSet")) {
     stop("x must be either a flowFrame, flowSet or GatingSet. Subsetted GatingSet should be used instead of GatingHierarchy.")
-    
   }
-  
+
   # Get comlete transList
   transList <- .getCompleteTransList(x, transList)
-  
+
   # Extract channels which have transformations
-  if(inherits(transList, "transformList")){
-    
+  if (inherits(transList, "transformList")) {
     chans <- names(transList@transforms)
-    
-  }else if(inherits(transList, "transformerList")){
-    
+  } else if (inherits(transList, "transformerList")) {
     chans <- names(transList)
-    
   }
-  
+
   # Extract summary stats
-  if(inherits(x, "flowFrame")){
-    
+  if (inherits(x, "flowFrame")) {
     sm <- flowWorkspace::pData(flowCore::parameters(x))
-    
-  }else if(inherits(x, "flowSet")){
-    
+  } else if (inherits(x, "flowSet")) {
     sm <- flowWorkspace::pData(flowCore::parameters(x[[1]]))
-    
-  }else if(inherits(x, "GatingSet")){
-    
+  } else if (inherits(x, "GatingSet")) {
     sm <- flowWorkspace::pData(flowCore::parameters(flowWorkspace::getData(x, "root")[[1]]))
-    
   }
-      
+
   # Extract channels that have been transformed
-  chns <- sm[, "name"][sm[,"maxRange"] < 6]
-      
+  chns <- sm[, "name"][sm[, "maxRange"] < 6]
+
   # Check all chans have been transformed
-  if(length(chns) == 0){
-        
+  if (length(chns) == 0) {
+
     # No channels transformed
     x <- flowCore::transform(x, transList)
+  } else if (all(chans %in% chns)) {
 
-  }else if(all(chans %in% chns)){
-        
     # All channels have been transformed
+  } else {
 
-  }else{
-        
     # Get transformations for untransformed channels
-    if(inherits(transList, "transformList")){
-      
+    if (inherits(transList, "transformList")) {
       transList <- flowCore::transformList(chans[!chans %in% chns], transList@transforms[chans[!chans %in% chns]][[1]]@f)
-      
-    }else if(inherits(transList, "transformerList")){
-      
+    } else if (inherits(transList, "transformerList")) {
       transList <- flowWorkspace::transformerList(chans[!chans %in% chns], transList[chans[!chans %in% chns]])
-      
     }
-    
+
     # Some channels have been transformed
     x <- suppressMessages(flowCore::transform(x, transList))
-        
   }
-  
+
   return(x)
-  
 }
 
 #' .getRawData
 #' return data which is untransformed - flowFrame/flowSet/GatingSet
 #' GatingSet returns a flowSet of untransformed data at parent node
 #' @noRd
-.getRawData <- function(x, transList = NULL, parent = "root"){
-  
-  # Only flowFrame/flowSet/GatingSet
-  if(!class(x)[1] %in% c("flowFrame", "flowSet", "GatingSet")){
-    
-    stop("x must be either a flowFrame, flowSet or GatingSet. Subsetted GatingSet should be used instead of GatingHierarchy.")
-    
-  }
-  
-  # Data is untransformed
-  if(.checkDataTransform(x) == FALSE){
-    
-    if(inherits(x, "flowFrame") | inherits(x, "flowSet")){
-      
-      return(x)
-      
-    }else if(inherits(x, "GatingSet")){
-      
-      return(flowWorkspace::getData(x, parent))
-      
-    }
-    
-  # Data is transformed  
-  }else{
-    
-    if(inherits(x, "flowFrame") | inherits(x, "flowSet")){
-      
-      if(is.null(transList)){
-        
-        stop("Supply a transList object to inverse transformations.")
-        
-      }
-      
-    }
-    
-  }
-  
-  # Extract transformations from GatingSet
-  if(is.null(transList) & inherits(x, "GatingSet")){
+.getRawData <- function(x, transList = NULL, parent = "root") {
 
+  # Only flowFrame/flowSet/GatingSet
+  if (!class(x)[1] %in% c("flowFrame", "flowSet", "GatingSet")) {
+    stop("x must be either a flowFrame, flowSet or GatingSet. Subsetted GatingSet should be used instead of GatingHierarchy.")
+  }
+
+  # Data is untransformed
+  if (.checkDataTransform(x) == FALSE) {
+    if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
+      return(x)
+    } else if (inherits(x, "GatingSet")) {
+      return(flowWorkspace::getData(x, parent))
+    }
+
+    # Data is transformed
+  } else {
+    if (inherits(x, "flowFrame") | inherits(x, "flowSet")) {
+      if (is.null(transList)) {
+        stop("Supply a transList object to inverse transformations.")
+      }
+    }
+  }
+
+  # Extract transformations from GatingSet
+  if (is.null(transList) & inherits(x, "GatingSet")) {
     channels <- colnames(x)
-    
-    trnsfrms <- lapply(channels, function(channel){getTransformations(x[[1]], channel, only.function = FALSE)})
+
+    trnsfrms <- lapply(channels, function(channel) {
+      getTransformations(x[[1]], channel, only.function = FALSE)
+    })
     names(trnsfrms) <- channels
-    
+
     # Remove NULL transforms
     trnsfrms[sapply(trnsfrms, is.null)] <- NULL
     transList <- transformerList(names(trnsfrms), trnsfrms)
-    
   }
-  
+
   # Get inverse transList
   inv <- checkTransList(transList, inverse = TRUE)
-  
+
   # Extract channels which have transformations
-  if(inherits(transList, "transformList")){
-    
+  if (inherits(transList, "transformList")) {
     chans <- names(transList@transforms)
-    
-  }else if(inherits(transList, "transformerList")){
-    
+  } else if (inherits(transList, "transformerList")) {
     chans <- names(transList)
-    
   }
-  
+
   # Extract summary stats
-  if(inherits(x, "flowFrame")){
-    
+  if (inherits(x, "flowFrame")) {
     sm <- flowWorkspace::pData(flowCore::parameters(x))
-    
-  }else if(inherits(x, "flowSet")){
-    
+  } else if (inherits(x, "flowSet")) {
     sm <- flowWorkspace::pData(flowCore::parameters(x[[1]]))
-    
-  }else if(inherits(x, "GatingSet")){
-    
+  } else if (inherits(x, "GatingSet")) {
     sm <- flowWorkspace::pData(flowCore::parameters(flowWorkspace::getData(x, "root")[[1]]))
-    
   }
-  
+
   # Extract channels that have been transformed - apply inverse transform
-  chns <- as.vector(sm[, "name"][sm[,"maxRange"] < 6])
-  
+  chns <- as.vector(sm[, "name"][sm[, "maxRange"] < 6])
+
   # Extract flowSet from GatingSet
-  if(inherits(x, "GatingSet")){
-    
+  if (inherits(x, "GatingSet")) {
     x <- flowWorkspace::getData(x, parent)
-    
-  }  
-  
+  }
+
   # Check all chans have been transformed
-  if(length(chns) == 0){
-    
+  if (length(chns) == 0) {
+
     # No channels transformed
-    
-  }else if(all(chans %in% chns)){
-    
+  } else if (all(chans %in% chns)) {
+
     # All channels have been transformed
     x <- flowCore::transform(x, inv)
-    
-  }else{
-    
+  } else {
+
     # Some channels have been transformed
-    trns <- lapply(chans[chans %in% chns], function(x){
+    trns <- lapply(chans[chans %in% chns], function(x) {
       inv@transforms[[x]]@f
     })
     names(trns) <- chans[chans %in% chns]
     inv <- transformList(names(trns), trns)
     x <- flowCore::transform(x, inv)
-    
   }
 
   return(x)
-  
 }
 
 #' .checkDataTransform
 #' Check whether data has been transfomed - return TRUE if any channels transformed
 #' @noRd
-.checkDataTransform <- function(x){
-  
-  if(inherits(x, "flowFrame")){
-    
+.checkDataTransform <- function(x) {
+  if (inherits(x, "flowFrame")) {
+
     # Extract summary stats
     sm <- pData(parameters(x))
-    
+
     # Check if any maxRange < 6
-    if(any(sm[,"maxRange"] < 6)){
-      
+    if (any(sm[, "maxRange"] < 6)) {
       return(TRUE)
-      
-    }else{
-      
+    } else {
       return(FALSE)
-      
     }
-    
-  }else if(inherits(x, "flowSet")){
-    
+  } else if (inherits(x, "flowSet")) {
+
     # Extract summary stats
     sm <- pData(parameters(x[[1]]))
-    
+
     # Check if any maxRange < 6
-    if(any(sm[,"maxRange"] < 6)){
-      
+    if (any(sm[, "maxRange"] < 6)) {
       return(TRUE)
-      
-    }else{
-      
+    } else {
       return(FALSE)
-      
     }
-    
-  }else if(inherits(x, "GatingSet")){
-    
+  } else if (inherits(x, "GatingSet")) {
+
     # Extract root flowSet
     fs <- getData(x, "root")
-    
+
     # Extract summary stats
     sm <- pData(parameters(fs[[1]]))
-    
+
     # Check if any maxRange < 6
-    if(any(sm[,"maxRange"] < 6)){
-      
+    if (any(sm[, "maxRange"] < 6)) {
       return(TRUE)
-      
-    }else{
-      
+    } else {
       return(FALSE)
-      
     }
-    
   }
-  
 }
