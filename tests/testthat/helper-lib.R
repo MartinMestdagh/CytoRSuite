@@ -23,6 +23,8 @@ fs <- Activation
 
 # pData information -
 pData(fs)$OVAConc <- c(0,0.005,0.05,0.5)
+pData(fs)$Treatment <- c("A","A","B","B")
+pData(fs)$Treatment <- factor(pData(fs)$Treatment, levels = c("B","A"))
 chnls <- c("Alexa Fluor 405-A","Alexa Fluor 430-A","APC-Cy7-A", "PE-A", "Alexa Fluor 488-A", "Alexa Fluor 700-A", "Alexa Fluor 647-A", "7-AAD-A") 
 markers <- c("Hoechst-405", "Hoechst-430", "CD11c", "Va2", "CD8", "CD4", "CD44", "CD69")
 names(markers) <- chnls
@@ -66,6 +68,7 @@ gs4 <- GatingSet(Comp)
 
 # Transformations -
 trans2 <- estimateLogicle(gs4[[1]], c("SSC-A", "SSC-H", "SSC-W"))
+trans3 <- estimateLogicle(gs4[[1]], getChannels(gs4))
 gs4 <- transform(gs4, trans2)
 
 # Gating -
@@ -75,7 +78,7 @@ gating(gtc, gs4)
 ## --------------------------------------------------------------------
 # Spillover Matrix -
 
-spill <- read.csv("Spillover Matrix.csv", header = TRUE, row.names = 1)
+spill <- read.csv("Ref-Spillover-Matrix.csv", header = TRUE, row.names = 1)
 colnames(spill) <- rownames(spill)
 
 ## --------------------------------------------------------------------

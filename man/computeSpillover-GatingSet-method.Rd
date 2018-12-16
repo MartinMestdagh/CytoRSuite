@@ -73,21 +73,31 @@ named .csv file for future use.
 }
 \examples{
 \dontrun{
-fs <- Activation
+library(CytoRSuiteData)
+
+# Use Compensation controls in CytoRSuiteData
+fs <- Compensation
+
+# Add controls to GatingSet
 gs <- GatingSet(fs)
-drawGate(gs, 
-         parent = "root", 
-         parent = "Cells", 
-         channels = c("FSC-A","SSC-A"), 
-         gtfile = "Example gatingTemplate.csv")
-drawGate(gs, 
-         parent = "Cells", 
-         parent = "Singlets", 
-         channels = c("FSC-A","FSC-H"), 
-         gtfile = "Example gatingTemplate.csv")
-spill <- computeSpillover(gs, 
-                          parent = "Single Cells", 
-                          spfile = "Example Spillover Matrix.csv")
+
+# Gate controls using drawGate
+drawGate(gs,
+         parent = "root",
+         alias = "Single Cells",
+         channels = c("FSC-A","FSC-H"),
+         gtfile = "Compensation-gatingTemplate.csv")
+
+# Find 'Compensation-gatingTemplate.csv' in working directory
+
+# Compute spillover matrix
+spill <- computeSpillover(gs, parent = "Single Cells")
+
+# Find 'Spillover Matrix.csv' and 'Compensation Channels.csv' in working directory.
+
+# Apply spillover matrix
+gs <- compensate(gs, spill)
+
 }
 
 }

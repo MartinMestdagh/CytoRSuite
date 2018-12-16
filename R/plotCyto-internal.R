@@ -516,7 +516,7 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
     
     }
     
-  }else{
+  }else if(!is.null(overlay) & offset != 0){
     
     .gateOverlay(x = fr, channel = channel, overlay = overlay, gates = gates, offset = offset, alias = text.labels, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
     
@@ -602,6 +602,11 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
   # Assign x to fs
   fs <- x
   fs.channels <- BiocGenerics::colnames(fs)
+  
+  # transList
+  if(!is.null(transList)){
+    transList <- checkTransList(transList, inverse = FALSE)
+  }
   
   # Check channel
   channel <- checkChannels(x = fs, channels = channel, plot = TRUE)
@@ -1409,6 +1414,9 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
 #' @export
 setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, transList = NULL, mergeBy = NULL, overlay = NULL, subSample = NULL, mfrow = NULL, popup = FALSE, limits = "machine", xlim = NULL, ylim = NULL, main,  ...){
   
+  # Prevent scientific notation
+  options(scipen = 999)  
+  
   # Assign x to fs
   fs <- x
   fs.channels <- BiocGenerics::colnames(fs)
@@ -1419,8 +1427,10 @@ setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, 
   # Check channels
   channels <- checkChannels(fs, channels = channels, plot = TRUE)
   
-  # Prevent scientific notation
-  options(scipen = 999)
+  # transList
+  if(!is.null(transList)){
+    transList <- checkTransList(transList, inverse = FALSE)
+  }
   
   # X axis limits
   if(is.null(xlim)){

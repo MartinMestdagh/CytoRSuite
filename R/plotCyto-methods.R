@@ -242,7 +242,14 @@ setMethod(plotCyto, signature = "GatingSet",
   # transList
   if(is.null(transList)){
     
-    transList <- .getCompleteTransList(x = gs, transList = transList)
+    # Some transforms found - replace these entries in transList
+    trnsfrms <- lapply(channels, function(channel){getTransformations(gs[[1]], channel, only.function = FALSE)})
+    names(trnsfrms) <- channels
+    
+    # Remove NULL transforms
+    trnsfrms[sapply(trnsfrms, is.null)] <- NULL
+    transList <- transformerList(names(trnsfrms), trnsfrms)
+    
     transList <- checkTransList(transList, inverse = FALSE)
     
   }else{
@@ -584,19 +591,13 @@ setMethod(plotCyto, signature = "GatingHierarchy",
   # transList
   if(is.null(transList)){
     
-    trns <- getTransformations(gh, only.function = TRUE)
+    # Some transforms found - replace these entries in transList
+    trnsfrms <- lapply(channels, function(channel){getTransformations(gh, channel, only.function = FALSE)})
+    names(trnsfrms) <- channels
     
-    if(!length(trns) == 0){
-      
-      transList <- transformList(names(trns), trns)
-      
-    }
-    
-    if(length(trns) == 0){
-      
-      transList <- NULL
-      
-    }
+    # Remove NULL transforms
+    trnsfrms[sapply(trnsfrms, is.null)] <- NULL
+    transList <- transformerList(names(trnsfrms), trnsfrms)
     
     transList <- checkTransList(transList, inverse = FALSE)
     

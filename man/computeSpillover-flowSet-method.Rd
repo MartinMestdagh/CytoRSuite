@@ -65,12 +65,19 @@ and written to a named .csv file for future use.
 }
 \examples{
 \dontrun{
-fs <- Activation
-gate1 <- drawGate(fs, alias = "Cells", channels = c("FSC-A","SSC-A"))
-Cells <- Subset(fs, g1[[1]])
-gate2 <- drawGate(Cells, alias = "Singlets", channels = c("FSC-A","FSC-H"))
-Singlets <- Subset(Cells, g2[[1]])
-spill <- computeSpillover(Singlets, spfile = "Example Spillover Matrix.csv")
+library(CytoRSuiteData)
+
+# Use Compensation controls in CytoRSuiteData
+fs <- Compensation
+
+# Compute spillover matrix
+spill <- computeSpillover(fs)
+
+# Find 'Spillover Matrix.csv' and 'Compensation Channels.csv' in working directory.
+
+# Apply spillover matrix
+fs <- compensate(fs, spill)
+
 }
 
 }
