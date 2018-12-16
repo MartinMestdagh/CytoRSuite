@@ -5,6 +5,7 @@ Version: 0.9.5
 Author: Dillon Hammill <Dillon.Hammill@anu.edu.au>
 Maintainer: Dillon Hammill <Dillon.Hammill@anu.edu.au>
 Description: Compensation, Gating & Visualisation Toolkit for Analysis of Flow Cytometry Data.
+BugReports: https://github.com/DillonHammill/CytoRSuite/issues
 Depends: 
   R (>= 2.10),
   openCyto(>= 1.21.1),
