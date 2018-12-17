@@ -5,79 +5,78 @@
 #'   \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @seealso \code{\link{getChannels,flowFrame-method}}
 #' @seealso \code{\link{getChannels,flowSet-method}}
 #' @seealso \code{\link{getChannels,GatingSet-method}}
 #'
 #' @export
-setGeneric(name="getChannels",
-           def=function(x){standardGeneric("getChannels")}
+setGeneric(
+  name = "getChannels",
+  def = function(x) {
+    standardGeneric("getChannels")
+  }
 )
 
 #' Extract Fluorescent Channels - flowFrame Method
-#' 
+#'
 #' @param x object \code{\link[flowCore:flowFrame-class]{flowFrame}}.
-#' 
+#'
 #' @return vector of fluorescent channels.
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @seealso \code{\link{getChannels,flowSet-method}}
 #' @seealso \code{\link{getChannels,GatingSet-method}}
-#' 
-#' @examples 
+#'
+#' @examples
 #' \dontrun{
 #' fs <- Activation
 #' getChannels(fs[[1]])
 #' }
 #' 
 #' @export
-setMethod(getChannels, signature = "flowFrame", definition = function(x){
-  
+setMethod(getChannels, signature = "flowFrame", definition = function(x) {
   channels <- unname(BiocGenerics::colnames(x))
-  channels <- channels[!channels %in% c("FSC-A","FSC-H","FSC-W","SSC-A","SSC-H","SSC-W", "Time","Original")]
-  
+  channels <- channels[!channels %in% c("FSC-A", "FSC-H", "FSC-W", "SSC-A", "SSC-H", "SSC-W", "Time", "Original")]
+
   return(channels)
-  
 })
 
 #' Extract Fluorescent Channels - flowSet Method
-#' 
+#'
 #' @param x object \code{\link[flowCore:flowSet-class]{flowSet}}.
-#' 
+#'
 #' @return vector of fluorescent channels.
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @seealso \code{\link{getChannels,flowFrame-method}}
 #' @seealso \code{\link{getChannels,GatingSet-method}}
-#' 
-#' @examples 
+#'
+#' @examples
 #' \dontrun{
 #' fs <- Activation
 #' getChannels(fs)
 #' }
 #' 
 #' @export
-setMethod(getChannels, signature = "flowSet", definition = function(x){
-  
+setMethod(getChannels, signature = "flowSet", definition = function(x) {
   getChannels(x[[1]])
-  
 })
 
 #' Extract Fluorescent Channels - GatingSet Method
-#' 
+#'
 #' @param x object \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
-#' 
+#'
 #' @return vector of fluorescent channels.
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
-#' 
+#'
 #' @seealso \code{\link{getChannels,flowFrame-method}}
 #' @seealso \code{\link{getChannels,flowSet-method}}
-#' 
-#' @examples 
+#'
+#' @examples
 #' \dontrun{
 #' fs <- Activation
 #' gs <- GatingSet(fs)
@@ -85,11 +84,9 @@ setMethod(getChannels, signature = "flowSet", definition = function(x){
 #' }
 #' 
 #' @export
-setMethod(getChannels, signature = "GatingSet", definition = function(x){
-  
+setMethod(getChannels, signature = "GatingSet", definition = function(x) {
   fr <- getData(x[[1]], "root")
   getChannels(fr)
-  
 })
 
 #' Select Fluorescent Channel for Compensation Controls
@@ -104,8 +101,11 @@ setMethod(getChannels, signature = "GatingSet", definition = function(x){
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setGeneric(name="selectChannels",
-           def=function(x){standardGeneric("selectChannels")}
+setGeneric(
+  name = "selectChannels",
+  def = function(x) {
+    standardGeneric("selectChannels")
+  }
 )
 
 #' Select Fluorescent Channel for Compensation Controls - flowFrame Method
@@ -118,38 +118,34 @@ setGeneric(name="selectChannels",
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @examples 
+#' @examples
 #' \dontrun{
 #' fs <- Activation
 #' selectChannels(fs[[1]])
 #' }
-#'
+#' 
 #' @export
-setMethod(selectChannels, signature = "flowFrame", definition = function(x){
-  
+setMethod(selectChannels, signature = "flowFrame", definition = function(x) {
+
   # Assign x to fr
   fr <- x
-  
+
   opts <- getChannels(fr)
-  
+
   # Print sample name and select channel
   message(paste("Select a fluorescent channel for the following compensation control:", fr@description$GUID))
-  
-  if(getOption("CytoRSuite_interact") == TRUE){
-    
+
+  if (getOption("CytoRSuite_interact") == TRUE) {
     channel <- opts[menu(choices = opts, graphics = TRUE)]
-    
-  }else{
-    
+  } else {
+
     # Tests use PE Cy7 Control -
     channel <- opts[5]
-    
   }
-  
+
   return(channel)
-  
-}) 
- 
+})
+
 #' Select Fluorescent Channel for Compensation Controls - flowSet Method
 #'
 #' @param x object of class
@@ -162,43 +158,37 @@ setMethod(selectChannels, signature = "flowFrame", definition = function(x){
 #'
 #' @importFrom utils menu
 #'
-#' @examples 
+#' @examples
 #' \dontrun{
 #' fs <- Activation
 #' selectChannels(fs)
 #' }
-#'
+#' 
 #' @export
-setMethod(selectChannels, signature = "flowSet", definition = function(x){
-  
+setMethod(selectChannels, signature = "flowSet", definition = function(x) {
+
   # Assign x to fs
   fs <- x
-  
+
   opts <- c(getChannels(fs), "Unstained")
-  
+
   # Print sample name and select channel
-  channels <- opts[sapply(pData(fs)$name, function(x){
-    
+  channels <- opts[sapply(pData(fs)$name, function(x) {
     message("Select a fluorescent channel for the following compensation control:")
-    
+
     print(x)
-    
-    if(getOption("CytoRSuite_interact") == TRUE){
-        
+
+    if (getOption("CytoRSuite_interact") == TRUE) {
       menu(choices = opts, graphics = TRUE)
-        
-    }else{
-        
+    } else {
+
       # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
       c(4, 7, 11, 12, 5, 2)[match(x, pData(fs)$name)]
-        
     }
-    
   })]
-  
+
   return(channels)
-  
-}) 
+})
 
 #' Select Fluorescent Channel for Compensation Controls - GatingSet Method
 #'
@@ -212,43 +202,37 @@ setMethod(selectChannels, signature = "flowSet", definition = function(x){
 #'
 #' @importFrom utils menu
 #'
-#' @examples 
+#' @examples
 #' \dontrun{
 #' fs <- Activation
 #' gs <- GatingSet(fs)
 #' selectChannels(gs)
 #' }
-#'
+#' 
 #' @export
-setMethod(selectChannels, signature = "GatingSet", definition = function(x){
-  
+setMethod(selectChannels, signature = "GatingSet", definition = function(x) {
+
   # Assign x to gs
   gs <- x
-  
+
   opts <- c(getChannels(gs), "Unstained")
-  
+
   # Print sample name and select channel
-  channels <- opts[sapply(pData(gs)$name, function(x){
-    
+  channels <- opts[sapply(pData(gs)$name, function(x) {
     message("Select a fluorescent channel for the following compensation control:")
-    
+
     print(x)
-    
-    if(getOption("CytoRSuite_interact") == TRUE){
-      
+
+    if (getOption("CytoRSuite_interact") == TRUE) {
       menu(choices = opts, graphics = TRUE)
-      
-    }else{
-      
+    } else {
+
       # Test channels - 7AAD, AF430, APC Cy7, NIL, PE Cy7, PE
       c(4, 7, 11, 12, 5, 2)[match(x, pData(gs)$name)]
-      
     }
-    
   })]
-  
+
   return(channels)
-  
 })
 
 #' Sample a flowFrame
@@ -266,28 +250,26 @@ setMethod(selectChannels, signature = "GatingSet", definition = function(x){
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @examples 
+#' @examples
 #' \dontrun{
 #' fs <- Activation
 #' sampleFrame(fs[[1]], 50000)
 #' }
-#'
+#' 
 #' @export
-sampleFrame <- function(fr, size = 250000){
-  
+sampleFrame <- function(fr, size = 250000) {
+
   # Number of events
   events <- nrow(fr)
-  
-  if(events < size){
-    
+
+  if (events < size) {
     size <- events
-  
-  }else{
-    
+  } else {
+
   }
 
   smp <- sampleFilter(size = size)
   fr <- Subset(fr, smp)
-  
+
   return(fr)
 }

@@ -27,5 +27,6 @@ test_that("selectChannels", {
 test_that("sampleFrame returns subsetted flowFrame", {
   
   expect_equal(nrow(exprs(sampleFrame(fs[[1]],25000))), 25000)
+  expect_equal(nrow(exprs(sampleFrame(fs[[1]],75000))), 50000)
   
 })
