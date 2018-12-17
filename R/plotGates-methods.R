@@ -16,8 +16,11 @@
 #' @seealso \code{\link{plotGates,filters-method}}
 #'
 #' @export
-setGeneric(name = "plotGates",
-           def = function(x, ...){standardGeneric("plotGates")}
+setGeneric(
+  name = "plotGates",
+  def = function(x, ...) {
+    standardGeneric("plotGates")
+  }
 )
 
 #' Plot rectangleGate Objects onto an Existing plot
@@ -50,115 +53,84 @@ setGeneric(name = "plotGates",
 #' @seealso \code{\link{plotGates,filters-method}}
 #'
 #' @export
-setMethod(plotGates, signature = "rectangleGate", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1){
-  
+setMethod(plotGates, signature = "rectangleGate", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1) {
+
   # Assign x to gt
   gt <- x
-  
+
   # Allow 1D gate plotted in 2D
-  if(!missing(channels)){
-    
-    if(length(channels) == 2 & length(parameters(gt)) == 1){
-    
-      rg <- matrix(c(as.numeric(gt@min),as.numeric(gt@max), -Inf, Inf), ncol = 2, nrow = 2)
+  if (!missing(channels)) {
+    if (length(channels) == 2 & length(parameters(gt)) == 1) {
+      rg <- matrix(c(as.numeric(gt@min), as.numeric(gt@max), -Inf, Inf), ncol = 2, nrow = 2)
       colnames(rg) <- c(as.vector(parameters(gt)), channels[!channels == as.vector(parameters(gt))])
-      rownames(rg) <- c("min","max")
+      rownames(rg) <- c("min", "max")
       gt <- rectangleGate(.gate = rg)
-    
     }
-    
-  }else{
-    
+  } else {
     channels <- as.vector(parameters(gt))
-    
   }
-  
+
   # 2D gatre in 1D
-  if(length(channels) == 1 & length(parameters(gt)) == 2){
-    
+  if (length(channels) == 1 & length(parameters(gt)) == 2) {
     gt <- gt[channels]
-    
   }
-  
-  if(!all(as.vector(parameters(gt)) %in% channels)){
-    
+
+  if (!all(as.vector(parameters(gt)) %in% channels)) {
     stop("Channels used to construct the plot do not match those of the supplied gate.")
-    
   }
-  
+
   # 2D rectangleGate
-  if(length(gt@min) == 2){
-    
+  if (length(gt@min) == 2) {
+
     # Replace -Inf x values for plotting
-    if(is.infinite(gt@min[channels[1]])){
-      
+    if (is.infinite(gt@min[channels[1]])) {
       gt@min[channels[1]] <- par("usr")[1]
-      
     }
-    
+
     # Replace Inf x values for plotting
-    if(is.infinite(gt@max[channels[1]])){
-      
+    if (is.infinite(gt@max[channels[1]])) {
       gt@max[channels[1]] <- par("usr")[2]
-      
     }
-    
+
     # Replace -Inf y values for plotting
-    if(is.infinite(gt@min[channels[2]])){
-      
+    if (is.infinite(gt@min[channels[2]])) {
       gt@min[channels[2]] <- par("usr")[3]
-      
     }
-    
+
     # Replace Inf y values for plotting
-    if(is.infinite(gt@max[channels[2]])){
-      
+    if (is.infinite(gt@max[channels[2]])) {
       gt@max[channels[2]] <- par("usr")[4]
-      
     }
-    
-    if(pts.gate == TRUE){
-      
-      points(x = c(gt@min[channels[1]],gt@max[channels[1]]), y = c(gt@min[channels[2]],gt@max[channels[2]]), col = col.gate, pch = pch.gate, cex = cex.gate)
-      
+
+    if (pts.gate == TRUE) {
+      points(x = c(gt@min[channels[1]], gt@max[channels[1]]), y = c(gt@min[channels[2]], gt@max[channels[2]]), col = col.gate, pch = pch.gate, cex = cex.gate)
     }
-    
+
     rect(xleft = gt@min[channels[1]], ybottom = gt@min[channels[2]], xright = gt@max[channels[1]], ytop = gt@max[channels[2]], border = col.gate, lwd = lwd.gate, lty = lty.gate)
-    
-  }else if(length(gt@min) == 1){
-    
+  } else if (length(gt@min) == 1) {
+
     # Replace -Inf values for plotting
-    if(is.infinite(gt@min[1])){
-      
+    if (is.infinite(gt@min[1])) {
       gt@min[1] <- par("usr")[1]
-      
     }
-    
+
     # Replace Inf values for plotting
-    if(is.infinite(gt@max[1])){
-      
+    if (is.infinite(gt@max[1])) {
       gt@max[1] <- par("usr")[2]
-      
     }
-    
+
     # height of horizontal line
-    hln <- 0.5*par("usr")[4]
-    
+    hln <- 0.5 * par("usr")[4]
+
     # Add points (x1,hln) and (x2, hln)
-    if(pts.gate == TRUE){
-      
-      points(x = c(gt@min[channels[1]], gt@max[channels[1]]), y = c(hln,hln), col = col.gate, pch = pch.gate, cex = cex.gate)
-      
+    if (pts.gate == TRUE) {
+      points(x = c(gt@min[channels[1]], gt@max[channels[1]]), y = c(hln, hln), col = col.gate, pch = pch.gate, cex = cex.gate)
     }
-    
-    # Add vertical lines through x1 and x2
-    abline(v = c(gt@min[channels[1]], gt@max[channels[1]]), lwd = lwd.gate, col = col.gate, lty = lty.gate)
-    
-    # Add horizontal line
-    lines(x = c(gt@min[channels[1]], gt@max[channels[1]]), y = c(hln,hln), col = col.gate, lwd = lwd.gate, lty = lty.gate)
-    
-  }
+
+    # Add rectangle
+    rect(xleft = gt@min[channels[1]], ybottom = 0.6*par("usr")[3], xright = gt@max[channels[1]], ytop = 0.985*par("usr")[4], border = col.gate, lwd = lwd.gate, lty = lty.gate)
   
+  }
 })
 
 #' Plot polygonGate Objects onto an Existing Plot
@@ -190,74 +162,50 @@ setMethod(plotGates, signature = "rectangleGate", definition = function(x, chann
 #' @seealso \code{\link{plotGates,filters-method}}
 #'
 #' @export
-setMethod(plotGates, signature = "polygonGate", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1){
-  
+setMethod(plotGates, signature = "polygonGate", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1) {
+
   # Assign x to gt
   gt <- x
-  
+
   # Check Channels
-  if(missing(channels)){
-    
+  if (missing(channels)) {
     channels <- as.vector(parameters(gt))
-    
   }
-  
-  if(!all(as.vector(parameters(gt)) %in% channels)){
-    
+
+  if (!all(as.vector(parameters(gt)) %in% channels)) {
     stop("Channels used to construct the plot do not match those of the supplied gate.")
-    
   }
-  
+
   # Replace Inf values with plot limits
-  if(!all(is.finite(gt@boundaries))){
-    
+  if (!all(is.finite(gt@boundaries))) {
     cnt <- 0
-    lapply(1:length(channels), function(x){
-      
-      cnt <<-  cnt + 1
-      
-      if(any(!is.finite(gt@boundaries[,channels[x]]) & any(gt@boundaries[,channels[x]] < 0))){
-        
-        if(cnt == 1){
-          
-          gt@boundaries[,channels[x]][which(gt@boundaries[, channels[x]] < 0)] <<- par("usr")[1]
-          
-        }else if(cnt == 2){
-          
-          gt@boundaries[,channels[x]][which(gt@boundaries[,channels[x]] < 0)] <<- par("usr")[3]
-          
+    lapply(1:length(channels), function(x) {
+      cnt <<- cnt + 1
+
+      if (any(!is.finite(gt@boundaries[, channels[x]]) & any(gt@boundaries[, channels[x]] < 0))) {
+        if (cnt == 1) {
+          gt@boundaries[, channels[x]][which(gt@boundaries[, channels[x]] < 0)] <<- par("usr")[1]
+        } else if (cnt == 2) {
+          gt@boundaries[, channels[x]][which(gt@boundaries[, channels[x]] < 0)] <<- par("usr")[3]
         }
-        
       }
-      
-      if(any(!is.finite(gt@boundaries[,channels[x]]) & any(!gt@boundaries[,channels[x]] < 0))){
-        
-        if(cnt == 1){
-          
-          gt@boundaries[,channels[x]][which(!is.finite(gt@boundaries[,channels[x]]) & !gt@boundaries[,channels[x]] < 0)] <<- par("usr")[2]
-          
-        }else if(cnt == 2){
-          
-          gt@boundaries[,channels[x]][which(!is.finite(gt@boundaries[,channels[x]]) & !gt@boundaries[,channels[x]] < 0)] <<- par("usr")[4]
-          
+
+      if (any(!is.finite(gt@boundaries[, channels[x]]) & any(!gt@boundaries[, channels[x]] < 0))) {
+        if (cnt == 1) {
+          gt@boundaries[, channels[x]][which(!is.finite(gt@boundaries[, channels[x]]) & !gt@boundaries[, channels[x]] < 0)] <<- par("usr")[2]
+        } else if (cnt == 2) {
+          gt@boundaries[, channels[x]][which(!is.finite(gt@boundaries[, channels[x]]) & !gt@boundaries[, channels[x]] < 0)] <<- par("usr")[4]
         }
-        
       }
-      
     })
-    
   }
-  
+
   # Plot Gate
-  if(pts.gate == TRUE){
-    
-    points(x = c(gt@boundaries[,channels[1]]), y = c(gt@boundaries[,channels[2]]), pch = pch.gate, col = col.gate, cex = cex.gate)
-    
-  } 
-  
-  polygon(gt@boundaries[,channels[1]], gt@boundaries[,channels[2]], border = col.gate, lwd = lwd.gate, lty = lty.gate)
-  
-  
+  if (pts.gate == TRUE) {
+    points(x = c(gt@boundaries[, channels[1]]), y = c(gt@boundaries[, channels[2]]), pch = pch.gate, col = col.gate, cex = cex.gate)
+  }
+
+  polygon(gt@boundaries[, channels[1]], gt@boundaries[, channels[2]], border = col.gate, lwd = lwd.gate, lty = lty.gate)
 })
 
 #' Plot ellipsoidGate Objects onto an Existing Plot
@@ -291,30 +239,25 @@ setMethod(plotGates, signature = "polygonGate", definition = function(x, channel
 #' @seealso \code{\link{plotGates,filters-method}}
 #'
 #' @export
-setMethod(plotGates, signature = "ellipsoidGate", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1){
-  
+setMethod(plotGates, signature = "ellipsoidGate", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1) {
+
   # Assign x to gt
   gt <- x
-  
+
   # Check Channels
-  if(missing(channels)){
-    
+  if (missing(channels)) {
     channels <- as.vector(parameters(gt))
-    
   }
-  
-  if(!all(as.vector(parameters(gt)) %in% channels)){
-    
+
+  if (!all(as.vector(parameters(gt)) %in% channels)) {
     stop("Channels used to construct the plot do not match those of the supplied gate.")
-    
   }
-  
+
   # Coerce to polygonGate
   gt <- as(gt, "polygonGate")
-  
+
   # Plot gate
-  polygon(gt@boundaries[,channels[1]], gt@boundaries[,channels[2]], border = col.gate, lwd = lwd.gate, lty = lty.gate)
-  
+  polygon(gt@boundaries[, channels[1]], gt@boundaries[, channels[2]], border = col.gate, lwd = lwd.gate, lty = lty.gate)
 })
 
 #' Plot List of Gate Objects onto an Existing Plot
@@ -346,107 +289,69 @@ setMethod(plotGates, signature = "ellipsoidGate", definition = function(x, chann
 #' @seealso \code{\link{plotGates,filters-method}}
 #'
 #' @export
-setMethod(plotGates, signature = "list", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1){
-  
+setMethod(plotGates, signature = "list", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1) {
+
   # Assign x to gts
   gts <- x
-  
+
   # Check Channels
-  if(missing(channels)){
-    
-    channels <- unique(as.vector(sapply(gts,parameters)))
-    
+  if (missing(channels)) {
+    channels <- unique(as.vector(sapply(gts, parameters)))
   }
-  
-  if(!all(unique(as.vector(sapply(gts,parameters))) %in% channels)){
-    
+
+  if (!all(unique(as.vector(sapply(gts, parameters))) %in% channels)) {
     stop("Channels used to construct the plot do not match those of the supplied gate.")
-    
   }
-  
+
   # Gate colours
-  if(length(col.gate) != length(gts)){
-    
-    if(length(col.gate) == 1){
-      
+  if (length(col.gate) != length(gts)) {
+    if (length(col.gate) == 1) {
       col.gate <- rep(col.gate, length(gts))
-      
-    }else if(length(col.gate) > length(gts)){
-      
+    } else if (length(col.gate) > length(gts)) {
       col.gate <- col.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Gate Line Type
-  if(length(lty.gate) != length(gts)){
-    
-    if(length(lty.gate) == 1){
-      
+  if (length(lty.gate) != length(gts)) {
+    if (length(lty.gate) == 1) {
       lty.gate <- rep(lty.gate, length(gts))
-      
-    }else if(length(lty.gate) > length(gts)){
-      
+    } else if (length(lty.gate) > length(gts)) {
       lty.gate <- lty.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Gate Line Width
-  if(length(lwd.gate) != length(gts)){
-    
-    if(length(lwd.gate) == 1){
-      
+  if (length(lwd.gate) != length(gts)) {
+    if (length(lwd.gate) == 1) {
       lwd.gate <- rep(lwd.gate, length(gts))
-      
-    }else if(length(lwd.gate) > length(gts)){
-      
+    } else if (length(lwd.gate) > length(gts)) {
       lwd.gate <- lwd.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Gate Point Character
-  if(length(pch.gate) != length(gts)){
-    
-    if(length(pch.gate) == 1){
-      
+  if (length(pch.gate) != length(gts)) {
+    if (length(pch.gate) == 1) {
       pch.gate <- rep(pch.gate, length(gts))
-      
-    }else if(length(pch.gate) > length(gts)){
-      
+    } else if (length(pch.gate) > length(gts)) {
       pch.gate <- pch.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Gate Point Expansion
-  if(length(cex.gate) != length(gts)){
-    
-    if(length(cex.gate) == 1){
-      
+  if (length(cex.gate) != length(gts)) {
+    if (length(cex.gate) == 1) {
       cex.gate <- rep(cex.gate, length(gts))
-      
-    }else if(length(cex.gate) > length(gts)){
-      
+    } else if (length(cex.gate) > length(gts)) {
       cex.gate <- cex.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Plot Gates
-  mapply(function(gt, col.gate, lty.gate, lwd.gate, pch.gate, cex.gate){
-    
+  mapply(function(gt, col.gate, lty.gate, lwd.gate, pch.gate, cex.gate) {
     plotGates(gt, channels = channels, col.gate = col.gate, lwd.gate = lwd.gate, lty.gate = lty.gate, pts.gate = pts.gate, pch.gate = pch.gate, cex.gate = cex.gate)
-    
   }, gts, col.gate, lty.gate, lwd.gate, pch.gate, cex.gate)
-  
-  
 })
 
 #' Plot filters List of Gate Objects onto an Existing Plot
@@ -479,105 +384,67 @@ setMethod(plotGates, signature = "list", definition = function(x, channels, col.
 #' @seealso \code{\link{plotGates,list-method}}
 #'
 #' @export
-setMethod(plotGates, signature = "filters", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1){
-  
+setMethod(plotGates, signature = "filters", definition = function(x, channels, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, pts.gate = FALSE, pch.gate = 16, cex.gate = 1) {
+
   # Assign x to gts
   gts <- x
-  
+
   # Check Channels
-  if(missing(channels)){
-    
-    channels <- unique(as.vector(sapply(gts,parameters)))
-    
+  if (missing(channels)) {
+    channels <- unique(as.vector(sapply(gts, parameters)))
   }
-  
-  if(!all(unique(as.vector(sapply(gts,parameters))) %in% channels)){
-    
+
+  if (!all(unique(as.vector(sapply(gts, parameters))) %in% channels)) {
     stop("Channels used to construct the plot do not match those of the supplied gate.")
-    
   }
-  
+
   # Gate colours
-  if(length(col.gate) != length(gts)){
-    
-    if(length(col.gate) == 1){
-      
+  if (length(col.gate) != length(gts)) {
+    if (length(col.gate) == 1) {
       col.gate <- rep(col.gate, length(gts))
-      
-    }else if(length(col.gate) > length(gts)){
-      
+    } else if (length(col.gate) > length(gts)) {
       col.gate <- col.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Gate Line Type
-  if(length(lty.gate) != length(gts)){
-    
-    if(length(lty.gate) == 1){
-      
+  if (length(lty.gate) != length(gts)) {
+    if (length(lty.gate) == 1) {
       lty.gate <- rep(lty.gate, length(gts))
-      
-    }else if(length(lty.gate) > length(gts)){
-      
+    } else if (length(lty.gate) > length(gts)) {
       lty.gate <- lty.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Gate Line Width
-  if(length(lwd.gate) != length(gts)){
-    
-    if(length(lwd.gate) == 1){
-      
+  if (length(lwd.gate) != length(gts)) {
+    if (length(lwd.gate) == 1) {
       lwd.gate <- rep(lwd.gate, length(gts))
-      
-    }else if(length(lwd.gate) > length(gts)){
-      
+    } else if (length(lwd.gate) > length(gts)) {
       lwd.gate <- lwd.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Gate Point Character
-  if(length(pch.gate) != length(gts)){
-    
-    if(length(pch.gate) == 1){
-      
+  if (length(pch.gate) != length(gts)) {
+    if (length(pch.gate) == 1) {
       pch.gate <- rep(pch.gate, length(gts))
-      
-    }else if(length(pch.gate) > length(gts)){
-      
+    } else if (length(pch.gate) > length(gts)) {
       pch.gate <- pch.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Gate Point Expansion
-  if(length(cex.gate) != length(gts)){
-    
-    if(length(cex.gate) == 1){
-      
+  if (length(cex.gate) != length(gts)) {
+    if (length(cex.gate) == 1) {
       cex.gate <- rep(cex.gate, length(gts))
-      
-    }else if(length(cex.gate) > length(gts)){
-      
+    } else if (length(cex.gate) > length(gts)) {
       cex.gate <- cex.gate[1:length(gts)]
-      
     }
-    
   }
-  
+
   # Plot Gates
-  mapply(function(gt, col.gate, lty.gate, lwd.gate, pch.gate, cex.gate){
-    
+  mapply(function(gt, col.gate, lty.gate, lwd.gate, pch.gate, cex.gate) {
     plotGates(gt, channels = channels, col.gate = col.gate, lwd.gate = lwd.gate, lty.gate = lty.gate, pts.gate = pts.gate, pch.gate = pch.gate, cex.gate = cex.gate)
-    
   }, gts, col.gate, lty.gate, lwd.gate, pch.gate, cex.gate)
-  
-  
 })

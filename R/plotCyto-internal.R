@@ -15,8 +15,11 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setGeneric(name = "plotCyto1d",
-           def = function(x, ...){standardGeneric("plotCyto1d")}
+setGeneric(
+  name = "plotCyto1d",
+  def = function(x, ...) {
+    standardGeneric("plotCyto1d")
+  }
 )
 
 #' plotCyto1d - flowFrame Method
@@ -107,10 +110,10 @@ setGeneric(name = "plotCyto1d",
 #'
 #' @examples
 #' \dontrun{
-#'   fs <- Activation
-#'   plotCyto1d(fs[[1]], channel = "FSC-A", overlay = fs[[2]], fill = c("red","blue"))
+#' fs <- Activation
+#' plotCyto1d(fs[[1]], channel = "FSC-A", overlay = fs[[2]], fill = c("red", "blue"))
 #' }
-#'
+#' 
 #' @importFrom flowCore exprs parameters
 #' @importFrom flowWorkspace pData
 #' @importFrom graphics plot axis title abline polygon legend par
@@ -125,406 +128,264 @@ setGeneric(name = "plotCyto1d",
 #' @export
 
 setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel, transList = NULL, overlay = NULL, gates = NULL, modal = TRUE, offset = 0.5, adjust = 1.5, popup = FALSE,
-                                                                     limits = "machine", xlim = NULL, ylim, main, xlab, ylab, fill, alpha = 1, col = "black", lty = 1, lwd = 1, cex.axis = 1, 
+                                                                     limits = "machine", xlim = NULL, ylim, main, xlab, ylab, fill, alpha = 1, col = "black", lty = 1, lwd = 1, cex.axis = 1,
                                                                      col.axis = "black", cex.lab = 1.1, col.lab = "black", cex.main = 1.1, col.main = "black", legend = FALSE,
                                                                      text.legend, col.legend, fill.legend, cex.legend = 1, col.gate = "red", lwd.gate = 2.5, lty.gate = 1,
-                                                                     labels = TRUE, format.labels = c("alias","percent"), text.labels, 
-                                                                     cex.labels = 0.8, font.labels = 2, col.labels = "black", alpha.labels = 0.6, ...){
+                                                                     labels = TRUE, format.labels = c("alias", "percent"), text.labels,
+                                                                     cex.labels = 0.8, font.labels = 2, col.labels = "black", alpha.labels = 0.6, ...) {
+
+  # Prevent scientific notation on axes
+  options(scipen = 999)
   
   # Assign x to fr
   fr <- x
   fr.channels <- BiocGenerics::colnames(fr)
-    
-  # Check channel
+
+  # Return channel name if marker supplied
   channel <- checkChannels(fr, channels = channel, plot = TRUE)
+
+  # Get X Axis Breaks and Labels from transList if supplied
+  xlabels <- axesLabels(x = fr, channels = channel, transList = transList)[[1]]
   
-  # Prevent scientific notation
-  options(scipen = 999)
-  
-  # Axes limits
-  if(is.null(xlim)){
-      
-    xlim <- suppressWarnings(.getAxesLimits(x = fr, channels = channel, overlay = overlay, limits = limits)[[1]])
-    
-  }
-  
-  # Get Axis Breaks and Labels from transList if supplied
-  if(!is.null(transList)){
-    
-    transList <- checkTransList(transList, inverse = FALSE)
-    axs <- axisLabels(fr, channel = channel, transList = transList)
-    axs <- list(axs)
-    names(axs) <- channel
-    xlabels <- axs[[1]]
-    
-  }else{
-    
-    axs <- list(NULL)
-    xlabels <- NULL
-    
-  } 
-  
-  # Check overlay -> list of fowFrames
-  if(!is.null(overlay)){
-    
+  # Check overlay return list of fowFrames
+  if (!is.null(overlay)) {
     overlay <- checkOverlay(x = fr, overlay = overlay)
-    
   }
   
+  # number of overlays
+  ovn <- length(overlay)
+
   # Merge fr with overlay if supplied - named list of fr & overlay
-  if(!is.null(overlay)){
-    
+  if (!is.null(overlay)) {
     frs <- c(list(fr), overlay)
     names(frs) <- as.vector(sapply(frs, function(fr) fr@description$GUID))
-    modal <- TRUE
-    
-  }else{
-    
+  } else {
     frs <- list(fr)
     names(frs) <- fr@description$GUID
-    modal <- modal
-    
   }
-  
+
   # Extract information
   fr.data <- flowWorkspace::pData(parameters(fr))
   fr.channels <- BiocGenerics::colnames(fr)
-  
-  # Extract data from frs and calculate kernel density
-  adjust <- adjust
-  frs.dens <- lapply(frs, function(fr){
-    
-    fr.exprs <- flowCore::exprs(fr)[,channel]
-    fr.dens <- density(fr.exprs, adjust = adjust)
-    
-    if(modal == TRUE){
-      
-      fr.dens$y <- (fr.dens$y / max(fr.dens$y))*100
-      
-    }
-    
-    return(fr.dens)
-    
-  })
-  
-  # number of overlays
-  ovn <- length(frs.dens) - 1
-  
-  # Y axis labels
-  if(ovn == 0){
-    
-    ylabels <- TRUE
-    
-  }else if(ovn != 0 & offset == 0){
-    
-    ylabels <- TRUE
-    
-  }else if(ovn != 0 & offset != 0){
-    
-    ylabels <- FALSE
-    
-  }
-  
-  # Adjust values if offset != 0
-  if(offset != 0){
 
-    # Calculate offset for each overlay
-    ofst <- seq(0, ovn*offset*100, offset*100)
+  # Extract data from frs and calculate kernel density
+  frs.dens <- .getDensity(x = frs, channel = channel, adjust = adjust, modal = modal, offset = offset)
+
+  # Y axis labels
+  if (ovn == 0) {
+    ylabels <- TRUE
+  } else if (ovn != 0 & offset == 0) {
+    ylabels <- TRUE
+  } else if (ovn != 0 & offset != 0) {
+    ylabels <- FALSE
+  }
+
+  # Get y axis values for horizontal lines
+  if (offset != 0) {
+
+    ofst <- seq(0, ovn * offset * 100, offset * 100)
     
-    # Offset overlays
-    frs.dens<- mapply(function(fr.dens, ofst){
-      
-      fr.dens$y <- fr.dens$y + ofst
-      
-      return(fr.dens)
-      
-    }, frs.dens, ofst, SIMPLIFY = FALSE)
-  
-  }else if(offset == 0){
+  } else if (offset == 0) {
     
     ofst <- 0
     
   }
-  
+
   # Title
-  if(missing(main)){
-    
+  if (missing(main)) {
     main <- fr@description$GUID
-    
   }
-  
-  # Axes Labels
-  if(missing(ylab) & !modal){
-    
+
+  # Y Axis Title
+  if (missing(ylab) & !modal) {
     ylab <- "Density"
-    
-  }else if(missing(ylab) & modal){
-    
+  } else if (missing(ylab) & modal) {
     ylab <- "Density Normalised to Mode (%)"
-    
   }
-  
-  if(missing(xlab)){
-    
-    if(!is.na(fr.data$desc[which(fr.channels == channel)])){
-      
+
+  # X Axis Title
+  if (missing(xlab)) {
+    if (!is.na(fr.data$desc[which(fr.channels == channel)])) {
       xlab <- paste(fr.data$desc[which(fr.channels == channel)], channel, sep = " ")
-      
-    }else if(is.na(fr.data$desc[which(fr.channels == channel)])){
-      
+    } else if (is.na(fr.data$desc[which(fr.channels == channel)])) {
       xlab <- paste(channel, sep = " ")
-      
     }
-    
+  }
+
+  # Y Axis Limits
+  if (missing(ylim)) {
+    if (is.null(overlay)) {
+      if (modal == FALSE) {
+        ylim <- range(frs.dens[[1]]$y)
+      } else if (modal == TRUE) {
+        ylim <- c(0, 100)
+      }
+    } else if (!is.null(overlay)) {
+
+      # No offset with overlay y limits c(0,100)
+      if (offset == 0) {
+        ylim <- c(0, 100)
+      } else if (offset != 0) {
+
+        # Overlays with offset
+        ylim <- c(0, (100 + ovn * offset * 100))
+      }
+    }
   }
   
-  # Y Axis Limits
-  if(missing(ylim)){
-    
-    if(is.null(overlay)){
-      
-      if(modal == FALSE){
-        
-        ylim <-  range(frs.dens[[1]]$y)
-        
-      }else if(modal == TRUE){
-        
-        ylim <- c(0,100)
-        
-      }
-      
-    }else if(!is.null(overlay)){
-      
-      # No offset with overlay y limits c(0,100)
-      if(offset == 0){
-        
-        ylim <- c(0,100)
-        
-      }else if(offset != 0){
-        
-        # Overlays with offset
-        ylim = c(0, (100 + ovn*offset*100))
-        
-      }
-      
-    }
-    
+  # X Axis limits
+  if (is.null(xlim)) {
+    xlim <- suppressWarnings(.getAxesLimits(x = fr, channels = channel, overlay = overlay, limits = limits)[[1]])
   }
   
   # Overlay colours
-  cols <- colorRampPalette(c("grey","bisque4","brown1","red", "darkred","chocolate","orange", "yellow", "yellowgreen", "green", "aquamarine","cyan", "cornflowerblue","blue", "blueviolet","purple","magenta","deeppink"))
-  
-  if(missing(fill)){
-    
+  cols <- colorRampPalette(c("grey", "bisque4", "brown1", "red", "darkred", "chocolate", "orange", "yellow", "yellowgreen", "green", "aquamarine", "cyan", "cornflowerblue", "blue", "blueviolet", "purple", "magenta", "deeppink"))
+
+  if (missing(fill)) {
     fill <- cols(length(frs.dens))
-    
-  }else if(length(fill) < length(frs.dens)){
-    
+  } else if (length(fill) < length(frs.dens)) {
     fill <- c(fill, cols((length(frs.dens) - length(fill))))
-    
-  }else if(length(fill) > length(frs.dens)){
-    
+  } else if (length(fill) > length(frs.dens)) {
     fill <- fill[length(frs.dens)]
-    
   }
-  
+
   # Border colours
-  if(length(col) == 1){
-    
+  if (length(col) == 1) {
     col <- rep(col, length(frs.dens))
-    
-  }else if(length(col) < length(frs.dens)){
-    
+  } else if (length(col) < length(frs.dens)) {
     col <- c(col, cols((length(frs.dens) - length(col))))
-    
-  }else if( length(col) > length(frs.dens)){
-    
+  } else if (length(col) > length(frs.dens)) {
     col <- col[length(frs.dens)]
-    
   }
-  
+
   # Border thickness
-  if(length(lwd) == 1){
-    
+  if (length(lwd) == 1) {
     lwd <- rep(lwd, length(frs.dens))
-    
-  }else if(length(lwd) < length(frs.dens)){
-    
+  } else if (length(lwd) < length(frs.dens)) {
     lwd <- c(lwd, rep(1, (length(frs.dens) - length(lwd))))
-    
-  }else if(length(lwd) > length(frs.dens)){
-    
+  } else if (length(lwd) > length(frs.dens)) {
     lwd <- lwd[length(frs.dens)]
-    
   }
-  
+
   # Border line type
-  if(length(lty) == 1){
-    
+  if (length(lty) == 1) {
     lty <- rep(lty, length(frs.dens))
-    
-  }else if(length(lty) < length(frs.dens)){
-    
+  } else if (length(lty) < length(frs.dens)) {
     lty <- c(lty, rep(1, (length(frs.dens) - length(lty))))
-    
-  }else if(length(lty) > length(frs.dens)){
-    
+  } else if (length(lty) > length(frs.dens)) {
     lty <- lty[length(frs.dens)]
-    
   }
-  
+
   # Alpha
-  if(length(alpha) == 1){
-    
+  if (length(alpha) == 1) {
     alpha <- rep(alpha, length(frs.dens))
-    
-  }else if(length(alpha) < length(frs.dens)){
-    
+  } else if (length(alpha) < length(frs.dens)) {
     alpha <- c(alpha, rep(1, (length(frs.dens) - length(alpha))))
-    
-  }else if(length(alpha) > length(frs.dens)){
-    
+  } else if (length(alpha) > length(frs.dens)) {
     alpha <- alpha[length(frs.dens)]
-    
   }
-  
+
   # Pop-up
-  if(popup == TRUE){
-    
+  if (popup == TRUE) {
     checkOSGD()
-    
   }
-  
+
   # Legend text
-  if(missing(text.legend)){
-    
+  if (missing(text.legend)) {
     text.legend <- names(frs)
-    
   }
-  
+
   # Plot margins
   .setPlotMargins(x = fr, overlay = overlay, legend = legend, text.legend = text.legend, main = main)
 
   # Set up empty plot
-  if(is.null(xlabels) & ylabels == FALSE){
-    
+  if (is.null(xlabels) & ylabels == FALSE) {
     graphics::plot(1, type = "n", yaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, cex.axis = cex.axis, col.axis = col.axis, ann = FALSE, ...)
     abline(h = c(0, ofst), col = col[length(frs.dens):1])
     title(main = main, cex.main = cex.main, col.main = col.main)
     title(xlab = xlab, col.lab = col.lab, cex.lab = cex.lab)
-    title(ylab = ylab, mgp = c(2,0,0), col.lab = col.lab, cex.lab = cex.lab)
-
-  }else if(is.null(xlabels) & ylabels == TRUE){
-    
+    title(ylab = ylab, mgp = c(2, 0, 0), col.lab = col.lab, cex.lab = cex.lab)
+  } else if (is.null(xlabels) & ylabels == TRUE) {
     graphics::plot(1, type = "n", xlim = xlim, ylim = ylim, axes = TRUE, cex.axis = cex.axis, col.axis = col.axis, ann = FALSE, las = 1, ...)
     abline(h = c(0, ofst), col = col[length(frs.dens):1])
     title(main = main, cex.main = cex.main, col.main = col.main)
     title(xlab = xlab, col.lab = col.lab, cex.lab = cex.lab)
-    title(ylab = ylab, mgp = c(3,0,0), col.lab = col.lab, cex.lab = cex.lab)
-    
-  }else if(!is.null(xlabels) & ylabels == FALSE){
-    
+    title(ylab = ylab, mgp = c(3, 0, 0), col.lab = col.lab, cex.lab = cex.lab)
+  } else if (!is.null(xlabels) & ylabels == FALSE) {
     graphics::plot(1, type = "n", yaxt = "n", xaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, cex.axis = cex.axis, col.axis = col.axis, ann = FALSE, ...)
     axis(1, at = xlabels$at, labels = xlabels$label)
     abline(h = c(0, ofst), col = col[length(frs.dens):1])
     title(main = main, cex.main = cex.main, col.main = col.main)
     title(xlab = xlab, col.lab = col.lab, cex.lab = cex.lab)
-    title(ylab = ylab, mgp = c(2,0,0), col.lab = col.lab, cex.lab = cex.lab)
-    
-  }else if(!is.null(xlabels) & ylabels == TRUE){
-    
+    title(ylab = ylab, mgp = c(2, 0, 0), col.lab = col.lab, cex.lab = cex.lab)
+  } else if (!is.null(xlabels) & ylabels == TRUE) {
     graphics::plot(1, type = "n", xaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, xlab = xlab, ylab = ylab, cex.axis = cex.axis, col.axis = col.axis, ann = FALSE, las = 1, ...)
     axis(1, at = xlabels$at, labels = xlabels$label)
     abline(h = c(0, ofst), col = col[length(frs.dens):1])
     title(main = main, cex.main = cex.main, col.main = col.main)
     title(xlab = xlab, col.lab = col.lab, cex.lab = cex.lab)
-    title(ylab = ylab, mgp = c(3,0,0), col.lab = col.lab, cex.lab = cex.lab)
-    
+    title(ylab = ylab, mgp = c(3, 0, 0), col.lab = col.lab, cex.lab = cex.lab)
   }
-  
+
   # Add density distributions - reverse plot order and colours
-  if(!is.null(overlay) & offset == 0){
-    
-    mapply(function(fr.dens, fill, col, lwd, lty, alpha){
-      
+  if (!is.null(overlay) & offset == 0) {
+    mapply(function(fr.dens, fill, col, lwd, lty, alpha) {
       polygon(fr.dens, col = adjustcolor(fill, alpha), border = col, lwd = lwd, lty = lty)
-      
     }, frs.dens, fill, col, lwd, lty, alpha)
-    
-    
-  }else{
-    
-    mapply(function(fr.dens, fill, col, lwd, lty, alpha){
-    
+  } else {
+    mapply(function(fr.dens, fill, col, lwd, lty, alpha) {
       polygon(fr.dens, col = adjustcolor(fill, alpha), border = col, lwd = lwd, lty = lty)
-    
     }, frs.dens[length(frs.dens):1], fill[length(frs.dens):1], col[length(frs.dens):1], lwd[length(frs.dens):1], lty[length(frs.dens):1], alpha[length(frs.dens):1])
-    
   }
-  
+
   # Add legend
-  if(!is.null(overlay) & legend == TRUE){
-    
+  if (!is.null(overlay) & legend == TRUE) {
+
     # Legend position x
-    legend.x <- par("usr")[2] + 0.025*par("usr")[2]
-    
+    legend.x <- par("usr")[2] + 0.025 * par("usr")[2]
+
     # Legend position y
-    legend.y <- mean(par("usr")[c(3,4)]) + (((par("usr")[4])/21)*0.5*length(frs.dens))
-    
+    legend.y <- mean(par("usr")[c(3, 4)]) + (((par("usr")[4]) / 21) * 0.5 * length(frs.dens))
+
     # Legend labels
     text.legend <- text.legend[length(text.legend):1]
-    
+
     # Legend with lines
-    if(!missing(col.legend) & missing(fill.legend)){
-      
+    if (!missing(col.legend) & missing(fill.legend)) {
       legend(x = legend.x, y = legend.y, legend = text.legend, col = col.legend, lty = lty, lwd = lwd, xpd = TRUE, bty = "n", x.intersp = 0.5)
-      
-    }else if(missing(col.legend) & !missing(fill.legend)){
-    
+    } else if (missing(col.legend) & !missing(fill.legend)) {
       legend(x = legend.x, y = legend.y, legend = text.legend, fill = fill.legend, xpd = TRUE, bty = "n", x.intersp = 0.5)
-    
-    }else if(missing(col.legend) & missing(fill.legend)){
-      
+    } else if (missing(col.legend) & missing(fill.legend)) {
       legend(x = legend.x, y = legend.y, legend = text.legend, fill = fill[length(frs):1], xpd = TRUE, bty = "n", x.intersp = 0.5)
-      
     }
-    
+  }
+  
+  # Missing labels for plotLabels
+  if(missing(text.labels)){
+    text.labels <- NA
   }
   
   # Gates - no overlay
-  if(is.null(overlay)){
-    
-    if(!is.null(gates)){
-    
+  if (is.null(overlay)) {
+    if (!is.null(gates)) {
       plotGates(gates, channels = channel, col.gate = col.gate, lwd.gate = lwd.gate, lty.gate = lty.gate)
-    
     }
-  
+
     # Labels
-    if(!is.null(gates) & labels == TRUE){
-    
+    if (!is.null(gates) & labels == TRUE) {
+
       # Population names missing - show percantage only
-      if(missing(text.labels)){
-    
-        plotLabels(x = fr, channels = channel, alias = NA, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
-    
-      }else if(!missing(text.labels)){
-      
-        plotLabels(x = fr, channels = channel, alias = text.labels, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
-      
-      }
+      plotLabels(x = fr, channels = channel, alias = text.labels, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
     
     }
     
-  }else if(!is.null(overlay) & offset != 0){
-    
+  } else if (!is.null(overlay) & offset != 0 & !is.null(gates)) {
     .gateOverlay(x = fr, channel = channel, overlay = overlay, gates = gates, offset = offset, alias = text.labels, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
-    
   }
 
   # Return options to default
   options(scipen = 0)
-  
+
   # Return plot margins to default
   par(mar = c(5, 4, 4, 2) + 0.1)
   
@@ -577,10 +438,10 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
 #'
 #' @examples
 #' \dontrun{
-#'   fs <- Activation
-#'   plotCyto1d(fs, channel = "FSC-A", legend = TRUE)
+#' fs <- Activation
+#' plotCyto1d(fs, channel = "FSC-A", legend = TRUE)
 #' }
-#'
+#' 
 #' @seealso \code{\link{plotCyto1d,flowFrame-method}}
 #' @seealso \code{\link{plotCyto,flowSet-method}}
 #'
@@ -594,276 +455,229 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, transList = NULL, mergeBy = NULL, overlay = NULL, stack = c(0,1), offset = 0.5, limits = "machine", xlim = NULL, mfrow = NULL, popup = FALSE, main = NULL, text.legend = NULL, ...){
-    
+setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, transList = NULL, mergeBy = NULL, overlay = NULL, stack = c(0, 1), offset = 0.5, limits = "machine", xlim = NULL, mfrow = NULL, popup = FALSE, main = NULL, text.legend = NULL, ...) {
+
   # Prevent scientific notation
   options(scipen = 999)
-  
+
   # Assign x to fs
   fs <- x
   fs.channels <- BiocGenerics::colnames(fs)
-  
+
   # transList
-  if(!is.null(transList)){
+  if (!is.null(transList)) {
     transList <- checkTransList(transList, inverse = FALSE)
   }
-  
+
   # Check channel
   channel <- checkChannels(x = fs, channels = channel, plot = TRUE)
-  
+
   # Axes limits
-  if(is.null(xlim)){
-      
+  if (is.null(xlim)) {
     xlim <- suppressWarnings(.getAxesLimits(x = fs, channels = channel, overlay = overlay, limits = limits)[[1]])
-    
   }
-  
+
   # MergeBy
-  if(!is.null(mergeBy)){
-    
+  if (!is.null(mergeBy)) {
+
     # Return list of merge flowFrames
     fr.lst <- .mergeBy(x = fs, mergeBy = mergeBy)
-    
+
     # Check overlay
-    if(!is.null(overlay)){
-      
+    if (!is.null(overlay)) {
       overlay <- checkOverlay(x = fs, overlay = overlay)
-      
+
       # list of flowFrame lists to overlay (1 per group)
       overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy)
-      
     }
-    
+
     # Plot(s)
-    if(is.null(overlay) & stack[1] == 0){
-      
+    if (is.null(overlay) & stack[1] == 0) {
+
       # Main
-      if(is.null(main) & !mergeBy == "all"){
+      if (is.null(main) & !mergeBy == "all") {
         main <- names(fr.lst)
-      }else if(is.null(main) & mergeBy == "all"){
+      } else if (is.null(main) & mergeBy == "all") {
         main <- "Combined Events"
       }
-      
+
       # Plot layout - each group separate panel - no stacking
       mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
 
-      mapply(function(fr, main){
+      mapply(function(fr, main) {
         plotCyto1d(x = fr, channel = channel, transList = transList, offset = offset, main = main, xlim = xlim, popup = popup, mfrow = mfrow, ...)
       }, fr.lst, main)
-      
-    }else if(!is.null(overlay) & stack[1] == 0){
-      
+    } else if (!is.null(overlay) & stack[1] == 0) {
+
       # Main
-      if(is.null(main)){
+      if (is.null(main)) {
         main <- names(fr.lst)
       }
-      
+
       # Plot layout - separate panel with overlay
       mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
 
       # Legend text
-      if(is.null(text.legend)){
-        
-        text.legend <- c("Base","Overlay")
-        
+      if (is.null(text.legend)) {
+        text.legend <- c("Base", "Overlay")
       }
-      
-      mapply(function(fr, main, overlay){
+
+      mapply(function(fr, main, overlay) {
         plotCyto1d(x = fr, channel = channel, overlay = overlay, transList = transList, offset = offset, main = main, xlim = xlim, popup = popup, mfrow = mfrow, text.legend = text.legend, ...)
       }, fr.lst, main, overlay)
-      
-    }else if(is.null(overlay) & stack[1] != 0){
-      
+    } else if (is.null(overlay) & stack[1] != 0) {
+
       # Main
-      if(is.null(main)){
+      if (is.null(main)) {
         main <- paste(mergeBy, sep = "-")
       }
-      
+
       # Plot layout - stacking
       mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
-      
+
       # Split fr.lst by stack[2]
-      if(length(stack) == 1){
+      if (length(stack) == 1) {
         stack[2] <- length(fr.lst)
       }
-      
+
       sp <- rep(1:length(fr.lst), each = stack[2], length.out = length(fr.lst))
-      
-      lapply(unique(sp), function(x){
-        
+
+      lapply(unique(sp), function(x) {
+
         # Legend text
-        if(is.null(text.legend)){
-          
+        if (is.null(text.legend)) {
           text.legend <- names(fr.lst[sp == x])
-          
         }
-        
+
         # Plot
         plotCyto1d(x = fr.lst[sp == x][[1]], overlay = fr.lst[sp == x][2:length(fr.lst[sp == x])], channel = channel, transList = transList, offset = stack[1], main = main, xlim = xlim, popup = popup, mfrow = mfrow, text.legend = text.legend, ...)
-      
       })
-      
-    }else if(!is.null(overlay) & stack[1] != 0){
-      
+    } else if (!is.null(overlay) & stack[1] != 0) {
       stop("Overlays and stacking are not currently supported. Please remove stacking.")
-      
     }
-    
-  }else if(is.null(mergeBy)){
+  } else if (is.null(mergeBy)) {
 
-  # Stacking
-  if(stack[1] != 0){
-    
-    if(length(stack) == 1){
-      
-      stack[2] <- length(fs)
-      
-    }else if(is.na(stack[2])){
-      
-      stack[2] <- length(fs)
-      
+    # Stacking
+    if (stack[1] != 0) {
+      if (length(stack) == 1) {
+        stack[2] <- length(fs)
+      } else if (is.na(stack[2])) {
+        stack[2] <- length(fs)
+      }
     }
-    
+
+    # Number of samples
+    smp <- length(fs)
+
+    # Convert fs to list of flowFrames
+    fs.lst <- lapply(seq(1, length(fs), 1), function(x) fs[[x]])
+
+    # No stacking - each in new plot
+    if (stack[1] == 0) {
+
+      # Overlays - list containing flowFrame lists
+      if (!is.null(overlay)) {
+        overlay <- checkOverlay(x = fs, overlay = overlay)
+      }
+
+      # Pop-up window
+      if (popup == TRUE) {
+        checkOSGD()
+      }
+
+      # Plot layout
+      mfrow <- .setPlotLayout(x = fs, mfrow = mfrow, stack = stack)
+
+      # Plot space
+      np <- mfrow[1] * mfrow[2]
+
+      # Titles
+      if (missing(main)) {
+        main <- sampleNames(fs)
+      }
+
+      # Plot
+      if (!is.null(overlay)) {
+        cnt <- 0
+        mapply(function(fr, o, main) {
+          cnt <<- cnt + 1
+
+          plotCyto1d(x = fr, channel = channel, transList = transList, overlay = o, offset = offset, main = main, xlim = xlim, ...)
+
+          if (popup == TRUE & cnt %% np == 0 & length(fs.lst) > cnt) {
+            checkOSGD()
+          }
+        }, fs.lst, overlay, main)
+      } else {
+        cnt <- 0
+        mapply(function(fr, main) {
+          cnt <<- cnt + 1
+          plotCyto1d(x = fr, channel = channel, transList = transList, offset = offset, main = main, xlim = xlim, ...)
+
+          if (popup == TRUE & cnt %% np == 0 & length(fs.lst) > cnt) {
+            checkOSGD()
+          }
+        }, fs.lst, main)
+      }
+
+      # Stacking - set offset to zero
+    } else if (stack[1] != 0) {
+
+      # Stacked overlays not yet supported
+      if (!is.null(overlay)) {
+        message("Overlays are not yet supported for stacked samples. Overlay and offset arguments will be ignored during plotting.")
+      }
+
+      # split up samples based on stack[2]
+      nm <- ceiling(length(fs.lst) / stack[2])
+      fs.lsts <- lapply(seq(stack[2], nm * stack[2], stack[2]), function(x) {
+        i <- x - stack[2] + 1
+        fs.lst[i:x]
+      })
+
+      # Plot layout
+      mfrow <- .setPlotLayout(x = fs, mfrow = mfrow, stack = stack)
+
+      # Pass first frame to .plotCyto1d with others as list of frames - popup?
+      lapply(fs.lsts, function(fs.lst) {
+        fr.lst <- fs.lst[2:length(fs.lst)]
+
+        plotCyto1d(x = fs.lst[[1]], channel = channel, transList = transList, overlay = fr.lst, offset = stack[1], main = main, xlim = xlim, ...)
+      })
+    }
   }
 
-  # Number of samples
-  smp <- length(fs)
-  
-  # Convert fs to list of flowFrames
-  fs.lst <- lapply(seq(1,length(fs),1), function(x) fs[[x]])
-  
-  # No stacking - each in new plot
-  if(stack[1] == 0){
-    
-    # Overlays - list containing flowFrame lists
-    if(!is.null(overlay)){
-     
-      overlay <- checkOverlay(x = fs, overlay = overlay)
-     
-    }
-    
-    # Pop-up window
-    if(popup == TRUE){
-      
-      checkOSGD()
-      
-    }
-    
-    # Plot layout
-    mfrow <- .setPlotLayout(x = fs,mfrow = mfrow, stack = stack)
-
-    # Plot space
-    np <- mfrow[1] * mfrow[2]
-    
-    # Titles
-    if(missing(main)){
-      
-      main <- sampleNames(fs)
-      
-    }
-    
-    # Plot
-    if(!is.null(overlay)){
-      
-      cnt <- 0
-      mapply(function(fr, o, main){
-        
-        cnt <<- cnt + 1
-      
-        plotCyto1d(x = fr, channel = channel, transList = transList, overlay = o, offset = offset, main = main, xlim = xlim, ...)
-        
-        if(popup == TRUE & cnt %% np == 0 & length(fs.lst) > cnt){
-          
-          checkOSGD()
-          
-        } 
-        
-      }, fs.lst, overlay, main)
-      
-    }else{
-      
-      cnt <- 0
-      mapply(function(fr, main){
-
-        cnt <<- cnt + 1
-        plotCyto1d(x = fr, channel = channel, transList = transList, offset = offset, main = main, xlim = xlim, ...)
-        
-        if(popup == TRUE & cnt %% np == 0 & length(fs.lst) > cnt){
-          
-          checkOSGD()
-          
-        } 
-        
-      }, fs.lst, main)
-      
-    }
-    
-  # Stacking - set offset to zero
-  }else if(stack[1] != 0){
-    
-    # Stacked overlays not yet supported
-    if(!is.null(overlay)){
-      
-      message("Overlays are not yet supported for stacked samples. Overlay and offset arguments will be ignored during plotting.")
-    
-    }
-    
-    # split up samples based on stack[2]
-    nm <- ceiling(length(fs.lst)/stack[2])
-    fs.lsts <- lapply(seq(stack[2],nm*stack[2],stack[2]), function(x){
-      
-      i <- x-stack[2]+1
-      fs.lst[i:x]
-      
-    })
-    
-    # Plot layout
-    mfrow <- .setPlotLayout(x = fs,mfrow = mfrow, stack = stack)
-    
-    # Pass first frame to .plotCyto1d with others as list of frames - popup?
-    lapply(fs.lsts, function(fs.lst){
-      
-      fr.lst <- fs.lst[2:length(fs.lst)]
-
-      plotCyto1d(x = fs.lst[[1]], channel = channel, transList = transList, overlay = fr.lst, offset = stack[1], main = main, xlim = xlim, ...)
-      
-    })
-    
-  }
-  
-  }
-  
   # Return mfrow to default
-  if(mfrow[1] != FALSE){
-    
-    par(mfrow = c(1,1))
-    
+  if (mfrow[1] != FALSE) {
+    par(mfrow = c(1, 1))
   }
-  
+
   # Return options to default
   options(scipen = 0)
-  
 })
 
 #' plotCyto2d
-#' 
+#'
 #' Visualise 2-D flow cytometry scatterplots with blue-red density colour scale.
-#' 
+#'
 #' For a complete list of customisation arguments see
 #' \code{\link{plotCyto2d,flowFrame-method}}.
-#' 
+#'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}} or
 #'   \code{\link[flowCore:flowSet-class]{flowSet}}.
 #' @param ... additional method-specific arguments for plotCyto2d.
-#' 
+#'
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #' @seealso \code{\link{plotCyto2d,flowSet-method}}
-#' 
+#'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
-#' 
+#'
 #' @export
-setGeneric(name = "plotCyto2d",
-           def = function(x, ...){standardGeneric("plotCyto2d")}
+setGeneric(
+  name = "plotCyto2d",
+  def = function(x, ...) {
+    standardGeneric("plotCyto2d")
+  }
 )
 
 #' plotCyto2d - flowFrame Method
@@ -959,12 +773,11 @@ setGeneric(name = "plotCyto2d",
 #'
 #' @examples
 #' \dontrun{
-#'   fs <- Activation
-#'   plotCyto2d(fs[[1]], channel = c("FSC-A","SSC-A"), overlay = fs[[2]], col = c(NA,"purple"))
-#'   plotCyto2d(fs[[1]], channel = c("FSC-A","SSC-A"), overlay = fs[[2]], col = c("black","red"))
-#'
+#' fs <- Activation
+#' plotCyto2d(fs[[1]], channel = c("FSC-A", "SSC-A"), overlay = fs[[2]], col = c(NA, "purple"))
+#' plotCyto2d(fs[[1]], channel = c("FSC-A", "SSC-A"), overlay = fs[[2]], col = c("black", "red"))
 #' }
-#'
+#' 
 #' @importFrom flowCore exprs parameters fsApply
 #' @importFrom flowWorkspace pData
 #' @importFrom MASS kde2d
@@ -978,377 +791,252 @@ setGeneric(name = "plotCyto2d",
 #'
 #' @export
 setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels, transList = NULL, overlay = NULL, contours = 0, gates = NULL, popup = FALSE, subSample = NULL, limits = "machine", xlim = NULL, ylim = NULL,
-                                                                     main, xlab, ylab, pch = ".", cex.pts = 2, col, alpha = 1, col.contour = "black", lwd.contour = 1, 
+                                                                     main, xlab, ylab, pch = ".", cex.pts = 2, col, alpha = 1, col.contour = "black", lwd.contour = 1,
                                                                      cex.axis = 1, col.axis = "black", cex.lab = 1.1, col.lab = "black", cex.main = 1.1,
-                                                                     col.main = "black", legend = FALSE, text.legend, col.legend, fill.legend, cex.legend = 1, 
-                                                                     col.gate = "red", lwd.gate = 2.5, lty.gate = 1, labels = TRUE, text.labels, format.labels = c("alias","percent"), cex.labels = 0.8, font.labels = 2, 
-                                                                     col.labels = "black", alpha.labels = 0.6,...){
-  
+                                                                     col.main = "black", legend = FALSE, text.legend, col.legend, fill.legend, cex.legend = 1,
+                                                                     col.gate = "red", lwd.gate = 2.5, lty.gate = 1, labels = TRUE, text.labels, format.labels = c("alias", "percent"), cex.labels = 0.8, font.labels = 2,
+                                                                     col.labels = "black", alpha.labels = 0.6, ...) {
+
   # Prevent scientific notation
   options(scipen = 999)
-  
+
   # Assign x to fr
   fr <- x
   fr.channels <- BiocGenerics::colnames(fr)
-    
+
   # Check channels
   channels <- checkChannels(fr, channels = channels, plot = TRUE)
-  
+
   # X axis limits
-  if(is.null(xlim)){
-    
+  if (is.null(xlim)) {
     xlim <- suppressWarnings(.getAxesLimits(x = fr, channels = channels, overlay = overlay, limits = limits)[[1]])
-    
   }
-  
+
   # Y axis limits
-  if(is.null(ylim)){
-    
+  if (is.null(ylim)) {
     ylim <- suppressWarnings(.getAxesLimits(x = fr, channels = channels, overlay = overlay, limits = limits)[[2]])
-    
   }
-  
+
   # subSample
-  if(!is.null(subSample)){
-    
+  if (!is.null(subSample)) {
     fr <- sampleFrame(fr, subSample)
-    
   }
-  
-  # Get Axis Breaks and Labels from trans
-  if(!is.null(transList)){
-    
-    transList <- checkTransList(transList, inverse = FALSE)
-    axs <- lapply(channels, function(channel) {axisLabels(fr, channel = channel, transList = transList)})
-    names(axs) <- channels
-    xlabels <- axs[[1]]
-    ylabels <- axs[[2]]
-    
-  }else{
-    
-    axs <- list(NULL, NULL)
-    xlabels <- axs[[1]]
-    ylabels <- axs[[2]]
-    
-  }  
-  
+
+  # Get Axis Breaks and Labels from transList if supplied
+  axs <- axesLabels(x = fr, channels = channel, transList = transList)
+  xlabels <- axs[[1]]
+  ylabels <- axs[[2]]
+
   # overlay
-  if(!is.null(overlay)){
-    
+  if (!is.null(overlay)) {
     overlay <- checkOverlay(x = fr, overlay = overlay, subSample = subSample)
-    
   }
-  
+
   # Number of samples
-  if(!is.null(overlay)){
-    
+  if (!is.null(overlay)) {
     smp <- 1 + length(overlay)
-    
-  }else{
-    
+  } else {
     smp <- 1
-    
   }
-  
+
   # Extract data for plotting
   fr.exprs <- flowCore::exprs(fr)[, channels]
-  
+
   # Extract pData and Channels
   fr.data <- flowWorkspace::pData(flowCore::parameters(fr))
-  
+
   # Point colour - 2D colour scale
-  if(missing(col)){
-    
+  if (missing(col)) {
     cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-    col.pts <- densCols(fr.exprs[,channels], colramp = cols)
-    
-    if(!is.null(overlay)){
-      
+    col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+
+    if (!is.null(overlay)) {
       cols <- colorRampPalette(c("black", "darkorchid", "blueviolet", "magenta", "deeppink", "red4", "orange", "springgreen4"))
       col.overlay <- cols(length(overlay))
-      
     }
-   
-  }else if(length(col) == 1){
-    
-    if(is.na(col[1])){
-      
+  } else if (length(col) == 1) {
+    if (is.na(col[1])) {
       cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-      col.pts <- densCols(fr.exprs[,channels], colramp = cols)
-      
-    }else{
-      
+      col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+    } else {
       col.pts <- col[1]
-      
     }
-    
-    if(!is.null(overlay)){
-      
+
+    if (!is.null(overlay)) {
       cols <- colorRampPalette(c("darkorchid", "blueviolet", "magenta", "deeppink", "red4", "orange", "springgreen4", "navyblue"))
       col.overlay <- cols(length(overlay))
-      
     }
-    
-  }else if(length(col) > 1){
-    
-    if(length(col) < length(smp)){
-      
-      if(is.na(col[1])){
-        
+  } else if (length(col) > 1) {
+    if (length(col) < length(smp)) {
+      if (is.na(col[1])) {
         cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-        col.pts <- densCols(fr.exprs[,channels], colramp = cols)
-        
-      }else{
-        
+        col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+      } else {
         col.pts <- col[1]
-        
       }
       cols <- colorRampPalette(c("darkorchid", "blueviolet", "magenta", "deeppink", "red4", "orange", "springgreen4", "navyblue"))
-      col.overlay <- c(col[2:length(col)], cols((smp-1) - length(col[2:length(col)])))
-      
-    }else if(length(col) > length(smp)){
-      
-      if(is.na(col[1])){
-        
+      col.overlay <- c(col[2:length(col)], cols((smp - 1) - length(col[2:length(col)])))
+    } else if (length(col) > length(smp)) {
+      if (is.na(col[1])) {
         cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-        col.pts <- densCols(fr.exprs[,channels], colramp = cols)
-        
-      }else{
-        
+        col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+      } else {
         col.pts <- col[1]
-        
       }
       col.overlay <- col[2:smp]
-      
-    }else{
-    
-      if(is.na(col[1])){
-        
+    } else {
+      if (is.na(col[1])) {
         cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-        col.pts <- densCols(fr.exprs[,channels], colramp = cols)
-        
-      }else{
-        
+        col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+      } else {
         col.pts <- col[1]
-        
       }
       col.overlay <- col[2:length(col)]
-    
     }
-    
-  }else{
-    
+  } else {
     col.overlay <- col[-1]
-    
   }
-  
+
   # Labels
-  if(missing(xlab)){
-    
-    if(!is.na(fr.data$desc[which(fr.channels == channels[1])])){
-      
-      xlab <- paste(fr.data$desc[which(fr.channels == channels[1])], channels[1] , sep = " ")
-      
-    }else if(is.na(fr.data$desc[which(fr.channels == channels[1])])){
-      
+  if (missing(xlab)) {
+    if (!is.na(fr.data$desc[which(fr.channels == channels[1])])) {
+      xlab <- paste(fr.data$desc[which(fr.channels == channels[1])], channels[1], sep = " ")
+    } else if (is.na(fr.data$desc[which(fr.channels == channels[1])])) {
       xlab <- paste(channels[1], sep = " ")
-      
     }
-    
   }
-  
-  if(missing(ylab)){
-    
-    if(!is.na(fr.data$desc[which(fr.channels == channels[2])])){
-      
-      ylab <- paste(fr.data$desc[which(fr.channels == channels[2])], channels[2] , sep = " ")
-      
-    }else if(is.na(fr.data$desc[which(fr.channels == channels[2])])){
-      
+
+  if (missing(ylab)) {
+    if (!is.na(fr.data$desc[which(fr.channels == channels[2])])) {
+      ylab <- paste(fr.data$desc[which(fr.channels == channels[2])], channels[2], sep = " ")
+    } else if (is.na(fr.data$desc[which(fr.channels == channels[2])])) {
       ylab <- paste(channels[2], sep = " ")
-      
     }
-    
   }
-  
+
   # Title
-  if(missing(main)){
-    
+  if (missing(main)) {
     main <- fr@description$GUID
-    
   }
-  
+
   # Alpha
-  if(length(alpha) == 1){
-    
+  if (length(alpha) == 1) {
     alpha.pts <- alpha[1]
-    
-    if(!is.null(overlay)){
-      
+
+    if (!is.null(overlay)) {
       alpha.overlay <- rep(alpha, length(overlay))
-      
     }
-    
-  }else if(length(alpha) < length(smp)){
-    
+  } else if (length(alpha) < length(smp)) {
     alpha.pts <- alpha[1]
     alpha.overlay <- c(alpha[2:length(alpha)], rep(1, (smp - length(alpha))))
-    
-  }else if(length(alpha) > length(smp)){
-    
+  } else if (length(alpha) > length(smp)) {
     alpha.pts <- alpha[1]
     alpha.overlay <- alpha[2:smp]
-    
   }
-  
+
   # Pop-up
-  if(popup == TRUE){
-    
+  if (popup == TRUE) {
     checkOSGD()
-    
   }
-  
-  #Plot margins
+
+  # Plot margins
   .setPlotMargins(x = fr, overlay = overlay, legend = legend, text.legend = text.legend, main = main)
-  
+
   # Plot
-  if (nrow(fr) < 2){
-    
+  if (nrow(fr) < 2) {
     graphics::plot(1, type = "n", axes = F, pch = pch, cex.pts = cex.pts, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, ...)
-    
-  }else{
-    
-    if(is.null(xlabels) & is.null(ylabels)){
-      
+  } else {
+    if (is.null(xlabels) & is.null(ylabels)) {
       graphics::plot(fr.exprs, col = adjustcolor(col.pts, alpha.pts), pch = pch, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = cex.pts, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, ...)
-      
-    }else if(!is.null(xlabels) & is.null(ylabels)){
-      
+    } else if (!is.null(xlabels) & is.null(ylabels)) {
       graphics::plot(fr.exprs, xaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = pch, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = cex.pts, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, ...)
       axis(1, at = xlabels$at, labels = xlabels$label)
-      
-    }else if(is.null(xlabels) & !is.null(ylabels)){
-      
+    } else if (is.null(xlabels) & !is.null(ylabels)) {
       graphics::plot(fr.exprs, yaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = pch, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = cex.pts, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, ...)
       axis(2, at = ylabels$at, labels = ylabels$label)
-      
-    }else if(!is.null(xlabels) & !is.null(ylabels)){
-      
+    } else if (!is.null(xlabels) & !is.null(ylabels)) {
       graphics::plot(fr.exprs, xaxt = "n", yaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = pch, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = cex.pts, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, ...)
       axis(1, at = xlabels$at, labels = xlabels$label)
       axis(2, at = ylabels$at, labels = ylabels$label)
-      
     }
   }
-  
+
   # Contour Lines
-  if(contours != 0){
-    
+  if (contours != 0) {
+
     # Calculate 2D kernel density using kde2d from MASS
-    z <- MASS::kde2d(fr.exprs[,1], fr.exprs[,2], n = 75)
-    
+    z <- MASS::kde2d(fr.exprs[, 1], fr.exprs[, 2], n = 75)
+
     # Add contour lines to plot
     graphics::contour(z = z$z, x = z$x, y = z$y, add = TRUE, drawlabels = FALSE, nlevels = contours, col = col.contour, lwd = lwd.contour)
-    
-    
   }
-  
+
   # Add overlays
-  if(!is.null(overlay)){
-    
-    mapply(function(overlay, col.overlay, alpha.overlay){
-      
+  if (!is.null(overlay)) {
+    mapply(function(overlay, col.overlay, alpha.overlay) {
       points(x = exprs(overlay)[, channels[1]], y = exprs(overlay)[, channels[2]], pch = ".", col = adjustcolor(col.overlay, alpha.overlay), cex = cex.pts)
-      
     }, overlay, col.overlay, alpha.overlay)
-    
   }
-  
+
   # Add legend
-  if(!is.null(overlay) & legend == TRUE){
-    
+  if (!is.null(overlay) & legend == TRUE) {
+
     # Legend position x
-    legend.x <- par("usr")[2] + 0.025*par("usr")[2]
-    
+    legend.x <- par("usr")[2] + 0.025 * par("usr")[2]
+
     # Legend position y
-    legend.y <- mean(par("usr")[c(3,4)]) + (((par("usr")[4])/21)*0.5*smp)
-    
+    legend.y <- mean(par("usr")[c(3, 4)]) + (((par("usr")[4]) / 21) * 0.5 * smp)
+
     # Legend labels
-    if(missing(text.legend)){
-      
+    if (missing(text.legend)) {
       text.legend <- c(fr@description$GUID, names(overlay))
-      
     }
-    
+
     # Legend colours
-    if(missing(col)){
-      
+    if (missing(col)) {
       col.pts <- "blue"
-      
-    }else if(is.na(col[1])){
-      
+    } else if (is.na(col[1])) {
       col.pts <- "blue"
-      
     }
-    
+
     # Legend with lines
-    if(!missing(col.legend) & missing(fill.legend)){
-      
+    if (!missing(col.legend) & missing(fill.legend)) {
       legend(x = legend.x, y = legend.y, legend = text.legend, col = col.legend, xpd = TRUE, bty = "n", x.intersp = 0.5)
-      
-    }else if(missing(col.legend) & !missing(fill.legend)){
-      
+    } else if (missing(col.legend) & !missing(fill.legend)) {
       legend(x = legend.x, y = legend.y, legend = text.legend, fill = fill.legend, xpd = TRUE, bty = "n", x.intersp = 0.5)
-      
-    }else if(missing(col.legend) & missing(fill.legend)){
-      
+    } else if (missing(col.legend) & missing(fill.legend)) {
       legend(x = legend.x, y = legend.y, legend = text.legend, fill = c(col.pts, col.overlay), xpd = TRUE, bty = "n", x.intersp = 0.5)
-      
     }
-    
   }
-  
+
   # Gates
-  if(!is.null(gates)){
-    
+  if (!is.null(gates)) {
     plotGates(gates, channels = channels, col.gate = col.gate, lwd.gate = lwd.gate, lty.gate = lty.gate)
-    
   }
-  
+
   # Labels
-  if(!is.null(gates) & labels == TRUE){
-    
-    if(class(gates) %in% c("rectangleGate","polygonGate","ellipsoidGate")){
-      
+  if (!is.null(gates) & labels == TRUE) {
+    if (class(gates) %in% c("rectangleGate", "polygonGate", "ellipsoidGate")) {
       gates <- filters(list(gates))
-      
-    }else if(class(gates) == "list"){
-      
+    } else if (class(gates) == "list") {
       gates <- filters(gates)
-      
-    }else if(class(gates) == "filters"){
-      
+    } else if (class(gates) == "filters") {
+
     }
-    
+
     # Population names missing - show percantage only
-    if(missing(text.labels)){
-      
+    if (missing(text.labels)) {
       plotLabels(x = fr, channels = channels, alias = NA, gates = gates, format.text = "percent", cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
-      
-    }else if(!missing(text.labels)){
-      
-      plotLabels(x = fr, channels = channels, alias = text.labels, gates = gates, format.text= format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
-      
+    } else if (!missing(text.labels)) {
+      plotLabels(x = fr, channels = channels, alias = text.labels, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
     }
-    
   }
-  
+
   # Return options to default
   options(scipen = 0)
-  
+
   # Return plot margins to default
-  par(mar = c(5,4,4,2) + 0.1)
-  
+  par(mar = c(5, 4, 4, 2) + 0.1)
 })
 
 #' plotCyto2d - flowSet Method
@@ -1394,10 +1082,9 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
 #'
 #' @examples
 #' \dontrun{
-#'   fs <- Activation
-#'   plotCyto2d(fs, channel = c("FSC-A","SSC-A"), overlay = fs[[2]], col = c(NA,"purple"))
-#'   plotCyto2d(fs, channel = c("FSC-A","SSC-A"), overlay = fs[[2]], col = c("black","red"))
-#'
+#' fs <- Activation
+#' plotCyto2d(fs, channel = c("FSC-A", "SSC-A"), overlay = fs[[2]], col = c(NA, "purple"))
+#' plotCyto2d(fs, channel = c("FSC-A", "SSC-A"), overlay = fs[[2]], col = c("black", "red"))
 #' }
 #' 
 #' @importFrom flowCore exprs parameters fsApply
@@ -1412,178 +1099,137 @@ setMethod(plotCyto2d, signature = "flowFrame", definition = function(x, channels
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, transList = NULL, mergeBy = NULL, overlay = NULL, subSample = NULL, mfrow = NULL, popup = FALSE, limits = "machine", xlim = NULL, ylim = NULL, main,  ...){
-  
+setMethod(plotCyto2d, signature = "flowSet", definition = function(x, channels, transList = NULL, mergeBy = NULL, overlay = NULL, subSample = NULL, mfrow = NULL, popup = FALSE, limits = "machine", xlim = NULL, ylim = NULL, main, ...) {
+
   # Prevent scientific notation
-  options(scipen = 999)  
-  
+  options(scipen = 999)
+
   # Assign x to fs
   fs <- x
   fs.channels <- BiocGenerics::colnames(fs)
-  
+
   # Sample names
   fsnms <- flowWorkspace::sampleNames(fs)
-  
+
   # Check channels
   channels <- checkChannels(fs, channels = channels, plot = TRUE)
-  
+
   # transList
-  if(!is.null(transList)){
+  if (!is.null(transList)) {
     transList <- checkTransList(transList, inverse = FALSE)
   }
-  
+
   # X axis limits
-  if(is.null(xlim)){
-    
+  if (is.null(xlim)) {
     xlim <- suppressWarnings(.getAxesLimits(x = fs, channels = channels, overlay = overlay, limits = limits)[[1]])
-    
   }
-  
+
   # Y axis limits
-  if(is.null(ylim)){
-      
+  if (is.null(ylim)) {
     ylim <- suppressWarnings(.getAxesLimits(x = fs, channels = channels, overlay = overlay, limits = limits)[[2]])
-    
   }
-  
+
   # MergeBy?
-  if(!is.null(mergeBy)){
-    
+  if (!is.null(mergeBy)) {
+
     # Return a list of merged flowFrames
     fr.lst <- .mergeBy(x = fs, mergeBy = mergeBy)
-    
-    if(missing(main) & !mergeBy == "all"){
-      
+
+    if (missing(main) & !mergeBy == "all") {
       main <- names(fr.lst)
-      
-    }else if(missing(main) & mergeBy == "all"){
-      
+    } else if (missing(main) & mergeBy == "all") {
       main <- "Combined Events"
-      
     }
-    
+
     # overlay
-    if(!is.null(overlay)){
-      
+    if (!is.null(overlay)) {
       overlay <- checkOverlay(x = fs, overlay = overlay, subSample = subSample)
-      
+
       # list of flowFrame lists to overlay (1 per group)
       overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy, subSample = subSample)
-      
     }
-    
+
     # Plot layout
     mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow)
-    
+
     # Plots
-    if(is.null(overlay)){
-      
-      mapply(function(fr, main){
+    if (is.null(overlay)) {
+      mapply(function(fr, main) {
         plotCyto2d(x = fr, channels = channels, subSample = subSample, transList = transList, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
       }, fr.lst, main)
-      
-    }else{
-      
-      mapply(function(fr, main, overlay){
+    } else {
+      mapply(function(fr, main, overlay) {
         plotCyto2d(x = fr, channels = channels, subSample = subSample, transList = transList, overlay = overlay, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
       }, fr.lst, main, overlay)
-      
     }
-      
-  }else if(is.null(mergeBy)){
-  
-  # Number of samples
-  smp <- length(fs)
-  
-  # Convert fs to list of flowFrames
-  fr.lst <- lapply(seq(1,length(fs),1), function(x) fs[[x]])
-  names(fr.lst) <- fsnms
-  
-  # subSample flowFrames
-  if(!missing(subSample)){
+  } else if (is.null(mergeBy)) {
 
-    fr.lst <- lapply(fr.lst, function(x){
-      
-      sampleFrame(x, subSample)
-      
-    })
-    
-  }
-  
-  # Overlays
-  if(!is.null(overlay)){
+    # Number of samples
+    smp <- length(fs)
 
-    overlay <- checkOverlay(x = fs, overlay = overlay, subSample = subSample)
-    
-  }
-  
-  # Pop-up
-  if(popup == TRUE){
-    
-    checkOSGD()
-    
-  }
-  
-  # Plot layout
-  mfrow <- .setPlotLayout(x = fs, mfrow = mfrow)
+    # Convert fs to list of flowFrames
+    fr.lst <- lapply(seq(1, length(fs), 1), function(x) fs[[x]])
+    names(fr.lst) <- fsnms
 
-  # Number of plots in window
-  np <- mfrow[1] * mfrow[2]
-  
-  # Titles
-  if(missing(main)){
-    
-    main <- sampleNames(fs)
-    
+    # subSample flowFrames
+    if (!missing(subSample)) {
+      fr.lst <- lapply(fr.lst, function(x) {
+        sampleFrame(x, subSample)
+      })
+    }
+
+    # Overlays
+    if (!is.null(overlay)) {
+      overlay <- checkOverlay(x = fs, overlay = overlay, subSample = subSample)
+    }
+
+    # Pop-up
+    if (popup == TRUE) {
+      checkOSGD()
+    }
+
+    # Plot layout
+    mfrow <- .setPlotLayout(x = fs, mfrow = mfrow)
+
+    # Number of plots in window
+    np <- mfrow[1] * mfrow[2]
+
+    # Titles
+    if (missing(main)) {
+      main <- sampleNames(fs)
+    }
+
+    # Plot
+    if (!is.null(overlay)) {
+      cnt <- 0
+      mapply(function(fr, o, main) {
+        cnt <<- cnt + 1
+
+        plotCyto2d(x = fr, channels = channels, transList = transList, overlay = o, main = main, xlim = xlim, ylim = ylim, ...)
+
+        if (popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt) {
+          checkOSGD()
+        }
+      }, fr.lst, overlay, main)
+    } else {
+      cnt <- 0
+      mapply(function(fr, main) {
+        cnt <<- cnt + 1
+
+        plotCyto2d(x = fr, channels = channels, transList = transList, main = main, xlim = xlim, ylim = ylim, ...)
+
+        if (popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt) {
+          checkOSGD()
+        }
+      }, fr.lst, main)
+    }
   }
 
-  # Plot
-  if(!is.null(overlay)){
-    
-    cnt <- 0
-    mapply(function(fr, o, main){
-      
-      cnt <<- cnt + 1
-
-      plotCyto2d(x = fr, channels = channels, transList = transList, overlay = o, main = main, xlim = xlim, ylim = ylim, ...)
-      
-      if(popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt){
-        
-        checkOSGD()
-        
-      } 
-      
-    }, fr.lst, overlay, main)
-    
-  }else{
-    
-    cnt <- 0
-    mapply(function(fr, main){
-      
-      cnt <<- cnt + 1
-      
-      plotCyto2d(x = fr, channels = channels, transList = transList, main = main, xlim = xlim, ylim = ylim, ...)
-      
-      if(popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt){
-        
-        checkOSGD()
-        
-      }
-      
-    }, fr.lst, main)
-    
-  }
-  
-  }
-  
   # Return mfrow to default
-  if(mfrow[1] != FALSE){
-    
-      par(mfrow = c(1,1))
-      
+  if (mfrow[1] != FALSE) {
+    par(mfrow = c(1, 1))
   }
-  
+
   # Return options to default
   options(scipen = 0)
-  
 })
