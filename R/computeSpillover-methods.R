@@ -358,7 +358,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, pa
 
   # Check class of transList
   if (!is.null(transList)) {
-    if (!class(transList)[1] %in% c("transformList", "transformerList")) {
+    if (!any(inherits(x, "transformList") | inherits(x, "transformerList"))) {
       stop("Supplied transList should be of class transformList or transformerList.")
     }
   }
@@ -606,7 +606,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, pa
 .getTransformedData <- function(x, transList = NULL) {
 
   # Only flowFrame/flowSet/GatingSet
-  if (!class(x)[1] %in% c("flowFrame", "flowSet", "GatingSet")) {
+  if (!any(inherits(x, "flowFrame") | inherits(x, "flowSet") | inherits(x, "GatingSet"))) {
     stop("x must be either a flowFrame, flowSet or GatingSet. Subsetted GatingSet should be used instead of GatingHierarchy.")
   }
 
@@ -663,7 +663,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, pa
 .getRawData <- function(x, transList = NULL, parent = "root") {
 
   # Only flowFrame/flowSet/GatingSet
-  if (!class(x)[1] %in% c("flowFrame", "flowSet", "GatingSet")) {
+  if (!any(inherits(x, "flowFrame") | inherits(x, "flowSet") | inherits(x, "GatingSet"))) {
     stop("x must be either a flowFrame, flowSet or GatingSet. Subsetted GatingSet should be used instead of GatingHierarchy.")
   }
 
