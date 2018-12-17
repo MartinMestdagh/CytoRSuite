@@ -358,7 +358,7 @@ setMethod(computeSpillover, signature = "GatingSet", definition = function(x, pa
 
   # Check class of transList
   if (!is.null(transList)) {
-    if (!any(inherits(x, "transformList") | inherits(x, "transformerList"))) {
+    if (!any(inherits(transList, "transformList") | inherits(transList, "transformerList"))) {
       stop("Supplied transList should be of class transformList or transformerList.")
     }
   }
