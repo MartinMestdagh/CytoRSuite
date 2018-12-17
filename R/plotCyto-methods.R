@@ -38,8 +38,11 @@
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setGeneric(name = "plotCyto",
-           def = function(x, ...){standardGeneric("plotCyto")}
+setGeneric(
+  name = "plotCyto",
+  def = function(x, ...) {
+    standardGeneric("plotCyto")
+  }
 )
 
 #' plotCyto - flowFrame Method
@@ -55,43 +58,40 @@ setGeneric(name = "plotCyto",
 #'
 #' @examples
 #' \dontrun{
-#'   fs <- Activation
-#'   trans <- estimateLogicle(fs[[2]],"PE-A")
-#'   fs <- transform(fs, trans)
-#'   plotCyto(fs[[2]], channels = c("PE-A"), transList = trans, overlay = fs[[1]])
-#'   plotCyto(fs[[2]], channels = c("FSC-A","PE-A"), transList = trans, overlay = fs[[1]])
+#' fs <- Activation
+#' trans <- estimateLogicle(fs[[2]], "PE-A")
+#' fs <- transform(fs, trans)
+#' plotCyto(fs[[2]], channels = c("PE-A"), transList = trans, overlay = fs[[1]])
+#' plotCyto(fs[[2]], channels = c("FSC-A", "PE-A"), transList = trans, overlay = fs[[1]])
 #' }
-#'
+#' 
 #' @seealso \code{\link{plotCyto1d,flowFrame-method}}
 #' @seealso \code{\link{plotCyto2d,flowFrame-method}}
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setMethod(plotCyto, signature = "flowFrame", 
-          definition = function(x, channels, ...){
+setMethod(plotCyto,
+  signature = "flowFrame",
+  definition = function(x, channels, ...) {
 
-  # Assign x to fr
-  fr <- x
-  
-  # Check channels
-  channels <- checkChannels(fr, channels = channels, plot = TRUE)
-  
-  # Make call to appropriate plotCyto function
-  if(length(channels) == 1){
-      
+    # Assign x to fr
+    fr <- x
+
+    # Check channels
+    channels <- checkChannels(fr, channels = channels, plot = TRUE)
+
+    # Make call to appropriate plotCyto function
+    if (length(channels) == 1) {
       plotCyto1d(x = fr, channel = channels, ...)
-    
-  }else if(length(channels) == 2){
-      
+    } else if (length(channels) == 2) {
       plotCyto2d(x = fr, channels = channels, ...)
-    
+    }
   }
-  
-})
+)
 
 #' plotCyto - flowSet Method
-#' 
+#'
 #' Explore & visualise flow cytometry data for a flowSet.
 #'
 #' @param x object of class \code{\link[flowCore:flowSet-class]{flowSet}}.
@@ -103,45 +103,42 @@ setMethod(plotCyto, signature = "flowFrame",
 #'
 #' @examples
 #' \dontrun{
-#'   fs <- Activation
-#'   trans <- estimateLogicle(fs[[2]],"PE-A")
-#'   fs <- transform(fs, trans)
-#'   plotCyto(fs, channels = c("PE-A"), transList = trans, overlay = fs[[1]])
-#'   plotCyto(fs, channels = c("FSC-A","PE-A"), transList = trans, overlay = fs[[1]])
+#' fs <- Activation
+#' trans <- estimateLogicle(fs[[2]], "PE-A")
+#' fs <- transform(fs, trans)
+#' plotCyto(fs, channels = c("PE-A"), transList = trans, overlay = fs[[1]])
+#' plotCyto(fs, channels = c("FSC-A", "PE-A"), transList = trans, overlay = fs[[1]])
 #' }
-#'
+#' 
 #' @seealso \code{\link{plotCyto1d,flowSet-method}}
 #' @seealso \code{\link{plotCyto2d,flowSet-method}}
-#' 
+#'
 #' @importFrom flowCore exprs fsApply
 #' @importFrom flowWorkspace sampleNames
 #' @importFrom BiocGenerics colnames
 #' @importFrom methods as
-#' 
+#'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setMethod(plotCyto, signature = "flowSet", 
-          definition = function(x, channels, ...){
-  
-  # Assign x to fs
-  fs <- x
-  
-  # Check channels
-  channels <- checkChannels(fs, channels = channels, plot = TRUE)
+setMethod(plotCyto,
+  signature = "flowSet",
+  definition = function(x, channels, ...) {
 
-  # Make call to appropriate plotCyto function
-  if(length(channels) == 1){
-      
-     plotCyto1d(x = fs, channel = channels, ...)
-    
-  }else if(length(channels) == 2){
-    
-     plotCyto2d(x = fs, channels = channels, ...)
-      
+    # Assign x to fs
+    fs <- x
+
+    # Check channels
+    channels <- checkChannels(fs, channels = channels, plot = TRUE)
+
+    # Make call to appropriate plotCyto function
+    if (length(channels) == 1) {
+      plotCyto1d(x = fs, channel = channels, ...)
+    } else if (length(channels) == 2) {
+      plotCyto2d(x = fs, channels = channels, ...)
+    }
   }
-
-})
+)
 
 #' plotCyto - GatingSet Method
 #'
@@ -191,14 +188,14 @@ setMethod(plotCyto, signature = "flowSet",
 #'
 #' @examples
 #' \dontrun{
-#'   fs <- Activation
-#'   gs <- GatingSet(fs)
-#'   drawGate(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"))
-#'   plotCyto(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"))
-#'   drawGate(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A","FSC-H"))
-#'   plotCyto(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A","FSC-H"))
+#' fs <- Activation
+#' gs <- GatingSet(fs)
+#' drawGate(gs, parent = "root", alias = "Cells", channels = c("FSC-A", "SSC-A"))
+#' plotCyto(gs, parent = "root", alias = "Cells", channels = c("FSC-A", "SSC-A"))
+#' drawGate(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A", "FSC-H"))
+#' plotCyto(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A", "FSC-H"))
 #' }
-#'
+#' 
 #' @importFrom flowWorkspace getGate getData prettyAxis sampleNames
 #'   getTransformations sampleNames
 #' @importFrom flowCore exprs fsApply filters transformList
@@ -211,288 +208,226 @@ setMethod(plotCyto, signature = "flowSet",
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setMethod(plotCyto, signature = "GatingSet", 
-          definition = function(x, parent, alias = NULL, channels, transList = NULL, mergeBy = NULL, overlay = NULL, subSample = NULL, stack = c(0,1), text.labels, text.legend, main, mfrow = NULL,  ...){
-  
-  # No Parent Supplied
-  if(missing(parent)){
-    
-    stop("Please supply the name of the parent population to plot.")
-    
-  }
-                
-  # Check supplied alias exists in GatingSet
-  if(!missing(alias)){
-    
-    if(!all(alias %in% basename(getNodes(x)))){
-      
-      stop("Supplied alias does not exist in the GatingSet.")
-      
-    }
-    
-  }
+setMethod(plotCyto,
+  signature = "GatingSet",
+  definition = function(x, parent, alias = NULL, channels, transList = NULL, mergeBy = NULL, overlay = NULL, subSample = NULL, stack = c(0, 1), text.labels, text.legend, main, mfrow = NULL, ...) {
 
-  # Assign x to gs
-  gs <- x
-  smp <- length(gs)
-  
-  # Extract pData info
-  pd <- pData(gs)
-  
-  # transList
-  if(is.null(transList)){
-    
-    # Some transforms found - replace these entries in transList
-    trnsfrms <- lapply(channels, function(channel){getTransformations(gs[[1]], channel, only.function = FALSE)})
-    names(trnsfrms) <- channels
-    
-    # Remove NULL transforms
-    trnsfrms[sapply(trnsfrms, is.null)] <- NULL
-    transList <- transformerList(names(trnsfrms), trnsfrms)
-    
-    transList <- checkTransList(transList, inverse = FALSE)
-    
-  }else{
-    
-    transList <- checkTransList(transList, inverse = FALSE)
-    
-  }
-  
-  # Labels
-  if(missing(text.labels) & !is.null(alias)){
-    
-    text.labels <- alias
-    
-  }
-  
-  # Legend Text
-  if(!is.null(overlay)){
-    
-    if(class(overlay) == "character"){
-      
-      if(missing(text.legend)){
-        
-        text.legend <- c(parent, overlay)
-        
+    # No Parent Supplied
+    if (missing(parent)) {
+      stop("Please supply the name of the parent population to plot.")
+    }
+
+    # Check supplied alias exists in GatingSet
+    if (!missing(alias)) {
+      if (!all(alias %in% basename(getNodes(x)))) {
+        stop("Supplied alias does not exist in the GatingSet.")
       }
-      
     }
-    
-  }
-  
-  # MergeBy?
-  if(!is.null(mergeBy)){
-  
-    # check mergeBy
-    if(all(!mergeBy %in% c("all", colnames(pData(gs))))){
-      
-      stop("mergeBy should be the name of pData variables or 'all'.")
-      
-    }
-    
-    # Add merge column to pd - to get gates
-    if(length(mergeBy) == 1){
-      
-      if(mergeBy == "all"){
-        pd$merge <- rep("all", length(gs))
-      }else{
-        pd$merge <- pd[, mergeBy]
-      }
-      
-    }else{
-      
-      pd$merge <- do.call("paste", pd[, mergeBy])
-      
-    }
-    
-    # List of merged flowFrames
-    fs <- getData(gs, parent)
-    fr.lst <- .mergeBy(gs, parent = parent, mergeBy = mergeBy, subSample = subSample)
-    
-    # Merged names
-    nms <- names(fr.lst)
-    
-    # Overlay
-    if(!is.null(overlay)){
-      
-      overlay <- checkOverlay(x = gs, overlay = overlay, subSample = subSample)
-      overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy, subSample = subSample)
-      
-    }
-    
-    # Plot titles
-    if(missing(main)){ 
-      
-      if(parent == "root"){
-        prnt <- "All Events"
-      }else{
-        prnt <- parent
-      }
-      
-      main <- names(fr.lst)
-      main <- lapply(main, function(x){
-        
-        if(x == "all"){
-          x <- "Combined Events"
-        }
-        
-        paste(x,"\n",prnt,sep = " ")
-        
-        })
-      
-    }
-    
-    # Plot Layout
-    mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow)
-    
-    # Labels text
-    if(missing(text.labels) & !is.null(alias)){
-      
-      text.labels <- alias
-      
-    }
-    
-    # Make calls to plotCyto
-    if(!is.null(overlay)){
-      
-      if(!is.null(alias)){
-        
-        mapply(function(fr, overlay, main, nm){
-    
-          # Extract gates
-          gts <- lapply(alias, function(x){
-      
-            getGate(gs[[match(nm, pd$merge)]], x)
-      
-          })
-        
-          plotCyto(fr, channels = channels, overlay = overlay, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
-      
-        }, fr.lst, overlay, main, nms)
-        
-      }else{
-        
-        mapply(function(fr, overlay, main, nm){
-          
-          plotCyto(fr, channels = channels, overlay = overlay, transList = transList, main = main, text.legend = text.legend, ...)
-          
-        }, fr.lst, overlay, main, nms)
-        
-      }
-      
-    }else{
-      
-      if(!is.null(alias)){
-        
-        mapply(function(fr, main, nm){
-        
-          # Extract gates
-          gts <- lapply(alias, function(x){
-          
-            getGate(gs[[match(nm, pd$merge)]], x)
-          
-          })
-        
-          plotCyto(fr, channels = channels, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
-        
-        }, fr.lst, main, nms)
-      
-      }else{
-        
-        mapply(function(fr, main, nm){
-        
-          plotCyto(fr, channels = channels, transList = transList, main = main, text.legend = text.legend, ...)
-          
-        }, fr.lst, main, nms)
-        
-      }
-      
-    }
-  
-  }else if(is.null(mergeBy)){
-    
-    # Extract population
-    fs <- getData(gs, parent)
-    
-    # Plot titles
-    if(missing(main)){
-      
-      main <- sapply(1:length(gs), function(gh){
-        
-        if(parent == "root"){
-          
-          parent <- "All Events"
-          
-        }
-        
-        paste(sampleNames(gs)[gh],"\n",parent)
-        
+
+    # Assign x to gs
+    gs <- x
+    smp <- length(gs)
+
+    # Extract pData info
+    pd <- pData(gs)
+
+    # transList
+    if (is.null(transList)) {
+
+      # Some transforms found - replace these entries in transList
+      trnsfrms <- lapply(channels, function(channel) {
+        getTransformations(gs[[1]], channel, only.function = FALSE)
       })
+      names(trnsfrms) <- channels
+
+      # Remove NULL transforms
+      trnsfrms[sapply(trnsfrms, is.null)] <- NULL
       
-      if(length(channels) == 1 & stack[1] != 0){
+      if(length(trnsfrms) == 0){
         
-        main <- parent
+        transList <- NULL
         
-      }
+      }else{
       
-    }
-    
-    # Legend Text
-    if(!is.null(overlay)){
-      
-      if(class(overlay) == "character"){
-          
-        overlay <- checkOverlay(x = gs, overlay = overlay, subSample = subSample)
-        
-        if(missing(text.legend)){
-          
-          text.legend <- c(parent, overlay)
-          
-        }
+        transList <- transformerList(names(trnsfrms), trnsfrms)
         
       }
       
+      transList <- checkTransList(transList, inverse = FALSE)
+    } else {
+      transList <- checkTransList(transList, inverse = FALSE)
     }
-    
-    # Label text
-    if(missing(text.labels) & !is.null(alias)){
+
+    # Labels
+    if (missing(text.labels) & !is.null(alias)) {
       text.labels <- alias
     }
-    
-    # Plot Layout
-    mfrow <- .setPlotLayout(x = fs, mfrow = mfrow)
-    
-    # Plots
-    mapply(function(x, main){
-      
-    # Gates
-    if(!is.null(alias) & is.character(alias)){
-      
-      gates <- lapply(alias, function(pop) getGate(gs[[x]], pop))
-      names(gates) <- alias
-      gates <- filters(gates)
-      
-    }else{
-      
-      gates <- NULL
-      
+
+    # Legend Text
+    if (!is.null(overlay)) {
+      if (class(overlay) == "character") {
+        if (missing(text.legend)) {
+          text.legend <- c(parent, overlay)
+        }
+      }
     }
-      
-    # Call to plotCyto flowFrame method
-    if(is.null(alias)){
-      plotCyto(getData(gs[[x]], parent), channels = channels, overlay = overlay, transList = transList, main = main, text.legend = text.legend, gates = gates, ...)
-    }else{
-      plotCyto(getData(gs[[x]], parent), channels = channels, overlay = overlay, transList = transList, main = main, text.legend = text.legend, text.labels = text.labels, gates = gates, ...)
+
+    # MergeBy?
+    if (!is.null(mergeBy)) {
+
+      # check mergeBy
+      if (all(!mergeBy %in% c("all", colnames(pData(gs))))) {
+        stop("mergeBy should be the name of pData variables or 'all'.")
+      }
+
+      # Add merge column to pd - to get gates
+      if (length(mergeBy) == 1) {
+        if (mergeBy == "all") {
+          pd$merge <- rep("all", length(gs))
+        } else {
+          pd$merge <- pd[, mergeBy]
+        }
+      } else {
+        pd$merge <- do.call("paste", pd[, mergeBy])
+      }
+
+      # List of merged flowFrames
+      fs <- getData(gs, parent)
+      fr.lst <- .mergeBy(gs, parent = parent, mergeBy = mergeBy, subSample = subSample)
+
+      # Merged names
+      nms <- names(fr.lst)
+
+      # Overlay
+      if (!is.null(overlay)) {
+        overlay <- checkOverlay(x = gs, overlay = overlay, subSample = subSample)
+        overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy, subSample = subSample)
+      }
+
+      # Plot titles
+      if (missing(main)) {
+        if (parent == "root") {
+          prnt <- "All Events"
+        } else {
+          prnt <- parent
+        }
+
+        main <- names(fr.lst)
+        main <- lapply(main, function(x) {
+          if (x == "all") {
+            x <- "Combined Events"
+          }
+
+          paste(x, "\n", prnt, sep = " ")
+        })
+      }
+
+      # Plot Layout
+      mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow)
+
+      # Labels text
+      if (missing(text.labels) & !is.null(alias)) {
+        text.labels <- alias
+      }
+
+      # Make calls to plotCyto
+      if (!is.null(overlay)) {
+        if (!is.null(alias)) {
+          mapply(function(fr, overlay, main, nm) {
+
+            # Extract gates
+            gts <- lapply(alias, function(x) {
+              getGate(gs[[match(nm, pd$merge)]], x)
+            })
+
+            plotCyto(fr, channels = channels, overlay = overlay, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
+          }, fr.lst, overlay, main, nms)
+        } else {
+          mapply(function(fr, overlay, main, nm) {
+            plotCyto(fr, channels = channels, overlay = overlay, transList = transList, main = main, text.legend = text.legend, ...)
+          }, fr.lst, overlay, main, nms)
+        }
+      } else {
+        if (!is.null(alias)) {
+          mapply(function(fr, main, nm) {
+
+            # Extract gates
+            gts <- lapply(alias, function(x) {
+              getGate(gs[[match(nm, pd$merge)]], x)
+            })
+
+            plotCyto(fr, channels = channels, transList = transList, gates = gts, main = main, text.labels = text.labels, text.legend = text.legend, ...)
+          }, fr.lst, main, nms)
+        } else {
+          mapply(function(fr, main, nm) {
+            plotCyto(fr, channels = channels, transList = transList, main = main, text.legend = text.legend, ...)
+          }, fr.lst, main, nms)
+        }
+      }
+    } else if (is.null(mergeBy)) {
+
+      # Extract population
+      fs <- getData(gs, parent)
+
+      # Plot titles
+      if (missing(main)) {
+        main <- sapply(1:length(gs), function(gh) {
+          if (parent == "root") {
+            parent <- "All Events"
+          }
+
+          paste(sampleNames(gs)[gh], "\n", parent)
+        })
+
+        if (length(channels) == 1 & stack[1] != 0) {
+          main <- parent
+        }
+      }
+
+      # Legend Text
+      if (!is.null(overlay)) {
+        if (class(overlay) == "character") {
+          overlay <- checkOverlay(x = gs, overlay = overlay, subSample = subSample)
+
+          if (missing(text.legend)) {
+            text.legend <- c(parent, overlay)
+          }
+        }
+      }
+
+      # Label text
+      if (missing(text.labels) & !is.null(alias)) {
+        text.labels <- alias
+      }
+
+      # Plot Layout
+      mfrow <- .setPlotLayout(x = fs, mfrow = mfrow)
+
+      # Plots
+      mapply(function(x, main) {
+
+        # Gates
+        if (!is.null(alias) & is.character(alias)) {
+          gates <- lapply(alias, function(pop) getGate(gs[[x]], pop))
+          names(gates) <- alias
+          gates <- filters(gates)
+        } else {
+          gates <- NULL
+        }
+
+        # Call to plotCyto flowFrame method
+        if (is.null(alias)) {
+          plotCyto(getData(gs[[x]], parent), channels = channels, overlay = overlay, transList = transList, main = main, text.legend = text.legend, gates = gates, ...)
+        } else {
+          plotCyto(getData(gs[[x]], parent), channels = channels, overlay = overlay, transList = transList, main = main, text.legend = text.legend, text.labels = text.labels, gates = gates, ...)
+        }
+      }, 1:length(gs), main)
     }
-    
-    }, 1:length(gs), main)
-    
+
+    # Return defaults
+    par(mfrow = c(1, 1))
   }
-  
-  # Return defaults
-  par(mfrow = c(1,1))
-  
-})
+)
 
 #' plotCyto - GatingHierarchy Method
 #'
@@ -531,14 +466,14 @@ setMethod(plotCyto, signature = "GatingSet",
 #'
 #' @examples
 #' \dontrun{
-#'   fs <- Activation
-#'   gs <- GatingSet(fs)
-#'   drawGate(gs, parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"))
-#'   plotCyto(gs[[1]], parent = "root", alias = "Cells", channels = c("FSC-A","SSC-A"))
-#'   drawGate(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A","FSC-H"))
-#'   plotCyto(gs[[1]], parent = "Cells", alias = "Single Cells", channels = c("FSC-A","FSC-H"))
+#' fs <- Activation
+#' gs <- GatingSet(fs)
+#' drawGate(gs, parent = "root", alias = "Cells", channels = c("FSC-A", "SSC-A"))
+#' plotCyto(gs[[1]], parent = "root", alias = "Cells", channels = c("FSC-A", "SSC-A"))
+#' drawGate(gs, parent = "Cells", alias = "Single Cells", channels = c("FSC-A", "FSC-H"))
+#' plotCyto(gs[[1]], parent = "Cells", alias = "Single Cells", channels = c("FSC-A", "FSC-H"))
 #' }
-#'
+#' 
 #' @importFrom flowWorkspace getGate getData prettyAxis sampleNames
 #'   getTransformations
 #' @importFrom flowCore exprs fsApply filters transformList
@@ -551,128 +486,108 @@ setMethod(plotCyto, signature = "GatingSet",
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-setMethod(plotCyto, signature = "GatingHierarchy", 
-          definition = function(x, parent, alias = NULL, channels, transList = NULL, overlay = NULL, text.labels, text.legend, main, ...){
-            
-  # No Parent Supplied
-  if(missing(parent)){
-              
-    stop("Please supply the name of the parent population to plot.")
-              
-  }
-            
-  # Assign x to gh
-  gh <- x
-            
-  # Check supplied alias exists in GatingSet
-  if(!is.null(alias)){
-              
-     if(!all(alias %in% basename(getNodes(gh)))){
-                
-        stop("Supplied alias does not exist in the GatingSet.")
-                
-      }
-              
-  }
-            
-  # Extract alias gate for plotting
-  if(!is.null(alias)){
-              
-     gates <- lapply(alias, function(pop) getGate(gh, pop))
-     names(gates) <- alias
-     gates <- filters(gates)
-              
-  }else{
-              
-     gates <- NULL
-              
-  }
-            
-  # transList
-  if(is.null(transList)){
-    
-    # Some transforms found - replace these entries in transList
-    trnsfrms <- lapply(channels, function(channel){getTransformations(gh, channel, only.function = FALSE)})
-    names(trnsfrms) <- channels
-    
-    # Remove NULL transforms
-    trnsfrms[sapply(trnsfrms, is.null)] <- NULL
-    transList <- transformerList(names(trnsfrms), trnsfrms)
-    
-    transList <- checkTransList(transList, inverse = FALSE)
-    
-  }else{
-    
-    transList <- checkTransList(transList, inverse = FALSE)
-    
-  }
-            
-   # Labels?
-   if(is.null(gates)){
-              
-     labels <- FALSE
-              
-   }
-            
-   # Text for labels
-   if(missing(text.labels) & !missing(alias)){
-              
-      text.labels <- alias
-              
-  }
-            
-  # Extract population from GatingSet
-  fr <- getData(gh, parent)
-            
-  # Titles
-  if(missing(main)){
-                
-      if(parent == "root"){
-                  
-         parent <- "All Events"
-                  
-      }
-                
-      main <- paste(sampleNames(gh),"\n",parent)
-              
-  }
-            
-  # Legend Text
-  if(!is.null(overlay)){
-              
-     if(class(overlay) == "character"){
-                
-        if(missing(text.legend)){
-                  
-           text.legend <- c(parent, overlay)
-                  
-         }
-                
-     }
-              
-  }
-            
-  # Overlay
-  if(!is.null(overlay)){
-              
-    # Extract populations to overlay - list of flowSets
-    if(class(overlay) == "character"){
-                
-        overlay <- lapply(overlay, function(overlay){getData(gh, overlay)})
-                
+setMethod(plotCyto,
+  signature = "GatingHierarchy",
+  definition = function(x, parent, alias = NULL, channels, transList = NULL, overlay = NULL, text.labels, text.legend, main, ...) {
+
+    # No Parent Supplied
+    if (missing(parent)) {
+      stop("Please supply the name of the parent population to plot.")
     }
-              
+
+    # Assign x to gh
+    gh <- x
+
+    # Check supplied alias exists in GatingSet
+    if (!is.null(alias)) {
+      if (!all(alias %in% basename(getNodes(gh)))) {
+        stop("Supplied alias does not exist in the GatingSet.")
+      }
+    }
+
+    # Extract alias gate for plotting
+    if (!is.null(alias)) {
+      gates <- lapply(alias, function(pop) getGate(gh, pop))
+      names(gates) <- alias
+      gates <- filters(gates)
+    } else {
+      gates <- NULL
+    }
+
+    # transList
+    if (is.null(transList)) {
+
+      # Some transforms found - replace these entries in transList
+      trnsfrms <- lapply(channels, function(channel) {
+        getTransformations(gh, channel, only.function = FALSE)
+      })
+      names(trnsfrms) <- channels
+
+      # Remove NULL transforms
+      trnsfrms[sapply(trnsfrms, is.null)] <- NULL
+      
+      if(length(trnsfrms) == 0){
+        
+        transList <- NULL
+        
+      }else{
+        
+        transList <- transformerList(names(trnsfrms), trnsfrms)
+        
+      }
+
+      transList <- checkTransList(transList, inverse = FALSE)
+    } else {
+      transList <- checkTransList(transList, inverse = FALSE)
+    }
+
+    # Labels?
+    if (is.null(gates)) {
+      labels <- FALSE
+    }
+
+    # Text for labels
+    if (missing(text.labels) & !missing(alias)) {
+      text.labels <- alias
+    }
+
+    # Extract population from GatingSet
+    fr <- getData(gh, parent)
+
+    # Titles
+    if (missing(main)) {
+      if (parent == "root") {
+        parent <- "All Events"
+      }
+
+      main <- paste(sampleNames(gh), "\n", parent)
+    }
+
+    # Legend Text
+    if (!is.null(overlay)) {
+      if (class(overlay) == "character") {
+        if (missing(text.legend)) {
+          text.legend <- c(parent, overlay)
+        }
+      }
+    }
+
+    # Overlay
+    if (!is.null(overlay)) {
+
+      # Extract populations to overlay - list of flowSets
+      if (class(overlay) == "character") {
+        overlay <- lapply(overlay, function(overlay) {
+          getData(gh, overlay)
+        })
+      }
+    }
+
+    # Make call to appropriate plotCyto function
+    if (length(channels) == 1) {
+      plotCyto1d(x = fr, channel = channels, overlay = overlay, transList = transList, main = main, gates = gates, text.legend = text.legend, text.labels = text.labels, ...)
+    } else if (length(channels) == 2) {
+      plotCyto2d(x = fr, channels = channels, overlay = overlay, transList = transList, main = main, gates = gates, text.legend = text.legend, text.labels = text.labels, ...)
+    }
   }
-            
-  # Make call to appropriate plotCyto function
-  if(length(channels) == 1){
-              
-     plotCyto1d(x = fr, channel = channels, overlay = overlay, transList = transList, main = main,  gates = gates, text.legend = text.legend, text.labels = text.labels, ...)
-              
-  }else if(length(channels) == 2){
-              
-     plotCyto2d(x = fr, channels = channels, overlay = overlay, transList = transList, main = main, gates = gates, text.legend = text.legend, text.labels = text.labels, ...)
-              
-  }
-            
-})
+)
