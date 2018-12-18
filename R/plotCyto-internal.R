@@ -352,11 +352,35 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
 
     # Legend with lines
     if (!missing(col.legend) & missing(fill.legend)) {
+      
+      if(all(alpha != 1)){
+        col.legend <- mapply(function(col.legend, alpha){
+          adjustcolor(col.legend, alpha)
+        }, col.legend, alpha)
+      }
+      
       legend(x = legend.x, y = legend.y, legend = text.legend, col = col.legend, lty = lty, lwd = lwd, xpd = TRUE, bty = "n", x.intersp = 0.5)
     } else if (missing(col.legend) & !missing(fill.legend)) {
+      
+      if(all(alpha != 1)){
+        fill.legend <- mapply(function(fill.legend, alpha){
+          adjustcolor(fill.legend, alpha)
+        }, fill.legend, alpha)
+      }
+      
       legend(x = legend.x, y = legend.y, legend = text.legend, fill = fill.legend, xpd = TRUE, bty = "n", x.intersp = 0.5)
     } else if (missing(col.legend) & missing(fill.legend)) {
-      legend(x = legend.x, y = legend.y, legend = text.legend, fill = fill[length(frs):1], xpd = TRUE, bty = "n", x.intersp = 0.5)
+      
+      if(all(alpha != 1)){
+        fill <- fill[length(frs):1]
+        fill <- mapply(function(fill, alpha){
+          adjustcolor(fill, alpha)
+        }, fill, alpha)
+      }else{
+        fill <- fill[length(frs):1]
+      }
+      
+      legend(x = legend.x, y = legend.y, legend = text.legend, fill = fill, xpd = TRUE, bty = "n", x.intersp = 0.5)
     }
   }
   
@@ -477,6 +501,11 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
     xlim <- suppressWarnings(.getAxesLimits(x = fs, channels = channel, overlay = overlay, limits = limits)[[1]])
   }
 
+  # Pop-up
+  if (popup == TRUE) {
+    checkOSGD()
+  }
+  
   # MergeBy
   if (!is.null(mergeBy)) {
 
@@ -505,7 +534,7 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
       mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow, stack = stack)
 
       mapply(function(fr, main) {
-        plotCyto1d(x = fr, channel = channel, transList = transList, offset = offset, main = main, xlim = xlim, popup = popup, mfrow = mfrow, ...)
+        plotCyto1d(x = fr, channel = channel, transList = transList, offset = offset, main = main, xlim = xlim, mfrow = mfrow, ...)
       }, fr.lst, main)
     } else if (!is.null(overlay) & stack[1] == 0) {
 
@@ -523,7 +552,7 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
       }
 
       mapply(function(fr, main, overlay) {
-        plotCyto1d(x = fr, channel = channel, overlay = overlay, transList = transList, offset = offset, main = main, xlim = xlim, popup = popup, mfrow = mfrow, text.legend = text.legend, ...)
+        plotCyto1d(x = fr, channel = channel, overlay = overlay, transList = transList, offset = offset, main = main, xlim = xlim, mfrow = mfrow, text.legend = text.legend, ...)
       }, fr.lst, main, overlay)
     } else if (is.null(overlay) & stack[1] != 0) {
 
@@ -550,7 +579,7 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
         }
 
         # Plot
-        plotCyto1d(x = fr.lst[sp == x][[1]], overlay = fr.lst[sp == x][2:length(fr.lst[sp == x])], channel = channel, transList = transList, offset = stack[1], main = main, xlim = xlim, popup = popup, mfrow = mfrow, text.legend = text.legend, ...)
+        plotCyto1d(x = fr.lst[sp == x][[1]], overlay = fr.lst[sp == x][2:length(fr.lst[sp == x])], channel = channel, transList = transList, offset = stack[1], main = main, xlim = xlim, mfrow = mfrow, text.legend = text.legend, ...)
       })
     } else if (!is.null(overlay) & stack[1] != 0) {
       stop("Overlays and stacking are not currently supported. Please remove stacking.")
@@ -578,11 +607,6 @@ setMethod(plotCyto1d, signature = "flowSet", definition = function(x, channel, t
       # Overlays - list containing flowFrame lists
       if (!is.null(overlay)) {
         overlay <- checkOverlay(x = fs, overlay = overlay)
-      }
-
-      # Pop-up window
-      if (popup == TRUE) {
-        checkOSGD()
       }
 
       # Plot layout
