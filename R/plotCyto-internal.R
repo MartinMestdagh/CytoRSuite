@@ -350,10 +350,10 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
     # Legend labels
     text.legend <- text.legend[length(text.legend):1]
 
-    # Legend with lines
+    # Legend
     if (!missing(col.legend) & missing(fill.legend)) {
       
-      if(all(alpha != 1)){
+      if(!all(alpha == 1)){
         col.legend <- mapply(function(col.legend, alpha){
           adjustcolor(col.legend, alpha)
         }, col.legend, alpha)
@@ -362,7 +362,7 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
       legend(x = legend.x, y = legend.y, legend = text.legend, col = col.legend, lty = lty, lwd = lwd, xpd = TRUE, bty = "n", x.intersp = 0.5)
     } else if (missing(col.legend) & !missing(fill.legend)) {
       
-      if(all(alpha != 1)){
+      if(!all(alpha == 1)){
         fill.legend <- mapply(function(fill.legend, alpha){
           adjustcolor(fill.legend, alpha)
         }, fill.legend, alpha)
@@ -371,7 +371,7 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
       legend(x = legend.x, y = legend.y, legend = text.legend, fill = fill.legend, xpd = TRUE, bty = "n", x.intersp = 0.5)
     } else if (missing(col.legend) & missing(fill.legend)) {
       
-      if(all(alpha != 1)){
+      if(!all(alpha == 1)){
         fill <- fill[length(frs):1]
         fill <- mapply(function(fill, alpha){
           adjustcolor(fill, alpha)
