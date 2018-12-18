@@ -399,7 +399,7 @@ setMethod(plotCyto1d, signature = "flowFrame", definition = function(x, channel,
     if (!is.null(gates) & labels == TRUE) {
 
       # Population names missing - show percantage only
-      plotLabels(x = fr, channels = channel, alias = text.labels, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
+      suppressMessages(plotLabels(x = fr, channels = channel, alias = text.labels, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels))
     
     }
     

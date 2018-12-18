@@ -798,7 +798,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   # Plot labels
   lapply(1:length(gates), function(x) {
     lapply(1:length(fr.lst), function(y) {
-      plotLabels(x = fr.lst[[y]], channels = channel, gates = gates[[x]], x.text = txt.x[[x]], y.text = txt.y[y], alias = alias, format.text = format.text, font.text = font.text, col.text = col.text, cex.text = cex.text, alpha = alpha)
+      suppressMessages(plotLabels(x = fr.lst[[y]], channels = channel, gates = gates[[x]], x.text = txt.x[[x]], y.text = txt.y[y], alias = alias, format.text = format.text, font.text = font.text, col.text = col.text, cex.text = cex.text, alpha = alpha))
     })
   })
 }
