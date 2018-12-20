@@ -138,7 +138,6 @@ setMethod(selectChannels, signature = "flowFrame", definition = function(x) {
   if (getOption("CytoRSuite_interact") == TRUE) {
     channel <- opts[menu(choices = opts, graphics = TRUE)]
   } else {
-
     # Tests use PE Cy7 Control -
     channel <- opts[5]
   }
@@ -272,4 +271,68 @@ sampleFrame <- function(fr, size = 250000) {
   fr <- Subset(fr, smp)
 
   return(fr)
+}
+
+#' Assign marker names to flowFrame or flowSet
+#'
+#' \code{markers_assign} opens an editable table containing a list of channels
+#' and markers for a \code{flowFrame} or \code{flowSet}. Users can edit the
+#' \code{markers} column as required and these entries will be updated in the
+#' \code{flowFrame} or \code{flowSet} upon closing the window.
+#'
+#' @param x object of class \code{flowFrame} or \code{flowSet}.
+#'
+#' @importFrom flowWorkspace pData
+#' @importFrom flowCore parameters markernames
+#'
+#' @return NULL and update marker names of \code{x}.
+#'
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+#'
+#' @export
+markers_assign <- function(x){
+  
+  if(!any(inherits(x, "flowFrame") | inherits(x, "flowSet"))){
+    stop("Please supply either a flowFrame or flowSet object")
+  }
+  
+  if(inherits(x, "flowFrame")){
+    
+    # Extract pData of parameters
+    pd <- pData(parameters(x))
+    
+  }else if(inherits(x, "flowSet")){
+    
+    # Extract pData of parameters
+    pd <- pData(parameters(x[[1]]))
+    
+    
+  }
+  
+  # Make data.frame with channel and marker column
+  dt <- pd[,c("name","desc")]
+  colnames(dt) <- c("Channel","Marker")
+  rownames(dt)  <- NULL
+    
+  # Channels with markers
+  chans <- as.vector(dt$Channel[!is.na(dt$Marker)])
+  print(chans)
+  
+  # Edit dt
+  dt <- suppressWarnings(edit(dt))
+
+  # Channels with markers added
+  tb <- dt[!dt$Channel %in% chans,]
+  print(tb)
+  
+  chns <- tb$Channel[!is.na(tb$Marker)]
+  print(chns)
+  
+  # Pull out assigned markers
+  mrk <- dt$Marker[dt$Channel %in% c(chans,chns)]
+  names(mrk) <- dt$Channel[dt$Channel %in% c(chans,chns)]
+    
+  # Assign markers to x
+  markernames(x) <- mrk
+  
 }
