@@ -290,7 +290,7 @@ sampleFrame <- function(fr, size = 250000) {
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @export
-markers_assign <- function(x){
+cyto_markers <- function(x){
   
   if(!any(inherits(x, "flowFrame") | inherits(x, "flowSet"))){
     stop("Please supply either a flowFrame or flowSet object")
@@ -316,17 +316,14 @@ markers_assign <- function(x){
     
   # Channels with markers
   chans <- as.vector(dt$Channel[!is.na(dt$Marker)])
-  print(chans)
   
   # Edit dt
   dt <- suppressWarnings(edit(dt))
 
   # Channels with markers added
   tb <- dt[!dt$Channel %in% chans,]
-  print(tb)
   
   chns <- tb$Channel[!is.na(tb$Marker)]
-  print(chns)
   
   # Pull out assigned markers
   mrk <- dt$Marker[dt$Channel %in% c(chans,chns)]
@@ -334,5 +331,42 @@ markers_assign <- function(x){
     
   # Assign markers to x
   markernames(x) <- mrk
+  
+  invisible(NULL)
+}
+
+#' Interactively edit pData Information for a flowSet or GatingSet
+#' 
+#' @param x object of class \code{flowSet} or \code{GatingSet}.
+#' 
+#' @return NULL and update pData for the \code{flowSet} or \code{GatingSet}.
+#' 
+#' @importFrom flowWorkspace pData
+#' 
+#' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
+cyto_annotate <- function(x){
+  
+  # x should be a flowSet or GatingSet
+  if(!any(inherits(x, "flowSet") | inherits(x, "GatingSet"))){
+    stop("Please supply either a flowSet or a GatingSet")
+  }
+  
+  # Assign x to cyto
+  cyto <- x
+  
+  # Extract pData
+  pd <- pData(cyto)
+  rownames(pd) <- NULL
+  
+  # Edit pData
+  pd <- edit(pd)
+  rownames(pd) <- pd$name
+
+  # Update pData
+  pData(cyto) <- pd
+  
+  assign(deparse(substitute(x)), cyto, envir = globalenv())
+  
+  invisible(NULL)
   
 }
