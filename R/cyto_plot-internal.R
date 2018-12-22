@@ -143,7 +143,7 @@ setGeneric(
 #' @importFrom stats density
 #'
 #' @seealso \code{\link{cyto_1d_plot,flowSet-method}}
-#' @seealso \code{\link{plotCyto,flowFrame-method}}
+#' @seealso \code{\link{cyto_plot,flowFrame-method}}
 #'
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
@@ -1000,19 +1000,19 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
     ylim <- suppressWarnings(.getAxesLimits(x = fr, channels = channels, overlay = overlay, limits = limits)[[2]])
   }
 
-  # subSample
-  if (!is.null(subSample)) {
-    fr <- sampleFrame(fr, subSample)
+  # display
+  if (!is.null(display)) {
+    fr <- sampleFrame(fr, display)
   }
 
   # Get Axis Breaks and Labels from transList if supplied
-  axs <- axesLabels(x = fr, channels = channels, transList = transList)
+  axs <- axesLabels(x = fr, channels = channels, transList = axes_trans)
   xlabels <- axs[[1]]
   ylabels <- axs[[2]]
 
   # overlay
   if (!is.null(overlay)) {
-    overlay <- checkOverlay(x = fr, overlay = overlay, subSample = subSample)
+    overlay <- checkOverlay(x = fr, overlay = overlay, subSample = display)
   }
 
   # Number of samples
@@ -1029,7 +1029,7 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
   fr.data <- flowWorkspace::pData(flowCore::parameters(fr))
 
   # Point colour - 2D colour scale
-  if (missing(col)) {
+  if (missing(point_col)) {
     cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
     col.pts <- densCols(fr.exprs[, channels], colramp = cols)
 
@@ -1037,47 +1037,47 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
       cols <- colorRampPalette(c("black", "darkorchid", "blueviolet", "magenta", "deeppink", "red4", "orange", "springgreen4"))
       col.overlay <- cols(length(overlay))
     }
-  } else if (length(col) == 1) {
-    if (is.na(col[1])) {
+  } else if (length(point_col) == 1) {
+    if (is.na(point_col[1])) {
       cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
       col.pts <- densCols(fr.exprs[, channels], colramp = cols)
     } else {
-      col.pts <- col[1]
+      col.pts <- point_col[1]
     }
 
     if (!is.null(overlay)) {
       cols <- colorRampPalette(c("darkorchid", "blueviolet", "magenta", "deeppink", "red4", "orange", "springgreen4", "navyblue"))
       col.overlay <- cols(length(overlay))
     }
-  } else if (length(col) > 1) {
-    if (length(col) < length(smp)) {
-      if (is.na(col[1])) {
+  } else if (length(point_col) > 1) {
+    if (length(point_col) < length(smp)) {
+      if (is.na(point_col[1])) {
         cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
         col.pts <- densCols(fr.exprs[, channels], colramp = cols)
       } else {
-        col.pts <- col[1]
+        col.pts <- point_col[1]
       }
       cols <- colorRampPalette(c("darkorchid", "blueviolet", "magenta", "deeppink", "red4", "orange", "springgreen4", "navyblue"))
-      col.overlay <- c(col[2:length(col)], cols((smp - 1) - length(col[2:length(col)])))
-    } else if (length(col) > length(smp)) {
-      if (is.na(col[1])) {
+      col.overlay <- c(point_col[2:length(col)], cols((smp - 1) - length(point_col[2:length(point_col)])))
+    } else if (length(point_col) > length(smp)) {
+      if (is.na(point_col[1])) {
         cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
         col.pts <- densCols(fr.exprs[, channels], colramp = cols)
       } else {
-        col.pts <- col[1]
+        col.pts <- point_col[1]
       }
-      col.overlay <- col[2:smp]
+      col.overlay <- point_col[2:smp]
     } else {
-      if (is.na(col[1])) {
+      if (is.na(point_col[1])) {
         cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
         col.pts <- densCols(fr.exprs[, channels], colramp = cols)
       } else {
-        col.pts <- col[1]
+        col.pts <- point_col[1]
       }
-      col.overlay <- col[2:length(col)]
+      col.overlay <- point_col[2:length(col)]
     }
   } else {
-    col.overlay <- col[-1]
+    col.overlay <- point_col[-1]
   }
 
   # X Axis Title
@@ -1099,23 +1099,23 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
   }
 
   # Title
-  if (missing(main)) {
-    main <- fr@description$GUID
+  if (missing(title)) {
+    title <- fr@description$GUID
   }
 
   # Alpha
-  if (length(alpha) == 1) {
-    alpha.pts <- alpha[1]
+  if (length(point_alpha) == 1) {
+    alpha.pts <- point_alpha[1]
 
     if (!is.null(overlay)) {
-      alpha.overlay <- rep(alpha, length(overlay))
+      alpha.overlay <- rep(point_alpha, length(overlay))
     }
-  } else if (length(alpha) < length(smp)) {
-    alpha.pts <- alpha[1]
-    alpha.overlay <- c(alpha[2:length(alpha)], rep(1, (smp - length(alpha))))
-  } else if (length(alpha) > length(smp)) {
-    alpha.pts <- alpha[1]
-    alpha.overlay <- alpha[2:smp]
+  } else if (length(point_alpha) < length(smp)) {
+    alpha.pts <- point_alpha[1]
+    alpha.overlay <- c(point_alpha[2:length(point_alpha)], rep(1, (smp - length(point_alpha))))
+  } else if (length(point_alpha) > length(smp)) {
+    alpha.pts <- point_alpha[1]
+    alpha.overlay <- point_alpha[2:smp]
   }
 
   # Pop-up
@@ -1124,31 +1124,31 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
   }
 
   # Legend labels
-  if (missing(text.legend)) {
-    text.legend <- c(fr@description$GUID, as.vector(sapply(overlay,function(fr){fr@description$GUID})))
+  if (missing(legend_text)) {
+    legend_text <- c(fr@description$GUID, as.vector(sapply(overlay,function(fr){fr@description$GUID})))
   }
   
   # Plot margins
-  .setPlotMargins(x = fr, overlay = overlay, legend = legend, text.legend = text.legend, main = main)
+  .setPlotMargins(x = fr, overlay = overlay, legend = legend, text.legend = legend_text, main = title)
 
   # Plot
   if (nrow(fr) < 2) {
-    graphics::plot(1, type = "n", axes = F, pch = pch, cex.pts = cex.pts, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = main, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, bty = "n", ...)
+    graphics::plot(1, type = "n", axes = F, pch = point_shape, cex.pts = point_size, xlim = xlim, ylim = ylim, xlab = xlab, ylab = ylab, main = title, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
     box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
   } else {
     if (is.null(xlabels) & is.null(ylabels)) {
-      graphics::plot(fr.exprs, col = adjustcolor(col.pts, alpha.pts), pch = pch, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = cex.pts, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, bty = "n", ...)
+      graphics::plot(fr.exprs, col = adjustcolor(col.pts, alpha.pts), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
       box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
     } else if (!is.null(xlabels) & is.null(ylabels)) {
-      graphics::plot(fr.exprs, xaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = pch, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = cex.pts, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, bty = "n", ...)
+      graphics::plot(fr.exprs, xaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
       axis(1, at = xlabels$at, labels = xlabels$label)
       box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
     } else if (is.null(xlabels) & !is.null(ylabels)) {
-      graphics::plot(fr.exprs, yaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = pch, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = cex.pts, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, bty = "n", ...)
+      graphics::plot(fr.exprs, yaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
       axis(2, at = ylabels$at, labels = ylabels$label)
       box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
     } else if (!is.null(xlabels) & !is.null(ylabels)) {
-      graphics::plot(fr.exprs, xaxt = "n", yaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = pch, main = main, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = cex.pts, cex.axis = cex.axis, col.axis = col.axis, cex.lab = cex.lab, col.lab = col.lab, cex.main = cex.main, col.main = col.main, bty = "n", ...)
+      graphics::plot(fr.exprs, xaxt = "n", yaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
       axis(1, at = xlabels$at, labels = xlabels$label)
       axis(2, at = ylabels$at, labels = ylabels$label)
       box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
@@ -1156,13 +1156,13 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
   }
 
   # Contour Lines
-  if (contours != 0) {
+  if (contour != 0) {
 
     # Calculate 2D kernel density using kde2d from MASS
     z <- MASS::kde2d(fr.exprs[, 1], fr.exprs[, 2], n = 75)
 
     # Add contour lines to plot
-    graphics::contour(z = z$z, x = z$x, y = z$y, add = TRUE, drawlabels = FALSE, nlevels = contours, col = col.contour, lwd = lwd.contour)
+    graphics::contour(z = z$z, x = z$x, y = z$y, add = TRUE, drawlabels = FALSE, nlevels = contour, col = contour_line_col, lwd = contour_line_width)
   }
 
   # Add overlays
@@ -1182,42 +1182,42 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
     legend.y <- mean(par("usr")[c(3, 4)]) + (((par("usr")[4]) / 21) * 0.5 * smp)
 
     # Legend colours
-    if (missing(col)) {
+    if (missing(point_col)) {
       col.pts <- "blue"
-    } else if (is.na(col[1])) {
+    } else if (is.na(point_col[1])) {
       col.pts <- "blue"
     }
 
     # Legend with lines
-    if (!missing(col.legend) & missing(fill.legend)) {
-      legend(x = legend.x, y = legend.y, legend = text.legend, col = col.legend, xpd = TRUE, bty = "n", x.intersp = 0.5)
-    } else if (missing(col.legend) & !missing(fill.legend)) {
-      legend(x = legend.x, y = legend.y, legend = text.legend, fill = fill.legend, xpd = TRUE, bty = "n", x.intersp = 0.5)
-    } else if (missing(col.legend) & missing(fill.legend)) {
-      legend(x = legend.x, y = legend.y, legend = text.legend, fill = c(col.pts, col.overlay), xpd = TRUE, bty = "n", x.intersp = 0.5)
+    if (!missing(legend_line_col) & missing(legend_box_fill)) {
+      legend(x = legend.x, y = legend.y, legend = legend_text, col = legend_line_col, xpd = TRUE, bty = "n", x.intersp = 0.5)
+    } else if (missing(legend_line_col) & !missing(legend_box_fill)) {
+      legend(x = legend.x, y = legend.y, legend = legend_text, fill = legend_box_fill, xpd = TRUE, bty = "n", x.intersp = 0.5)
+    } else if (missing(legend_line_col) & missing(legend_box_fill)) {
+      legend(x = legend.x, y = legend.y, legend = legend_text, fill = c(col.pts, col.overlay), xpd = TRUE, bty = "n", x.intersp = 0.5)
     }
   }
 
   # Gates
-  if (!is.null(gates)) {
-    plotGates(gates, channels = channels, col.gate = col.gate, lwd.gate = lwd.gate, lty.gate = lty.gate)
+  if (!is.null(gate)) {
+    plotGates(gate, channels = channels, col.gate = gate_line_col, lwd.gate = gate_line_width, lty.gate = gate_line_type)
   }
 
   # Labels
-  if (!is.null(gates) & labels == TRUE) {
-    if (class(gates) %in% c("rectangleGate", "polygonGate", "ellipsoidGate")) {
-      gates <- filters(list(gates))
-    } else if (class(gates) == "list") {
-      gates <- filters(gates)
-    } else if (class(gates) == "filters") {
+  if (!is.null(gate) & label == TRUE) {
+    if (class(gate) %in% c("rectangleGate", "polygonGate", "ellipsoidGate")) {
+      gate <- filters(list(gate))
+    } else if (class(gate) == "list") {
+      gate <- filters(gate)
+    } else if (class(gate) == "filters") {
 
     }
 
     # Population names missing - show percantage only
-    if (missing(text.labels)) {
-      plotLabels(x = fr, channels = channels, alias = NA, gates = gates, format.text = "percent", cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
-    } else if (!missing(text.labels)) {
-      plotLabels(x = fr, channels = channels, alias = text.labels, gates = gates, format.text = format.labels, cex.text = cex.labels, font.text = font.labels, col.text = col.labels, alpha = alpha.labels)
+    if (missing(label_text)) {
+      plotLabels(x = fr, channels = channels, alias = NA, gates = gate, format.text = "percent", cex.text = label_text_size, font.text = label_text_font, col.text = label_text_col, alpha = label_box_alpha)
+    } else if (!missing(label_text)) {
+      plotLabels(x = fr, channels = channels, alias = label_text, gates = gate, format.text = label_text_format, cex.text = label_text_size, font.text = label_text_font, col.text = label_text_col, alpha = label_box_alpha)
     }
   }
 
@@ -1226,6 +1226,7 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
 
   # Return plot margins to default
   par(mar = c(5, 4, 4, 2) + 0.1)
+  
 })
 
 #' cyto_2d_plot - flowSet Method
@@ -1267,7 +1268,7 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param title title for the plot, set to the name of the sample by default.
-#' @param ... additional arguments passed to \code{\link{plotCyto2d,flowFrame-method}}.
+#' @param ... additional arguments passed to \code{\link{cyto_2d_plot,flowFrame-method}}.
 #'
 #' @examples
 #' \dontrun{
@@ -1332,10 +1333,10 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
 
     # overlay
     if (!is.null(overlay)) {
-      overlay <- checkOverlay(x = fs, overlay = overlay, subSample = subSample)
+      overlay <- checkOverlay(x = fs, overlay = overlay, subSample = display)
 
       # list of flowFrame lists to overlay (1 per group)
-      overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy, subSample = subSample)
+      overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy, subSample = display)
     }
 
     # Plot layout
@@ -1344,11 +1345,11 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
     # Plots
     if (is.null(overlay)) {
       mapply(function(fr, main) {
-        plotCyto2d(x = fr, channels = channels, subSample = subSample, transList = transList, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
+        cyto_2d_plot(x = fr, channels = channels, display = display, transList = transList, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
       }, fr.lst, main)
     } else {
       mapply(function(fr, main, overlay) {
-        plotCyto2d(x = fr, channels = channels, subSample = subSample, transList = transList, overlay = overlay, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
+        cyto_2d_plot(x = fr, channels = channels, display = display, transList = transList, overlay = overlay, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
       }, fr.lst, main, overlay)
     }
   } else if (is.null(mergeBy)) {
@@ -1360,16 +1361,16 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
     fr.lst <- lapply(seq(1, length(fs), 1), function(x) fs[[x]])
     names(fr.lst) <- fsnms
 
-    # subSample flowFrames
-    if (!missing(subSample)) {
+    # Sample flowFrames
+    if (!missing(display)) {
       fr.lst <- lapply(fr.lst, function(x) {
-        sampleFrame(x, subSample)
+        sampleFrame(x, display)
       })
     }
 
     # Overlays
     if (!is.null(overlay)) {
-      overlay <- checkOverlay(x = fs, overlay = overlay, subSample = subSample)
+      overlay <- checkOverlay(x = fs, overlay = overlay, subSample = display)
     }
 
     # Pop-up
@@ -1394,7 +1395,7 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
       mapply(function(fr, o, main) {
         cnt <<- cnt + 1
 
-        plotCyto2d(x = fr, channels = channels, transList = transList, overlay = o, main = main, xlim = xlim, ylim = ylim, ...)
+        cyto_2d_plot(x = fr, channels = channels, transList = transList, overlay = o, main = main, xlim = xlim, ylim = ylim, ...)
 
         if (popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt) {
           checkOSGD()
@@ -1405,7 +1406,7 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
       mapply(function(fr, main) {
         cnt <<- cnt + 1
 
-        plotCyto2d(x = fr, channels = channels, transList = transList, main = main, xlim = xlim, ylim = ylim, ...)
+        cyto_2d_plot(x = fr, channels = channels, transList = transList, main = main, xlim = xlim, ylim = ylim, ...)
 
         if (popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt) {
           checkOSGD()
