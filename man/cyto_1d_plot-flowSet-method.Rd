@@ -6,9 +6,10 @@
 \title{cyto_1d_plot - flowSet Method}
 \usage{
 \S4method{cyto_1d_plot}{flowSet}(x, channel, axes_trans = NULL,
-  merge = NULL, overlay = NULL, density_stack = c(0, 1),
-  limits = "machine", xlim = NULL, layout = NULL, popup = FALSE,
-  title = NULL, legend_text = NULL, ...)
+  merge = NULL, overlay = NULL, density_stack = 0,
+  density_height = length(x), limits = "machine", xlim = NULL,
+  layout = NULL, popup = FALSE, title = NULL, legend_text = NULL,
+  ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
@@ -26,17 +27,19 @@ are appropriately transformed. The transList will NOT be applied to the
 flowFrame internally and should be applied to the flowFrame prior to
 plotting.}
 
-\item{merge}{a vector of pData variables tomerge samples into groups, set
-to NULL by default to prevent merging. To merge all samples set this
-argument to "all".}
+\item{merge}{a vector of pData variables tomerge samples into groups, set to
+NULL by default to prevent merging. To merge all samples set this argument
+to "all".}
 
 \item{overlay}{a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
 \code{list of flowSets} or \code{list of flowFrame lists} containing
 populations to be overlaid onto the plot(s).}
 
-\item{density_stack}{vector of length 2 indicating offset for samples and number of
-samples per plot. Set to \code{c(0,1)} to plot each sample in a separate
-panel.}
+\item{density_stack}{numeric [0,1] indicating the degree of offset for
+overlayed populations, set to 0.5 by default.}
+
+\item{density_height}{numeric indicating the number of samples to stack each
+plot, set to all samples by default.}
 
 \item{limits}{indicates whether the axes limits should be based on the
 \code{"data"} or \code{"machine"}, set to "machine" by default to show

@@ -500,15 +500,16 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
 #'   are appropriately transformed. The transList will NOT be applied to the
 #'   flowFrame internally and should be applied to the flowFrame prior to
 #'   plotting.
-#' @param merge a vector of pData variables tomerge samples into groups, set
-#'   to NULL by default to prevent merging. To merge all samples set this
-#'   argument to "all".
+#' @param merge a vector of pData variables tomerge samples into groups, set to
+#'   NULL by default to prevent merging. To merge all samples set this argument
+#'   to "all".
 #' @param overlay a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
 #'   \code{list of flowSets} or \code{list of flowFrame lists} containing
 #'   populations to be overlaid onto the plot(s).
-#' @param density_stack vector of length 2 indicating offset for samples and number of
-#'   samples per plot. Set to \code{c(0,1)} to plot each sample in a separate
-#'   panel.
+#' @param density_stack numeric [0,1] indicating the degree of offset for
+#'   overlayed populations, set to 0.5 by default.
+#' @param density_height numeric indicating the number of samples to stack each
+#'   plot, set to all samples by default.
 #' @param limits indicates whether the axes limits should be based on the
 #'   \code{"data"} or \code{"machine"}, set to "machine" by default to show
 #'   complete axes ranges. This argument will only alter the upper axis limits,
@@ -532,7 +533,7 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
 #' fs <- Activation
 #' cyto_1d_plot(fs, channel = "FSC-A", legend = TRUE)
 #' }
-#' 
+#'
 #' @seealso \code{\link{cyto_1d_plot,flowFrame-method}}
 #' @seealso \code{\link{cyto_plot,flowSet-method}}
 #'
@@ -546,7 +547,19 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel, axes_trans = NULL, merge = NULL, overlay = NULL, density_stack = c(0,1), limits = "machine", xlim = NULL, layout = NULL, popup = FALSE, title = NULL, legend_text = NULL, ...) {
+setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, 
+                                                                     channel, 
+                                                                     axes_trans = NULL, 
+                                                                     merge = NULL, 
+                                                                     overlay = NULL, 
+                                                                     density_stack = 0,
+                                                                     density_height = length(x),
+                                                                     limits = "machine", 
+                                                                     xlim = NULL, 
+                                                                     layout = NULL, 
+                                                                     popup = FALSE, 
+                                                                     title = NULL, 
+                                                                     legend_text = NULL, ...) {
 
   # Prevent scientific notation
   options(scipen = 999)
@@ -600,15 +613,13 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
       }
       
       # Plot layout - each group separate panel - no stacking
-      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = density_stack)
-
-      print(layout)
+      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = c(density_stack, density_height))
       
       mapply(function(fr, title) {
-        cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, density_stack = density_stack[1], title = title, xlim = xlim, ...)
+        cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, density_stack = density_stack, title = title, xlim = xlim, ...)
       }, fr.lst, title)
       
-    } else if (!is.null(overlay) & density_stack[1] == 0) {
+    } else if (!is.null(overlay) & density_stack == 0) {
 
       # title
       if (is.null(title)) {
@@ -616,7 +627,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
       }
 
       # Plot layout - separate panel with overlay
-      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = density_stack)
+      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = c(density_stack, density_height))
 
       # Legend text
       if (is.null(legend_text)) {
@@ -624,10 +635,10 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
       }
 
       mapply(function(fr, title, overlay) {
-        cyto_1d_plot(x = fr, channel = channel, overlay = overlay, axes_trans = axes_trans, density_stack = density_stack[1], title = title, xlim = xlim, text.legend = legend_text, ...)
+        cyto_1d_plot(x = fr, channel = channel, overlay = overlay, axes_trans = axes_trans, density_stack = density_stack, title = title, xlim = xlim, text.legend = legend_text, ...)
       }, fr.lst, title, overlay)
       
-    } else if (is.null(overlay) & density_stack[1] != 0) {
+    } else if (is.null(overlay) & density_stack != 0) {
 
       # title
       if (is.null(title)) {
@@ -635,14 +646,10 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
       }
 
       # Plot layout - stacking
-      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = density_stack)
+      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = c(density_stack, density_height))
 
-      # Split fr.lst by density_stack[2]
-      if (length(density_stack) == 1) {
-        density_stack[2] <- length(fr.lst)
-      }
-
-      sp <- rep(1:length(fr.lst), each = density_stack[2], length.out = length(fr.lst))
+      # Split fr.lst by density_height
+      sp <- rep(1:length(fr.lst), each = density_height, length.out = length(fr.lst))
 
       lapply(unique(sp), function(x) {
 
@@ -652,23 +659,14 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
         }
 
         # Plot
-        cyto_1d_plot(x = fr.lst[sp == x][[1]], overlay = fr.lst[sp == x][2:length(fr.lst[sp == x])], channel = channel, axes_trans = axes_trans, density_stack = density_stack[1], title = title, xlim = xlim, text.legend = legend_text, ...)
+        cyto_1d_plot(x = fr.lst[sp == x][[1]], overlay = fr.lst[sp == x][2:length(fr.lst[sp == x])], channel = channel, axes_trans = axes_trans, density_stack = density_stack, title = title, xlim = xlim, text.legend = legend_text, ...)
       })
       
-    } else if (!is.null(overlay) & density_stack[1] != 0) {
+    } else if (!is.null(overlay) & density_stack != 0) {
       stop("Overlays and stacking are not currently supported. Please remove stacking.")
     }
   
   } else if (is.null(merge)) {
-
-    # Stacking
-    if (density_stack[1] != 0) {
-      if (length(density_stack) == 1) {
-        density_stack[2] <- length(fs)
-      } else if (is.na(density_stack[2])) {
-        density_stack[2] <- length(fs)
-      }
-    }
     
     # Number of samples
     smp <- length(fs)
@@ -677,7 +675,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
     fs.lst <- lapply(seq(1, length(fs), 1), function(x) fs[[x]])
     
     # No stacking - each in new plot
-    if (density_stack[1] == 0) {
+    if (density_stack == 0) {
 
       # Overlays - list containing flowFrame lists
       if (!is.null(overlay)) {
@@ -685,7 +683,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
       }
 
       # Plot layout
-      layout <- .setPlotLayout(x = fs, mfrow = layout, stack = density_stack)
+      layout <- .setPlotLayout(x = fs, mfrow = layout, stack = c(density_stack, density_height))
 
       # Plot space
       np <- layout[1] * layout[2]
@@ -701,7 +699,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
         mapply(function(fr, o, title) {
           cnt <<- cnt + 1
 
-          cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, overlay = o, density_stack = density_stack[1], title = title, xlim = xlim, ...)
+          cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, overlay = o, density_stack = density_stack, title = title, xlim = xlim, ...)
 
           if (popup == TRUE & cnt %% np == 0 & length(fs.lst) > cnt) {
             checkOSGD()
@@ -717,7 +715,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
         cnt <- 0
         mapply(function(fr, title) {
           cnt <<- cnt + 1
-          cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, density_stack = density_stack[1], title = title, xlim = xlim, ...)
+          cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, density_stack = density_stack, title = title, xlim = xlim, ...)
 
           if (popup == TRUE & cnt %% np == 0 & length(fs.lst) > cnt) {
             checkOSGD()
@@ -726,7 +724,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
       }
 
       # Stacking - set stack to zero
-    } else if (density_stack[1] != 0) {
+    } else if (density_stack != 0) {
 
       # Stacked overlays not yet supported
       if (!is.null(overlay)) {
@@ -734,14 +732,14 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
       }
 
       # split up samples based on density_stack[2]
-      nm <- ceiling(length(fs.lst) / density_stack[2])
-      fs.lsts <- lapply(seq(density_stack[2], nm * density_stack[2], density_stack[2]), function(x) {
-        i <- x - density_stack[2] + 1
+      nm <- ceiling(length(fs.lst) / density_height)
+      fs.lsts <- lapply(seq(density_height, nm * density_height, density_height), function(x) {
+        i <- x - density_height + 1
         fs.lst[i:x]
       })
       
       # Plot layout
-      layout <- .setPlotLayout(x = fs, mfrow = layout, stack = density_stack)
+      layout <- .setPlotLayout(x = fs, mfrow = layout, stack = c(density_stack, density_height))
 
       # Pass first frame to cyto_1d_plot with others as list of frames - popup?
       lapply(fs.lsts, function(fs.lst) {
@@ -754,7 +752,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x, channel,
           
           fr.lst <- fs.lst[2:length(fs.lst)]
 
-          cyto_1d_plot(x = fs.lst[[1]], channel = channel, axes_trans = axes_trans, overlay = fr.lst, density_stack = density_stack[1], title = title, xlim = xlim, ...)
+          cyto_1d_plot(x = fs.lst[[1]], channel = channel, axes_trans = axes_trans, overlay = fr.lst, density_stack = density_stack, title = title, xlim = xlim, ...)
 
         }
         
@@ -1031,53 +1029,53 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
   # Point colour - 2D colour scale
   if (missing(point_col)) {
     cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-    col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+    point_col <- densCols(fr.exprs[, channels], colramp = cols)
 
     if (!is.null(overlay)) {
       cols <- colorRampPalette(c("black", "darkorchid", "blueviolet", "magenta", "deeppink", "red4", "orange", "springgreen4"))
-      col.overlay <- cols(length(overlay))
+      overlay_col <- cols(length(overlay))
     }
   } else if (length(point_col) == 1) {
     if (is.na(point_col[1])) {
       cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-      col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+      point_col <- densCols(fr.exprs[, channels], colramp = cols)
     } else {
-      col.pts <- point_col[1]
+      point_col <- point_col[1]
     }
 
     if (!is.null(overlay)) {
       cols <- colorRampPalette(c("darkorchid", "blueviolet", "magenta", "deeppink", "red4", "orange", "springgreen4", "navyblue"))
-      col.overlay <- cols(length(overlay))
+      overlay_col <- cols(length(overlay))
     }
   } else if (length(point_col) > 1) {
     if (length(point_col) < length(smp)) {
       if (is.na(point_col[1])) {
         cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-        col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+        point_col <- densCols(fr.exprs[, channels], colramp = cols)
       } else {
-        col.pts <- point_col[1]
+        point_col <- point_col[1]
       }
       cols <- colorRampPalette(c("darkorchid", "blueviolet", "magenta", "deeppink", "red4", "orange", "springgreen4", "navyblue"))
-      col.overlay <- c(point_col[2:length(col)], cols((smp - 1) - length(point_col[2:length(point_col)])))
+      overlay_col <- c(point_col[2:length(col)], cols((smp - 1) - length(point_col[2:length(point_col)])))
     } else if (length(point_col) > length(smp)) {
       if (is.na(point_col[1])) {
         cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-        col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+        point_col <- densCols(fr.exprs[, channels], colramp = cols)
       } else {
-        col.pts <- point_col[1]
+        point_col <- point_col[1]
       }
-      col.overlay <- point_col[2:smp]
+      overlay_col <- point_col[2:smp]
     } else {
       if (is.na(point_col[1])) {
         cols <- colorRampPalette(c("blue", "turquoise", "green", "yellow", "orange", "red"))
-        col.pts <- densCols(fr.exprs[, channels], colramp = cols)
+        point_col <- densCols(fr.exprs[, channels], colramp = cols)
       } else {
-        col.pts <- point_col[1]
+        point_col <- point_col[1]
       }
-      col.overlay <- point_col[2:length(col)]
+      overlay_col <- point_col[2:length(col)]
     }
   } else {
-    col.overlay <- point_col[-1]
+    overlay_col <- point_col[-1]
   }
 
   # X Axis Title
@@ -1105,17 +1103,17 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
 
   # Alpha
   if (length(point_alpha) == 1) {
-    alpha.pts <- point_alpha[1]
+    point_alpha <- point_alpha[1]
 
     if (!is.null(overlay)) {
-      alpha.overlay <- rep(point_alpha, length(overlay))
+      overlay_alpha <- rep(point_alpha, length(overlay))
     }
   } else if (length(point_alpha) < length(smp)) {
-    alpha.pts <- point_alpha[1]
-    alpha.overlay <- c(point_alpha[2:length(point_alpha)], rep(1, (smp - length(point_alpha))))
+    point_alpha <- point_alpha[1]
+    overlay_alpha <- c(point_alpha[2:length(point_alpha)], rep(1, (smp - length(point_alpha))))
   } else if (length(point_alpha) > length(smp)) {
-    alpha.pts <- point_alpha[1]
-    alpha.overlay <- point_alpha[2:smp]
+    point_alpha <- point_alpha[1]
+    overlay_alpha <- point_alpha[2:smp]
   }
 
   # Pop-up
@@ -1137,18 +1135,18 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
     box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
   } else {
     if (is.null(xlabels) & is.null(ylabels)) {
-      graphics::plot(fr.exprs, col = adjustcolor(col.pts, alpha.pts), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
+      graphics::plot(fr.exprs, col = adjustcolor(point_col, point_alpha), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
       box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
     } else if (!is.null(xlabels) & is.null(ylabels)) {
-      graphics::plot(fr.exprs, xaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
+      graphics::plot(fr.exprs, xaxt = "n", col = adjustcolor(point_col, point_alpha), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
       axis(1, at = xlabels$at, labels = xlabels$label)
       box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
     } else if (is.null(xlabels) & !is.null(ylabels)) {
-      graphics::plot(fr.exprs, yaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
+      graphics::plot(fr.exprs, yaxt = "n", col = adjustcolor(point_col, point_alpha), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
       axis(2, at = ylabels$at, labels = ylabels$label)
       box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
     } else if (!is.null(xlabels) & !is.null(ylabels)) {
-      graphics::plot(fr.exprs, xaxt = "n", yaxt = "n", col = adjustcolor(col.pts, alpha.pts), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
+      graphics::plot(fr.exprs, xaxt = "n", yaxt = "n", col = adjustcolor(point_col, point_alpha), pch = point_shape, main = title, xlab = xlab, ylab = ylab, xlim = xlim, ylim = ylim, cex = point_size, cex.axis = axes_text_size, col.axis = axes_text_col, cex.lab = axes_label_size, col.lab = axes_label_col, cex.main = title_size, col.main = title_col, bty = "n", ...)
       axis(1, at = xlabels$at, labels = xlabels$label)
       axis(2, at = ylabels$at, labels = ylabels$label)
       box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
@@ -1167,9 +1165,9 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
 
   # Add overlays
   if (!is.null(overlay)) {
-    mapply(function(overlay, col.overlay, alpha.overlay) {
-      points(x = exprs(overlay)[, channels[1]], y = exprs(overlay)[, channels[2]], pch = ".", col = adjustcolor(col.overlay, alpha.overlay), cex = cex.pts)
-    }, overlay, col.overlay, alpha.overlay)
+    mapply(function(overlay, overlay_col, overlay_alpha) {
+      points(x = exprs(overlay)[, channels[1]], y = exprs(overlay)[, channels[2]], pch = ".", col = adjustcolor(overlay_col, overlay_alpha), cex = cex.pts)
+    }, overlay, overlay_col, overlay_alpha)
   }
 
   # Add legend
@@ -1183,9 +1181,9 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
 
     # Legend colours
     if (missing(point_col)) {
-      col.pts <- "blue"
+      point_col <- "blue"
     } else if (is.na(point_col[1])) {
-      col.pts <- "blue"
+      point_col <- "blue"
     }
 
     # Legend with lines
@@ -1194,7 +1192,7 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
     } else if (missing(legend_line_col) & !missing(legend_box_fill)) {
       legend(x = legend.x, y = legend.y, legend = legend_text, fill = legend_box_fill, xpd = TRUE, bty = "n", x.intersp = 0.5)
     } else if (missing(legend_line_col) & missing(legend_box_fill)) {
-      legend(x = legend.x, y = legend.y, legend = legend_text, fill = c(col.pts, col.overlay), xpd = TRUE, bty = "n", x.intersp = 0.5)
+      legend(x = legend.x, y = legend.y, legend = legend_text, fill = c(point_col, overlay_col), xpd = TRUE, bty = "n", x.intersp = 0.5)
     }
   }
 
@@ -1289,7 +1287,18 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
 #' @author Dillon Hammill (Dillon.Hammill@anu.edu.au)
 #'
 #' @export
-setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels, axes_trans = NULL, merge = NULL, overlay = NULL, display = NULL, layout = NULL, popup = FALSE, limits = "machine", xlim = NULL, ylim = NULL, title, ...) {
+setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, 
+                                                                     channels, 
+                                                                     axes_trans = NULL, 
+                                                                     merge = NULL, 
+                                                                     overlay = NULL, 
+                                                                     display = NULL, 
+                                                                     layout = NULL, 
+                                                                     popup = FALSE, 
+                                                                     limits = "machine", 
+                                                                     xlim = NULL, 
+                                                                     ylim = NULL, 
+                                                                     title, ...) {
 
   # Prevent scientific notation
   options(scipen = 999)
@@ -1422,4 +1431,5 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
 
   # Return options to default
   options(scipen = 0)
+  
 })

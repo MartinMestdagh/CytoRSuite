@@ -191,7 +191,7 @@ cyto_1d_plot(fs[[1]], channel = "FSC-A", overlay = fs[[2]], density_fill = c("re
 \seealso{
 \code{\link{cyto_1d_plot,flowSet-method}}
 
-\code{\link{plotCyto,flowFrame-method}}
+\code{\link{cyto_plot,flowFrame-method}}
 }
 \author{
 Dillon Hammill (Dillon.Hammill@anu.edu.au)

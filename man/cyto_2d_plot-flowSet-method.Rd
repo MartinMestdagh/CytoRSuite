@@ -57,7 +57,7 @@ to modify the lower limits use \code{xlim} and \code{ylim}.}
 
 \item{title}{title for the plot, set to the name of the sample by default.}
 
-\item{...}{additional arguments passed to \code{\link{plotCyto2d,flowFrame-method}}.}
+\item{...}{additional arguments passed to \code{\link{cyto_2d_plot,flowFrame-method}}.}
 }
 \description{
 Visualise 2-D flow cytometry scatterplots with blue-red density colour scale
