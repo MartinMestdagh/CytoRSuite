@@ -1305,8 +1305,8 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
   channels <- checkChannels(fs, channels = channels, plot = TRUE)
 
   # transList
-  if (!is.null(transList)) {
-    transList <- checkTransList(transList, inverse = FALSE)
+  if (!is.null(axes_trans)) {
+    axes_trans <- checkTransList(axes_trans, inverse = FALSE)
   }
 
   # X axis limits
@@ -1319,16 +1319,16 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
     ylim <- suppressWarnings(.getAxesLimits(x = fs, channels = channels, overlay = overlay, limits = limits)[[2]])
   }
 
-  # MergeBy?
-  if (!is.null(mergeBy)) {
+  # Merge?
+  if (!is.null(merge)) {
 
     # Return a list of merged flowFrames
-    fr.lst <- .mergeBy(x = fs, mergeBy = mergeBy)
+    fr.lst <- .mergeBy(x = fs, mergeBy = merge)
 
-    if (missing(main) & !mergeBy == "all") {
-      main <- names(fr.lst)
-    } else if (missing(main) & mergeBy == "all") {
-      main <- "Combined Events"
+    if (missing(title) & !merge == "all") {
+      title <- names(fr.lst)
+    } else if (missing(title) & merge == "all") {
+      title <- "Combined Events"
     }
 
     # overlay
@@ -1336,23 +1336,23 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
       overlay <- checkOverlay(x = fs, overlay = overlay, subSample = display)
 
       # list of flowFrame lists to overlay (1 per group)
-      overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = mergeBy, subSample = display)
+      overlay <- .mergeOverlay(x = fs, overlay = overlay, mergeBy = merge, subSample = display)
     }
 
     # Plot layout
-    mfrow <- .setPlotLayout(x = fr.lst, mfrow = mfrow)
+    layout <- .setPlotLayout(x = fr.lst, mfrow = layout)
 
     # Plots
     if (is.null(overlay)) {
-      mapply(function(fr, main) {
-        cyto_2d_plot(x = fr, channels = channels, display = display, transList = transList, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
-      }, fr.lst, main)
+      mapply(function(fr, title) {
+        cyto_2d_plot(x = fr, channels = channels, display = display, axes_trans = axes_trans, title = title, xlim = xlim, ylim = ylim, popup = popup, layout = FALSE, ...)
+      }, fr.lst, title)
     } else {
-      mapply(function(fr, main, overlay) {
-        cyto_2d_plot(x = fr, channels = channels, display = display, transList = transList, overlay = overlay, main = main, xlim = xlim, ylim = ylim, popup = popup, mfrow = FALSE, ...)
-      }, fr.lst, main, overlay)
+      mapply(function(fr, title, overlay) {
+        cyto_2d_plot(x = fr, channels = channels, display = display, axes_trans = axes_trans, overlay = overlay, title = title, xlim = xlim, ylim = ylim, popup = popup, layout = FALSE, ...)
+      }, fr.lst, title, overlay)
     }
-  } else if (is.null(mergeBy)) {
+  } else if (is.null(merge)) {
 
     # Number of samples
     smp <- length(fs)
@@ -1379,44 +1379,44 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x, channels
     }
 
     # Plot layout
-    mfrow <- .setPlotLayout(x = fs, mfrow = mfrow)
+    mfrow <- .setPlotLayout(x = fs, mfrow = layout)
 
     # Number of plots in window
-    np <- mfrow[1] * mfrow[2]
+    np <- layout[1] * layout[2]
 
     # Titles
-    if (missing(main)) {
-      main <- sampleNames(fs)
+    if (missing(title)) {
+      title <- sampleNames(fs)
     }
 
     # Plot
     if (!is.null(overlay)) {
       cnt <- 0
-      mapply(function(fr, o, main) {
+      mapply(function(fr, o, title) {
         cnt <<- cnt + 1
 
-        cyto_2d_plot(x = fr, channels = channels, transList = transList, overlay = o, main = main, xlim = xlim, ylim = ylim, ...)
+        cyto_2d_plot(x = fr, channels = channels, axes_trans = axes_trans, overlay = o, title = title, xlim = xlim, ylim = ylim, ...)
 
         if (popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt) {
           checkOSGD()
         }
-      }, fr.lst, overlay, main)
+      }, fr.lst, overlay, title)
     } else {
       cnt <- 0
-      mapply(function(fr, main) {
+      mapply(function(fr, title) {
         cnt <<- cnt + 1
 
-        cyto_2d_plot(x = fr, channels = channels, transList = transList, main = main, xlim = xlim, ylim = ylim, ...)
+        cyto_2d_plot(x = fr, channels = channels, axes_trans = axes_trans, title = title, xlim = xlim, ylim = ylim, ...)
 
         if (popup == TRUE & cnt %% np == 0 & length(fr.lst) > cnt) {
           checkOSGD()
         }
-      }, fr.lst, main)
+      }, fr.lst, title)
     }
   }
 
   # Return mfrow to default
-  if (mfrow[1] != FALSE) {
+  if (layout[1] != FALSE) {
     par(mfrow = c(1, 1))
   }
 
