@@ -645,19 +645,19 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 #' @param overlay object return by checkOverlay.
 #' @param legend logical indicating whether a legend should be included in the
 #'   plot.
-#' @param text.legend text to be used in the legend, used to calculate required
+#' @param legend_text text to be used in the legend, used to calculate required
 #'   space.
-#' @param main if NULL remove excess space above plot.
+#' @param title if NULL remove excess space above plot.
 #'
 #' @noRd
-.setPlotMargins <- function(x, overlay = NULL, legend = NULL, text.legend = NULL, main = NULL) {
+.setPlotMargins <- function(x, overlay = NULL, legend = NULL, legend_text = NULL, title = NULL) {
 
   # plot margins
-  if (!is.null(overlay) & legend == TRUE) {
-    mrgn <- 7 + max(nchar(text.legend)) * 0.32
+  if (!is.null(overlay) & legend != FALSE) {
+    mrgn <- 7 + max(nchar(legend_text)) * 0.32
 
     # Remove excess sapce above if no main
-    if (is.null(main)) {
+    if (is.null(title)) {
       par(mar = c(5, 5, 2, mrgn) + 0.1)
     } else {
       par(mar = c(5, 5, 4, mrgn) + 0.1)
@@ -665,7 +665,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   } else {
 
     # Remove excess space above if no main
-    if (is.null(main)) {
+    if (is.null(title)) {
       par(mar = c(5, 5, 2, 2) + 0.1)
     } else {
       par(mar = c(5, 5, 4, 2) + 0.1)
@@ -727,11 +727,11 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 #' @param channel used in the plot.
 #' @param overlay list of flowFrames to overlay.
 #' @param gates gate object(s).
-#' @param offset degree of stacking.
+#' @param density_stack degree of stacking.
 #' @param ... additional arguments passed to plotLabels.
 #'
 #' @noRd
-.gateOverlay <- function(x, channel = NULL, overlay = NULL, gates = NULL, offset = NULL, alias = NA, format.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6, ...) {
+.gateOverlay <- function(x, channel = NULL, overlay = NULL, gates = NULL, density_stack = NULL, alias = NA, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, format.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6, ...) {
   if (!inherits(x, "flowFrame")) {
     stop("x should be a flowFrame object.")
   }
@@ -786,11 +786,11 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 
   # Find y co-ord for each sample
   txt.y <- sapply(1:smp, function(x) {
-    (0.5 * offset * 100) + ((x - 1) * offset * 100)
+    (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
   })
 
   # Plot gates
-  plotGates(gates, channels = channel)
+  plotGates(gates, channels = channel, col.gate = col.gate, lwd.gate = lwd.gate, lty.gate = lty.gate)
 
   # List of flowFrames for plotLabels
   fr.lst <- c(list(x), overlay)

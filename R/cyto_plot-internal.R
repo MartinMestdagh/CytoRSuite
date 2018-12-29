@@ -66,8 +66,8 @@ setGeneric(
 #' @param density_stack numeric [0,1] indicating the degree of offset for
 #'   overlayed populations, set to 0.5 by default.
 #' @param density_fill colour(s) used to fill polygons.
-#' @param density_alpha numeric [0,1] used to control fill transparency, set to
-#'   1 by default to remove transparency.
+#' @param density_fill_alpha numeric [0,1] used to control fill transparency,
+#'   set to 1 by default to remove transparency.
 #' @param density_line_type line type(s) to use for border(s), set to solid
 #'   lines by default.
 #' @param density_line_width line width for border.
@@ -87,8 +87,9 @@ setGeneric(
 #'   details.
 #' @param title_text_size character expansion for plot title.
 #' @param title_text_col colour for plot title.
-#' @param legend logical indicating whether a legend should be included for
-#'   plots including overlays, set to FALSE by default.
+#' @param legend can be either \code{"line"} or \code{"fill"} to indicate
+#'   whether a legend should be constructed based on the density \code{"line"}
+#'   or \code{"fill"}, set to FALSE by default to remove the legend.
 #' @param legend_text vector of labels to use for the legend.
 #' @param legend_text_font numeric indicating the font to use for labels, set to
 #'   1 for plain font by default. See \code{\link[graphics:par]{?par}} font for
@@ -99,12 +100,12 @@ setGeneric(
 #'   by default.
 #' @param legend_line_col vector of line colours to use for legend.
 #' @param legend_box_fill vector of fill colours to use for legend.
-#' @param gate_line_col indicates the colour of the gate to be constructed, set
-#'   to \code{"red"} by default.
-#' @param gate_line_width numeric to adjust line thickness of gates, set to
-#'   \code{2.5} by default.
 #' @param gate_line_type integer [0,6] which controls the line type, set to
 #'   \code{1} to draw solid lines by default.
+#' @param gate_line_width numeric to adjust line thickness of gates, set to
+#'   \code{2.5} by default.
+#' @param gate_line_col indicates the colour of the gate to be constructed, set
+#'   to \code{"red"} by default.
 #' @param label logical indicating whether gated populations should be labelled.
 #'   If the names of the populations are supplied as the text.labels argument,
 #'   the population name and frequency will be included in the labels, otherwise
@@ -149,7 +150,7 @@ setGeneric(
 #'
 #' @export
 setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x, 
-                                                                       channel, 
+                                                                       channel = NULL, 
                                                                        axes_trans = NULL,
                                                                        overlay = NULL, 
                                                                        gate = NULL, 
@@ -163,8 +164,8 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
                                                                        xlab, 
                                                                        ylab,
                                                                        density_stack = 0.5,
-                                                                       density_fill, 
-                                                                       density_alpha = 1, 
+                                                                       density_fill = NULL, 
+                                                                       density_fill_alpha = 1, 
                                                                        density_line_type = 1, 
                                                                        density_line_width = 1, 
                                                                        density_line_col = "black",
@@ -182,22 +183,27 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
                                                                        legend_text_font = 1,
                                                                        legend_text_size = 1,
                                                                        legend_text_col = "black",
-                                                                       legend_line_col, 
-                                                                       legend_box_fill, 
-                                                                       gate_line_col = "red", 
+                                                                       legend_line_col = NA, 
+                                                                       legend_box_fill = NA, 
+                                                                       gate_line_type = 1, 
                                                                        gate_line_width = 2.5, 
-                                                                       gate_line_type = 1,
+                                                                       gate_line_col = "red",
                                                                        label = TRUE, 
-                                                                       label_text,
+                                                                       label_text = NA,
                                                                        label_text_format = c("alias", "percent"), 
                                                                        label_text_font = 2,
-                                                                       label_text_size = 0.8, 
+                                                                       label_text_size = 1, 
                                                                        label_text_col = "black", 
                                                                        label_box_alpha = 0.6,
                                                                        border_line_type = 1,
                                                                        border_line_width = 1,
                                                                        border_line_col = "black", ...) {
 
+  
+  # Check if channel supplied
+  if(missing(channel)){
+    stop("Please supply the name of the channel or marker to construct the plot.")
+  }
   
   # Prevent scientific notation on axes
   options(scipen = 999)
@@ -215,10 +221,23 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
   # Check overlay return list of fowFrames
   if (!is.null(overlay)) {
     overlay <- checkOverlay(x = fr, overlay = overlay)
+    
+    if(missing(title)){
+      title <- NULL
+    }
+    
+    if(!modal){
+      message("Overlays must be normalised to mode - setting modal to TRUE.")
+      modal <- TRUE
+    }
+
   }
   
   # number of overlays
   ovn <- length(overlay)
+  
+  # number of layers
+  lyrs <- ovn + 1
 
   # Merge fr with overlay if supplied - named list of fr & overlay
   if (!is.null(overlay)) {
@@ -306,109 +325,93 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
   # Overlay colours
   cols <- colorRampPalette(c("grey", "bisque4", "brown1", "red", "darkred", "chocolate", "orange", "yellow", "yellowgreen", "green", "aquamarine", "cyan", "cornflowerblue", "blue", "blueviolet", "purple", "magenta", "deeppink"))
 
-  if (missing(density_fill)) {
+  # Density fill
+  if (is.null(density_fill)) {
     density_fill <- cols(length(frs.dens))
   } else if (length(density_fill) < length(frs.dens)) {
     density_fill <- c(density_fill, cols((length(frs.dens) - length(density_fill))))
   } else if (length(density_fill) > length(frs.dens)) {
     density_fill <- density_fill[length(frs.dens)]
   }
-
-  # Border colours
-  if (length(density_line_col) == 1) {
-    density_line_col <- rep(density_line_col, length(frs.dens))
-  } else if (length(density_line_col) < length(frs.dens)) {
-    density_line_col <- c(density_line_col, cols((length(frs.dens) - length(density_line_col))))
-  } else if (length(density_line_col) > length(frs.dens)) {
-    density_line_col <- density_line_col[length(frs.dens)]
+  
+  # Legend text
+  if (missing(legend_text)) {
+    legend_text <- names(frs)
   }
-
-  # Border thickness
-  if (length(density_line_width) == 1) {
-    density_line_width <- rep(density_line_width, length(frs.dens))
-  } else if (length(density_line_width) < length(frs.dens)) {
-    density_line_width <- c(density_line_width, rep(1, (length(frs.dens) - length(density_line_width))))
-  } else if (length(density_line_width) > length(frs.dens)) {
-    density_line_width <- density_line_width[length(frs.dens)]
-  }
-
-  # Border line type
-  if (length(density_line_type) == 1) {
-    density_line_type <- rep(density_line_type, length(frs.dens))
-  } else if (length(density_line_type) < length(frs.dens)) {
-    density_line_type <- c(density_line_type, rep(1, (length(frs.dens) - length(density_line_type))))
-  } else if (length(density_line_type) > length(frs.dens)) {
-    density_line_type <- density_line_type[length(frs.dens)]
-  }
-
-  # Density transparency
-  if (length(density_alpha) == 1) {
-    density_alpha <- rep(density_alpha, length(frs.dens))
-  } else if (length(density_alpha) < length(frs.dens)) {
-    density_alpha <- c(density_alpha, rep(1, (length(frs.dens) - length(density_alpha))))
-  } else if (length(density_alpha) > length(frs.dens)) {
-    density_alpha <- density_alpha[length(frs.dens)]
-  }
-
+  
+  # Split arguments
+  args <- list(title, title_text_font, title_text_size, title_text_col,
+               density_stack, density_fill,density_fill_alpha, density_line_type, density_line_width, density_line_col,
+               axes_text_font, axes_text_size, axes_text_col,
+               axes_label_font, axes_label_size, axes_label_col,
+               legend, legend_text, legend_text_font, legend_text_size, legend_text_col, legend_line_col, legend_box_fill,
+               gate_line_type, gate_line_width, gate_line_col,
+               label, label_text, label_text_format, label_text_font, label_text_size, label_text_col, label_box_alpha,
+               border_line_type, border_line_width, border_line_col)
+  names(args) <- c("title", "title_text_font", "title_text_size", "title_text_col",
+                   "density_stack", "density_fill", "density_fill_alpha", "density_line_type", "density_line_width", "density_line_col",
+                   "axes_text_font", "axes_text_size", "axes_text_col",
+                   "axes_label_font", "axes_label_size", "axes_label_col",
+                   "legend", "legend_text", "legend_text_font", "legend_text_size", "legend_text_col", "legend_line_col", "legend_box_fill",
+                   "gate_line_type", "gate_line_width", "gate_line_col",
+                   "label", "label_text", "label_text_format", "label_text_font", "label_text_size", "label_text_col", "label_box_alpha",
+                   "border_line_type", "border_line_width", "border_line_col")
+  args <- .args_split(x = args, n = lyrs, plots = 1, layers = lyrs, gates = length(gate))
+  
   # Pop-up
   if (popup == TRUE) {
     checkOSGD()
   }
 
-  # Legend text
-  if (missing(legend_text)) {
-    legend_text <- names(frs)
-  }
-
   # Plot margins
-  .setPlotMargins(x = fr, overlay = overlay, legend = legend, text.legend = legend_text, main = title)
+  .setPlotMargins(x = fr, overlay = overlay, legend = legend, legend_text = legend_text, title = title)
 
   # Set up empty plot
   if (is.null(xlabels) & ylabels == FALSE) {
-    graphics::plot(1, type = "n", yaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, font.axis = axes_text_font, cex.axis = axes_text_size, col.axis = axes_text_col, ann = FALSE, bty = "n", ...)
-    box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
-    abline(h = c(0, ofst), col = density_line_col[length(frs.dens):1])
-    title(main = title, cex.main = title_text_size, col.main = title_text_col, font.main = title_text_font)
-    title(xlab = xlab, font.lab = axes_label_font, col.lab = axes_label_col, cex.lab = axes_label_size)
-    title(ylab = ylab, mgp = c(2, 0, 0), font.lab = axes_label_font, col.lab = axes_label_col, cex.lab = axes_label_size)
+    graphics::plot(1, type = "n", yaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, font.axis = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]], ann = FALSE, bty = "n", ...)
+    box(which = "plot", lty = args[["border_line_type"]], lwd = args[["border_line_width"]], col = args[["border_line_col"]])
+    abline(h = ofst, col = args[["density_line_col"]], lwd = args[["density_line_width"]])
+    title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    title(xlab = xlab, font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
+    title(ylab = ylab, mgp = c(2, 0, 0), font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
   } else if (is.null(xlabels) & ylabels == TRUE) {
-    graphics::plot(1, type = "n", xlim = xlim, ylim = ylim, axes = TRUE, font.axis = axes_text_font, cex.axis = axes_text_size, col.axis = axes_text_col, ann = FALSE, las = 1, bty = "n", ...)
-    box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
-    abline(h = c(0, ofst), col = density_line_col[length(frs.dens):1])
-    title(main = title, cex.main = title_text_size, col.main = title_text_col, font.main = title_text_font)
-    title(xlab = xlab, font.lab = axes_label_font, col.lab = axes_label_col, cex.lab = axes_label_size)
-    title(ylab = ylab, mgp = c(3, 0, 0), font.lab = axes_label_font, col.lab = axes_label_col, cex.lab = axes_label_size)
+    graphics::plot(1, type = "n", xlim = xlim, ylim = ylim, axes = TRUE, font.axis = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]], ann = FALSE, las = 1, bty = "n", ...)
+    box(which = "plot", lty = args[["border_line_type"]], lwd = args[["border_line_width"]], col = args[["border_line_col"]])
+    abline(h = ofst, col = args[["density_line_col"]], lwd = args[["density_line_width"]])
+    title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    title(xlab = xlab, font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
+    title(ylab = ylab, mgp = c(3, 0, 0), font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
   } else if (!is.null(xlabels) & ylabels == FALSE) {
-    graphics::plot(1, type = "n", yaxt = "n", xaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, cex.axis = axes_text_size, col.axis = axes_text_col, ann = FALSE, bty = "n", ...)
-    axis(1, at = xlabels$at, labels = xlabels$label, font = axes_text_font, cex.axis = axes_text_size, col.axis = axes_text_col)
-    box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
-    abline(h = c(0, ofst), col = density_line_col[length(frs.dens):1])
-    title(main = title, cex.main = title_text_size, col.main = title_text_col, font.main = title_text_font)
-    title(xlab = xlab, font.lab = axes_label_font, col.lab = axes_label_col, cex.lab = axes_label_size)
-    title(ylab = ylab, mgp = c(2, 0, 0), font.lab = axes_label_font, col.lab = axes_label_col, cex.lab = axes_label_size)
+    graphics::plot(1, type = "n", yaxt = "n", xaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]], ann = FALSE, bty = "n", ...)
+    axis(1, at = xlabels$at, labels = xlabels$label, font = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]])
+    box(which = "plot", lty = args[["border_line_type"]], lwd = args[["border_line_width"]], col = args[["border_line_col"]])
+    abline(h = ofst, col = args[["density_line_col"]], lwd = args[["density_line_width"]])
+    title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    title(xlab = xlab, font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
+    title(ylab = ylab, mgp = c(2, 0, 0), font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
   } else if (!is.null(xlabels) & ylabels == TRUE) {
-    graphics::plot(1, type = "n", xaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, xlab = xlab, ylab = ylab, cex.axis = axes_text_size, col.axis = axes_text_col, ann = FALSE, las = 1, bty = "n", ...)
-    axis(1, at = xlabels$at, labels = xlabels$label, font = axes_text_font, cex.axis = axes_text_size, col.axis = axes_text_col)
-    box(which = "plot", lty = border_line_type, lwd = border_line_width, col = border_line_col)
-    abline(h = c(0, ofst), col = density_line_col[length(frs.dens):1])
-    title(main = title, cex.main = title_text_size, col.main = title_text_col, font.main = title_text_font)
-    title(xlab = xlab, font.lab = axes_label_font, col.lab = axes_label_col, cex.lab = axes_label_size)
-    title(ylab = ylab, mgp = c(3, 0, 0), font.lab = axes_label_font, col.lab = axes_label_col, cex.lab = axes_label_size)
+    graphics::plot(1, type = "n", xaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, xlab = xlab, ylab = ylab, cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]], ann = FALSE, las = 1, bty = "n", ...)
+    axis(1, at = xlabels$at, labels = xlabels$label, font = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]])
+    box(which = "plot", lty = args[["border_line_type"]], lwd = args[["border_line_width"]], col = args[["border_line_col"]])
+    abline(h = ofst, col = args[["density_line_col"]], lwd = args[["density_line_width"]])
+    title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    title(xlab = xlab, font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
+    title(ylab = ylab, mgp = c(3, 0, 0), font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
   }
 
   # Add density distributions - reverse plot order and colours
   if (!is.null(overlay) & density_stack == 0) {
-    mapply(function(fr.dens, density_fill, density_line_col, density_line_width, density_line_type, density_alpha) {
-      polygon(fr.dens, col = adjustcolor(density_fill, density_alpha), border = density_line_col, lwd = density_line_width, lty = density_line_type)
-    }, frs.dens, density_fill, density_line_col, density_line_width, density_line_type, density_alpha)
+    mapply(function(fr.dens, density_fill, density_line_col, density_line_width, density_line_type, density_fill_alpha) {
+      polygon(fr.dens, col = adjustcolor(density_fill, density_fill_alpha), border = density_line_col, lwd = density_line_width, lty = density_line_type)
+    }, frs.dens, args[["density_fill"]], args[["density_line_col"]], args[["density_line_width"]], args[["density_line_type"]], args[["density_fill_alpha"]])
   } else {
-    mapply(function(fr.dens, density_fill, density_line_col, density_line_width, density_line_type, density_alpha) {
-      polygon(fr.dens, col = adjustcolor(density_fill, density_alpha), border = density_line_col, lwd = density_line_width, lty = density_line_type)
-    }, frs.dens[length(frs.dens):1], density_fill[length(frs.dens):1], density_line_col[length(frs.dens):1], density_line_width[length(frs.dens):1], density_line_type[length(frs.dens):1], density_alpha[length(frs.dens):1])
+    mapply(function(fr.dens, density_fill, density_line_col, density_line_width, density_line_type, density_fill_alpha) {
+      polygon(fr.dens, col = adjustcolor(density_fill, density_fill_alpha), border = density_line_col, lwd = density_line_width, lty = density_line_type)
+    }, frs.dens[length(frs.dens):1], args[["density_fill"]][length(frs.dens):1], args[["density_line_col"]][length(frs.dens):1], args[["density_line_width"]][length(frs.dens):1], args[["density_line_type"]][length(frs.dens):1], args[["density_fill_alpha"]][length(frs.dens):1])
   }
 
   # Add legend
-  if (!is.null(overlay) & legend == TRUE) {
+  if (!is.null(overlay) & args[["legend"]] != FALSE) {
 
     # Legend position x
     legend.x <- par("usr")[2] + 0.025 * par("usr")[2]
@@ -417,63 +420,60 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
     legend.y <- mean(par("usr")[c(3, 4)]) + (((par("usr")[4]) / 21) * 0.5 * length(frs.dens))
 
     # Legend labels
-    legend_text <- legend_text[length(legend_text):1]
+    legend_text <- rev(args[["legend_text"]])
 
-    # Legend
-    if (!missing(legend_line_col) & missing(legend_box_fill)) {
+    # Line legend
+    if(args[["legend"]] == "line"){
       
-      if(!all(density_alpha == 1)){
-        legend_line_col <- mapply(function(legend_line_col, density_alpha){
-          adjustcolor(legend_line_col, density_alpha)
-        }, legend_line_col, density_alpha)
+      # No line colours supplied - use density_line_col
+      if(all(is.na(args[["legend_line_col"]]))){
+        
+        args[["legend_line_col"]] <- args[["density_line_col"]]
+        
+      }
+      legend(x = legend.x, y = legend.y, legend = rev(args[["legend_text"]]), col = rev(args[["legend_line_col"]]), lty = rev(args[["density_line_type"]]), lwd = rev(args[["density_line_width"]]), xpd = TRUE, bty = "n", x.intersp = 0.5, cex = args[["legend_text_size"]], text.col = rev(args[["legend_text_col"]]), text.font = rev(args[["legend_text_font"]]))
+      
+    # Fill legend  
+    }else if(args[["legend"]] == "fill"){
+      
+      # No fill colours supplied - use density_line_col
+      if(all(is.na(args[["legend_box_fill"]]))){
+        
+        args[["legend_box_fill"]] <- args[["density_fill"]]
+        
       }
       
-      legend(x = legend.x, y = legend.y, legend = legend_text, col = legend_line_col, lty = density_line_type, lwd = density_line_width, xpd = TRUE, bty = "n", x.intersp = 0.5, cex = legend_text_size, text.col = legend_text_col, text.font = legend_text_font)
-    } else if (missing(legend_line_col) & !missing(legend_box_fill)) {
-      
-      if(!all(density_alpha == 1)){
-        legend_box_fill <- mapply(function(legend_box_fill, density_alpha){
-          adjustcolor(legend_box_fill, density_alpha)
-        }, legend_box_fill, density_alpha)
+      # Alpha adjust legend_fill
+      if(!all(args[["density_fill_alpha"]] == 1)){
+        args[["legend_box_fill"]] <- mapply(function(legend_box_fill, density_fill_alpha){
+          adjustcolor(legend_box_fill, density_fill_alpha)
+        }, args[["legend_box_fill"]], args[["density_fill_alpha"]])
       }
       
-      legend(x = legend.x, y = legend.y, legend = legend_text, fill = legend_box_fill, xpd = TRUE, bty = "n", x.intersp = 0.5, cex = legend_text_size, text.col = legend_text_col, text.font = legend_text_font)
-    } else if (missing(legend_line_col) & missing(legend_box_fill)) {
-      
-      if(!all(density_alpha == 1)){
-        fill <- density_fill[length(frs):1]
-        fill <- mapply(function(fill, density_alpha){
-          adjustcolor(fill, density_alpha)
-        }, fill, density_alpha)
-      }else{
-        fill <- density_fill[length(frs):1]
-      }
-      
-      legend(x = legend.x, y = legend.y, legend = legend_text, fill = fill, xpd = TRUE, bty = "n", x.intersp = 0.5, cex = legend_text_size, text.col = legend_text_col, text.font = legend_text_font)
+      legend(x = legend.x, y = legend.y, legend = rev(args[["legend_text"]]), fill = rev(args[["legend_box_fill"]]), xpd = TRUE, bty = "n", x.intersp = 0.5, cex = args[["legend_text_size"]], text.col = rev(args[["legend_text_col"]]), text.font = rev(args[["legend_text_font"]]))
+
     }
+    
   }
-  
-  # Missing labels for plotLabels
-  if(missing(label_text)){
-    label_text <- NA
-  }
-  
+
   # Gates - no overlay
   if (is.null(overlay)) {
     if (!is.null(gate)) {
-      plotGates(gate, channels = channel, col.gate = gate_line_col, lwd.gate = gate_line_width, lty.gate = gate_line_type)
+      plotGates(gate, channels = channel, col.gate = args[["gate_line_col"]], lwd.gate = args[["gate_line_width"]], lty.gate = args[["gate_line_type"]])
     }
 
     # Labels
-    if (!is.null(gate) & label == TRUE) {
+    if (!is.null(gate) & args[["label"]] == TRUE) {
 
       # Population names missing - show percantage only
-      suppressMessages(plotLabels(x = fr, channels = channel, alias = label_text, gates = gate, format.text = label_text_format, cex.text = label_text_size, font.text = label_text_font, col.text = label_text_col, alpha = label_box_alpha))
+      suppressMessages(plotLabels(x = fr, channels = channel, alias = args[["label_text"]], gates = gate, format.text = args[["label_text_format"]], cex.text = args[["label_text_size"]], font.text = args[["label_text_font"]], col.text = args[["label_text_col"]], alpha = args[["label_box_alpha"]]))
     
     }
     
-  } else if (!is.null(overlay) & density_stack != 0 & !is.null(gate)) {
-    .gateOverlay(x = fr, channel = channel, overlay = overlay, gates = gate, offset = density_stack, alias = label_text, format.text = label_text_format, cex.text = label_text_size, font.text = label_text_font, col.text = label_text_col, alpha = label_box_alpha, col.gate = gate_line_col, lwd.gate = gate_line_width, lty.gate = gate_line_type)
+  } else if (!is.null(overlay) & args[["density_stack"]] != 0 & !is.null(gate)) {
+    .gateOverlay(x = fr, channel = channel, overlay = overlay, gates = gate, density_stack = args[["density_stack"]], alias = args[["label_text"]], format.text = args[["label_text_format"]], cex.text = args[["label_text_size"]], font.text = args[["label_text_font"]], col.text = args[["label_text_col"]], alpha = args[["label_box_alpha"]], col.gate = args[["gate_line_col"]], lwd.gate = args[["gate_line_width"]], lty.gate = args[["gate_line_type"]])
+  } else if (!is.null(overlay) & args[["density_stack"]] == 0 & !is.null(gate)) {
+    message("Plotting gates with overlays and no stacking is not supported. Modify density_stack to plot gates.")
   }
 
   # Return options to default
@@ -506,23 +506,24 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
 #' @param overlay a \code{flowFrame}, \code{flowSet}, \code{list of flowFrames},
 #'   \code{list of flowSets} or \code{list of flowFrame lists} containing
 #'   populations to be overlaid onto the plot(s).
-#' @param density_stack numeric [0,1] indicating the degree of offset for
-#'   overlayed populations, set to 0.5 by default.
-#' @param density_height numeric indicating the number of samples to stack each
-#'   plot, set to all samples by default.
 #' @param limits indicates whether the axes limits should be based on the
 #'   \code{"data"} or \code{"machine"}, set to "machine" by default to show
 #'   complete axes ranges. This argument will only alter the upper axis limits,
 #'   to modify the lower limits use \code{xlim} and \code{ylim}.
-#' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
-#' @param layout a vector of the length 2 indicating the dimensions of the grid
-#'   for plotting \code{c(#rows, #columns)}.
 #' @param popup logical indicating whether the plot should be constructed in a
 #'   pop-up window, set to FALSE by default. \code{popup} will open OS-specific
 #'   graphic device prior to plotting. Mac users will need to install
 #'   \href{https://www.xquartz.org/}{XQuartz} for this functionality.
+#' @param layout a vector of the length 2 indicating the dimensions of the grid
+#'   for plotting \code{c(#rows, #columns)}.
+#' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param title vector of titles to use for each plot, set to name of the sample
 #'   by default.
+#' @param density_stack numeric [0,1] indicating the degree of offset for
+#'   overlayed populations, set to 0.5 by default.
+#' @param density_layers numeric indicating the number of samples to stack each
+#'   plot, set to all samples by default.
+#' @param density_fill colour(s) used to fill polygons.
 #' @param legend_text vector of names to use in the legend if legend is set to
 #'   TRUE.
 #' @param ... additional arguments passed to
@@ -552,15 +553,21 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
                                                                      axes_trans = NULL, 
                                                                      merge = NULL, 
                                                                      overlay = NULL, 
-                                                                     density_stack = 0,
-                                                                     density_height = length(x),
-                                                                     limits = "machine", 
-                                                                     xlim = NULL, 
+                                                                     limits = "machine",
+                                                                     popup = FALSE,
                                                                      layout = NULL, 
-                                                                     popup = FALSE, 
+                                                                     xlim = NULL,
                                                                      title = NULL, 
+                                                                     density_stack = 0,
+                                                                     density_layers = length(x),
+                                                                     density_fill = NULL,
                                                                      legend_text = NULL, ...) {
 
+  # Check if channel supplied
+  if(missing(channel)){
+    stop("Please supply the name of the channel or marker to construct the plot.")
+  }
+  
   # Prevent scientific notation
   options(scipen = 999)
 
@@ -585,6 +592,9 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
   if (popup == TRUE) {
     checkOSGD()
   }
+  
+  # Density fill
+  cols <- colorRampPalette(c("grey", "bisque4", "brown1", "red", "darkred", "chocolate", "orange", "yellow", "yellowgreen", "green", "aquamarine", "cyan", "cornflowerblue", "blue", "blueviolet", "purple", "magenta", "deeppink"))
   
   # MergeBy
   if (!is.null(merge)) {
@@ -613,11 +623,21 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       }
       
       # Plot layout - each group separate panel - no stacking
-      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = c(density_stack, density_height))
+      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = c(density_stack, density_layers))
       
-      mapply(function(fr, title) {
-        cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, density_stack = density_stack, title = title, xlim = xlim, ...)
-      }, fr.lst, title)
+      # Density fill
+      if (is.null(density_fill)) {
+        density_fill <- cols(length(fr.lst))
+      } else if (length(density_fill) < length(fr.lst)) {
+        density_fill <- c(density_fill, cols((length(fr.lst) - length(density_fill))))
+      } else if (length(density_fill) > length(fr.lst)) {
+        density_fill <- density_fill[length(fr.lst)]
+      }
+      
+      # Call to cyto_1d_plot
+      mapply(function(fr, title, density_fill, ...) {
+        cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, overlay = NULL, density_stack = density_stack, title = title, xlim = xlim, density_fill = density_fill, ...)
+      }, fr.lst, title, density_fill, ...)
       
     } else if (!is.null(overlay) & density_stack == 0) {
 
@@ -627,16 +647,28 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       }
 
       # Plot layout - separate panel with overlay
-      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = c(density_stack, density_height))
+      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = c(density_stack, density_layers))
 
       # Legend text
       if (is.null(legend_text)) {
         legend_text <- c("Base", "Overlay")
       }
 
-      mapply(function(fr, title, overlay) {
-        cyto_1d_plot(x = fr, channel = channel, overlay = overlay, axes_trans = axes_trans, density_stack = density_stack, title = title, xlim = xlim, text.legend = legend_text, ...)
-      }, fr.lst, title, overlay)
+      # Density fill
+      expt <- length(overlay[[1]]) + 1
+      if (is.null(density_fill)) {
+        density_fill <- cols(expt)
+      } else if (length(density_fill) < expt) {
+        density_fill <- c(density_fill, cols((expt - length(density_fill))))
+      } else if (length(density_fill) > expt) {
+        density_fill <- density_fill[expt]
+      }
+      density_fill <- split(density_fill, expt)
+      
+      # Call to cyto_1d_plot
+      mapply(function(fr, title, overlay, density_fill, ...) {
+        cyto_1d_plot(x = fr, channel = channel, overlay = overlay, axes_trans = axes_trans, density_stack = density_stack, density_fill = density_fill, title = title, xlim = xlim, legend_text = legend_text, ...)
+      }, fr.lst, title, overlay, density_fill, ...)
       
     } else if (is.null(overlay) & density_stack != 0) {
 
@@ -646,10 +678,10 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       }
 
       # Plot layout - stacking
-      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = c(density_stack, density_height))
+      layout <- .setPlotLayout(x = fr.lst, mfrow = layout, stack = c(density_stack, density_layers))
 
-      # Split fr.lst by density_height
-      sp <- rep(1:length(fr.lst), each = density_height, length.out = length(fr.lst))
+      # Split fr.lst by density_layers
+      sp <- rep(1:length(fr.lst), each = density_layers, length.out = length(fr.lst))
 
       lapply(unique(sp), function(x) {
 
@@ -683,7 +715,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       }
 
       # Plot layout
-      layout <- .setPlotLayout(x = fs, mfrow = layout, stack = c(density_stack, density_height))
+      layout <- .setPlotLayout(x = fs, mfrow = layout, stack = c(density_stack, density_layers))
 
       # Plot space
       np <- layout[1] * layout[2]
@@ -732,17 +764,22 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       }
 
       # split up samples based on density_stack[2]
-      nm <- ceiling(length(fs.lst) / density_height)
-      fs.lsts <- lapply(seq(density_height, nm * density_height, density_height), function(x) {
-        i <- x - density_height + 1
+      nm <- ceiling(length(fs.lst) / density_layers)
+      fs.lsts <- lapply(seq(density_layers, nm * density_layers, density_layers), function(x) {
+        i <- x - density_layers + 1
         fs.lst[i:x]
       })
       
       # Plot layout
-      layout <- .setPlotLayout(x = fs, mfrow = layout, stack = c(density_stack, density_height))
+      layout <- .setPlotLayout(x = fs, mfrow = layout, stack = c(density_stack, density_layers))
 
+      # Plot space
+      np <- layout[1] * layout[2]
+      
       # Pass first frame to cyto_1d_plot with others as list of frames - popup?
-      lapply(fs.lsts, function(fs.lst) {
+      cnt <- 0
+      mapply(function(fs.lst, title){
+        cnt <<- cnt + 1
         
         if(length(fs.lst) == 1){
           
@@ -756,7 +793,12 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
 
         }
         
-      })
+        if (popup == TRUE & cnt %% np == 0 & length(fs.lsts) > cnt) {
+          checkOSGD()
+        }
+        
+      }, fs.lsts, title)
+      
     }
   }
 
@@ -978,6 +1020,11 @@ setMethod(cyto_2d_plot, signature = "flowFrame", definition = function(x,
                                                                        border_line_width = 1,
                                                                        border_line_col = "black", ...) {
 
+  # Check if channels supplied
+  if(missing(channels)){
+    stop("Please supply the name of the channels or markers to construct the plot.")
+  }
+  
   # Prevent scientific notation
   options(scipen = 999)
 
@@ -1300,6 +1347,11 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x,
                                                                      ylim = NULL, 
                                                                      title, ...) {
 
+  # Check if channels supplied
+  if(missing(channels)){
+    stop("Please supply the name of the channels or markers to construct the plot.")
+  }
+  
   # Prevent scientific notation
   options(scipen = 999)
 
@@ -1433,3 +1485,102 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x,
   options(scipen = 0)
   
 })
+
+#' Split arguments for cyto_plot
+#' 
+#' @param x list of arguments
+#' @param n total number of layers
+#' @param plots number of plots
+#' @param layers number of layers per plot
+#' @param gates number of gates per plot
+#' 
+#' @noRd
+.args_split <- function(x, n, plots, layers, gates){
+  
+  # Arguments per plot
+  args <- c("title", "title_text_font", "title_text_size", "title_text_col", 
+            "density_stack",
+            "axes_text_font", "axes_text_size", "axes_text_col", 
+            "axes_label_font", "axes_label_size", "axes_label_col",
+            "legend", "legend_text", "legend_text_size", 
+            "label",
+            "border_line_type", "border_line_width", "border_line_col",
+            "contour", "contour_line_type", "contour_line_width", "contour_line_col")
+  
+  if(plots > 1){
+    
+    lapply(args, function(arg){
+    
+      if(arg %in% names(x)){
+      
+        res <- rep(x[[arg]], length.out = plots)
+        res <- split(res, plots)
+        x[[arg]] <<- res
+      
+      }
+      
+    })
+    
+  }
+  
+  # Arguments per layer
+  args <- c("density_fill", "density_fill_alpha", "density_line_type", "density_line_width", "density_line_col",
+            "legend_text_font", "legend_text_col", "legend_line_col", "legend_box_fill",
+            "point_shape", "point_size", "point_col", "point_alpha")
+  lapply(args, function(arg){
+
+    if(arg %in% names(x)){
+    
+      res <- rep(x[[arg]], length.out = n)
+      
+      if(plots != 1){
+        res <- split(res, plots)
+      }
+      
+      x[[arg]] <<- res
+      
+    }
+    
+  })
+  
+  # Arguments per gate
+  args <- c("gate_line_type", "gate_line_width", "gate_line_col",
+            "label_text", "label_text_format", "label_text_font", "label_text_size", "label_text_col", "label_box_alpha")
+  
+  if(gates != 0){
+  
+    lapply(args, function(arg){
+    
+      if(arg %in% names(x)){
+      
+        if(arg == "label_text_format" & length(x[[arg]]) == 2){
+      
+          res <- rep(x[[arg]], length.out = gates*plots*2)
+          
+          if(plots != 1){
+            res <- split(res, gates*2)
+          }
+
+          x[[arg]] <<- res
+      
+        }else{
+      
+          res <- rep(x[[arg]], length.out = gates*plots)
+          
+          if(plots != 1){
+            res <- split(res, gate)
+          }
+
+          x[[arg]] <<- res
+    
+        }
+      
+      }
+      
+    })
+    
+  }
+  
+  return(x)
+  
+}

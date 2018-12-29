@@ -6,10 +6,10 @@
 \title{cyto_1d_plot - flowSet Method}
 \usage{
 \S4method{cyto_1d_plot}{flowSet}(x, channel, axes_trans = NULL,
-  merge = NULL, overlay = NULL, density_stack = 0,
-  density_height = length(x), limits = "machine", xlim = NULL,
-  layout = NULL, popup = FALSE, title = NULL, legend_text = NULL,
-  ...)
+  merge = NULL, overlay = NULL, limits = "machine", popup = FALSE,
+  layout = NULL, xlim = NULL, title = NULL, density_stack = 0,
+  density_layers = length(x), density_fill = NULL,
+  legend_text = NULL, ...)
 }
 \arguments{
 \item{x}{object of class \code{\link[flowCore:flowSet-class]{flowSet}}.}
@@ -35,29 +35,31 @@ to "all".}
 \code{list of flowSets} or \code{list of flowFrame lists} containing
 populations to be overlaid onto the plot(s).}
 
-\item{density_stack}{numeric [0,1] indicating the degree of offset for
-overlayed populations, set to 0.5 by default.}
-
-\item{density_height}{numeric indicating the number of samples to stack each
-plot, set to all samples by default.}
-
 \item{limits}{indicates whether the axes limits should be based on the
 \code{"data"} or \code{"machine"}, set to "machine" by default to show
 complete axes ranges. This argument will only alter the upper axis limits,
 to modify the lower limits use \code{xlim} and \code{ylim}.}
-
-\item{xlim}{lower and upper limits of x axis (e.g. c(0,5)).}
-
-\item{layout}{a vector of the length 2 indicating the dimensions of the grid
-for plotting \code{c(#rows, #columns)}.}
 
 \item{popup}{logical indicating whether the plot should be constructed in a
 pop-up window, set to FALSE by default. \code{popup} will open OS-specific
 graphic device prior to plotting. Mac users will need to install
 \href{https://www.xquartz.org/}{XQuartz} for this functionality.}
 
+\item{layout}{a vector of the length 2 indicating the dimensions of the grid
+for plotting \code{c(#rows, #columns)}.}
+
+\item{xlim}{lower and upper limits of x axis (e.g. c(0,5)).}
+
 \item{title}{vector of titles to use for each plot, set to name of the sample
 by default.}
+
+\item{density_stack}{numeric [0,1] indicating the degree of offset for
+overlayed populations, set to 0.5 by default.}
+
+\item{density_layers}{numeric indicating the number of samples to stack each
+plot, set to all samples by default.}
+
+\item{density_fill}{colour(s) used to fill polygons.}
 
 \item{legend_text}{vector of names to use in the legend if legend is set to
 TRUE.}

@@ -63,7 +63,7 @@ setGeneric(
 #' 
 #' @export
 setMethod(checkChannels, signature = "flowFrame", definition = function(x, channels, plot = TRUE) {
-
+  
   # Incorrect channels length
   if (plot == TRUE) {
     if (!length(channels) %in% c(1, 2)) {
@@ -136,7 +136,7 @@ setMethod(checkChannels, signature = "flowFrame", definition = function(x, chann
 #' 
 #' @export
 setMethod(checkChannels, signature = "flowSet", definition = function(x, channels, plot = TRUE) {
-
+  
   # Incorrect channels length
   if (plot == TRUE) {
     if (!length(channels) %in% c(1, 2)) {
@@ -217,7 +217,7 @@ setMethod(checkChannels, signature = "flowSet", definition = function(x, channel
 #' 
 #' @export
 setMethod(checkChannels, signature = "GatingSet", definition = function(x, channels, plot = TRUE) {
-
+  
   # Incorrect channels length
   if (plot == TRUE) {
     if (!length(channels) %in% c(1, 2)) {
@@ -458,7 +458,6 @@ checkTemplate <- function(parent, alias, gtfile) {
 #'
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
-#' @export
 #' \dontrun{
 #' library(CytoRSuiteData)
 #' 

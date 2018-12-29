@@ -5,23 +5,23 @@
 \alias{cyto_1d_plot,flowFrame-method}
 \title{cyto_1d_plot - flowFrame Method}
 \usage{
-\S4method{cyto_1d_plot}{flowFrame}(x, channel, axes_trans = NULL,
-  overlay = NULL, gate = NULL, limits = "machine", popup = FALSE,
-  modal = TRUE, adjust = 1.5, xlim = NULL, ylim, title, xlab, ylab,
-  density_stack = 0.5, density_fill, density_alpha = 1,
-  density_line_type = 1, density_line_width = 1,
-  density_line_col = "black", axes_text_font = 1, axes_text_size = 1,
-  axes_text_col = "black", axes_label_font = 1,
-  axes_label_size = 1.1, axes_label_col = "black",
-  title_text_font = 2, title_text_size = 1.1,
-  title_text_col = "black", legend = FALSE, legend_text,
-  legend_text_font = 1, legend_text_size = 1,
-  legend_text_col = "black", legend_line_col, legend_box_fill,
-  gate_line_col = "red", gate_line_width = 2.5, gate_line_type = 1,
-  label = TRUE, label_text, label_text_format = c("alias", "percent"),
-  label_text_font = 2, label_text_size = 0.8,
-  label_text_col = "black", label_box_alpha = 0.6,
-  border_line_type = 1, border_line_width = 1,
+\S4method{cyto_1d_plot}{flowFrame}(x, channel = NULL,
+  axes_trans = NULL, overlay = NULL, gate = NULL,
+  limits = "machine", popup = FALSE, modal = TRUE, adjust = 1.5,
+  xlim = NULL, ylim, title, xlab, ylab, density_stack = 0.5,
+  density_fill = NULL, density_fill_alpha = 1, density_line_type = 1,
+  density_line_width = 1, density_line_col = "black",
+  axes_text_font = 1, axes_text_size = 1, axes_text_col = "black",
+  axes_label_font = 1, axes_label_size = 1.1,
+  axes_label_col = "black", title_text_font = 2,
+  title_text_size = 1.1, title_text_col = "black", legend = FALSE,
+  legend_text, legend_text_font = 1, legend_text_size = 1,
+  legend_text_col = "black", legend_line_col = NA,
+  legend_box_fill = NA, gate_line_type = 1, gate_line_width = 2.5,
+  gate_line_col = "red", label = TRUE, label_text = NA,
+  label_text_format = c("alias", "percent"), label_text_font = 2,
+  label_text_size = 1, label_text_col = "black",
+  label_box_alpha = 0.6, border_line_type = 1, border_line_width = 1,
   border_line_col = "black", ...)
 }
 \arguments{
@@ -81,8 +81,8 @@ overlayed populations, set to 0.5 by default.}
 
 \item{density_fill}{colour(s) used to fill polygons.}
 
-\item{density_alpha}{numeric [0,1] used to control fill transparency, set to
-1 by default to remove transparency.}
+\item{density_fill_alpha}{numeric [0,1] used to control fill transparency,
+set to 1 by default to remove transparency.}
 
 \item{density_line_type}{line type(s) to use for border(s), set to solid
 lines by default.}
@@ -115,8 +115,9 @@ details.}
 
 \item{title_text_col}{colour for plot title.}
 
-\item{legend}{logical indicating whether a legend should be included for
-plots including overlays, set to FALSE by default.}
+\item{legend}{can be either \code{"line"} or \code{"fill"} to indicate
+whether a legend should be constructed based on the density \code{"line"}
+or \code{"fill"}, set to FALSE by default to remove the legend.}
 
 \item{legend_text}{vector of labels to use for the legend.}
 
@@ -134,14 +135,14 @@ by default.}
 
 \item{legend_box_fill}{vector of fill colours to use for legend.}
 
-\item{gate_line_col}{indicates the colour of the gate to be constructed, set
-to \code{"red"} by default.}
+\item{gate_line_type}{integer [0,6] which controls the line type, set to
+\code{1} to draw solid lines by default.}
 
 \item{gate_line_width}{numeric to adjust line thickness of gates, set to
 \code{2.5} by default.}
 
-\item{gate_line_type}{integer [0,6] which controls the line type, set to
-\code{1} to draw solid lines by default.}
+\item{gate_line_col}{indicates the colour of the gate to be constructed, set
+to \code{"red"} by default.}
 
 \item{label}{logical indicating whether gated populations should be labelled.
 If the names of the populations are supplied as the text.labels argument,
