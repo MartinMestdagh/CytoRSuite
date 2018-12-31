@@ -110,11 +110,12 @@ setGeneric(
 #'   If the names of the populations are supplied as the text.labels argument,
 #'   the population name and frequency will be included in the labels, otherwise
 #'   only the population frequencies will be included in the labels.
-#' @param label_text vector of population names to use in labels.
-#' @param label_text_format indicates the type of text to include in the label,
-#'   can be either \code{"alias"}, \code{"percent"}, \code{"count"},
-#'   \code{c("alias","percent")} or \code{c("alias","count")}. Set to
-#'   \code{c("alias","percent")} by default.
+#' @param label_text vector of population names to use in labels. Set to NA to
+#'   exclude population names.
+#' @param label_stat indicates the type of statistic to include in the
+#'   label, can be \code{"percent"}, \code{"count"}, \code{"mean"},
+#'   \code{"median"}, \code{"mode"} or \code{"geo mean"}, set to
+#'   \code{"percent"} by default.
 #' @param label_text_font numeric indicating the font to use for labels, set to
 #'   2 for bold font by default. See \code{\link[graphics:par]{?par}} font for
 #'   details.
@@ -122,6 +123,10 @@ setGeneric(
 #'   default.
 #' @param label_text_col colour of text used in labels, set to \code{"black"} by
 #'   default.
+#' @param label_box_x x co-ordinate to manually adjust the position of the label
+#'   on the plot.
+#' @param label_box_y y co-ordinate(s) to manually adjust the position of the
+#'   label(s) on the plot.
 #' @param label_box_alpha numeric controlling backgropund fill transparency of
 #'   label boxes, set to 0.6 by default to introduce some transparency.
 #' @param border_line_type line type to use for plot border, set to 1 by default
@@ -190,10 +195,12 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
                                                                        gate_line_col = "red",
                                                                        label = TRUE, 
                                                                        label_text = NA,
-                                                                       label_text_format = c("alias", "percent"), 
+                                                                       label_stat = "percent", 
                                                                        label_text_font = 2,
                                                                        label_text_size = 1, 
                                                                        label_text_col = "black", 
+                                                                       label_box_x = NA,
+                                                                       label_box_y = NA,
                                                                        label_box_alpha = 0.6,
                                                                        border_line_type = 1,
                                                                        border_line_width = 1,
@@ -346,7 +353,7 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
                axes_label_font, axes_label_size, axes_label_col,
                legend, legend_text, legend_text_font, legend_text_size, legend_text_col, legend_line_col, legend_box_fill,
                gate_line_type, gate_line_width, gate_line_col,
-               label, label_text, label_text_format, label_text_font, label_text_size, label_text_col, label_box_alpha,
+               label, label_text, label_stat, label_text_font, label_text_size, label_text_col, label_box_x, label_box_y, label_box_alpha,
                border_line_type, border_line_width, border_line_col)
   names(args) <- c("title", "title_text_font", "title_text_size", "title_text_col",
                    "density_stack", "density_fill", "density_fill_alpha", "density_line_type", "density_line_width", "density_line_col",
@@ -354,9 +361,9 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
                    "axes_label_font", "axes_label_size", "axes_label_col",
                    "legend", "legend_text", "legend_text_font", "legend_text_size", "legend_text_col", "legend_line_col", "legend_box_fill",
                    "gate_line_type", "gate_line_width", "gate_line_col",
-                   "label", "label_text", "label_text_format", "label_text_font", "label_text_size", "label_text_col", "label_box_alpha",
+                   "label", "label_text", "label_stat", "label_text_font", "label_text_size", "label_text_col", "label_box_x", "label_box_y", "label_box_alpha",
                    "border_line_type", "border_line_width", "border_line_col")
-  args <- .args_split(x = args, n = lyrs, plots = 1, layers = lyrs, gates = length(gate))
+  args <- .arg_split(x = args, n = lyrs, plots = 1, layers = lyrs, gates = length(gate))
   
   # Pop-up
   if (popup == TRUE) {
@@ -455,23 +462,23 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
     }
     
   }
-
+  
   # Gates - no overlay
   if (is.null(overlay)) {
     if (!is.null(gate)) {
-      plotGates(gate, channels = channel, col.gate = args[["gate_line_col"]], lwd.gate = args[["gate_line_width"]], lty.gate = args[["gate_line_type"]])
+      cyto_plot_gate(gate, channels = channel, gate_line_col = args[["gate_line_col"]], gate_line_width = args[["gate_line_width"]], gate_line_type = args[["gate_line_type"]])
     }
 
     # Labels
     if (!is.null(gate) & args[["label"]] == TRUE) {
 
       # Population names missing - show percantage only
-      suppressMessages(plotLabels(x = fr, channels = channel, alias = args[["label_text"]], gates = gate, format.text = args[["label_text_format"]], cex.text = args[["label_text_size"]], font.text = args[["label_text_font"]], col.text = args[["label_text_col"]], alpha = args[["label_box_alpha"]]))
+      suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = args[["label_text"]], stat = args[["label_stat"]], text_size = args[["label_text_size"]], text_font = args[["label_text_font"]], text_col = args[["label_text_col"]], box_alpha = args[["label_box_alpha"]]))
     
     }
     
   } else if (!is.null(overlay) & args[["density_stack"]] != 0 & !is.null(gate)) {
-    .gateOverlay(x = fr, channel = channel, overlay = overlay, gates = gate, density_stack = args[["density_stack"]], alias = args[["label_text"]], format.text = args[["label_text_format"]], cex.text = args[["label_text_size"]], font.text = args[["label_text_font"]], col.text = args[["label_text_col"]], alpha = args[["label_box_alpha"]], col.gate = args[["gate_line_col"]], lwd.gate = args[["gate_line_width"]], lty.gate = args[["gate_line_type"]])
+    .overlay_gate(x = fr, channel = channel, trans = axes_trans, overlay = overlay, gates = gate, density_stack = args[["density_stack"]], label_text = args[["label_text"]], label_stat = args[["label_stat"]], label_text_size = args[["label_text_size"]], label_text_font = args[["label_text_font"]], col.text = args[["label_text_col"]], label_box_alpha = args[["label_box_alpha"]], gate_line_col = args[["gate_line_col"]], gate_line_width = args[["gate_line_width"]], gate_line_type = args[["gate_line_type"]])
   } else if (!is.null(overlay) & args[["density_stack"]] == 0 & !is.null(gate)) {
     message("Plotting gates with overlays and no stacking is not supported. Modify density_stack to plot gates.")
   }
@@ -1495,7 +1502,7 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x,
 #' @param gates number of gates per plot
 #' 
 #' @noRd
-.args_split <- function(x, n, plots, layers, gates){
+.arg_split <- function(x, n, plots, layers, gates){
   
   # Arguments per plot
   args <- c("title", "title_text_font", "title_text_size", "title_text_col", 
@@ -1507,26 +1514,27 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x,
             "border_line_type", "border_line_width", "border_line_col",
             "contour", "contour_line_type", "contour_line_width", "contour_line_col")
   
-  if(plots > 1){
+  lapply(args, function(arg){
     
-    lapply(args, function(arg){
-    
-      if(arg %in% names(x)){
+    if(arg %in% names(x)){
       
-        res <- rep(x[[arg]], length.out = plots)
-        res <- split(res, plots)
-        x[[arg]] <<- res
+      res <- rep(x[[arg]], length.out = plots)
       
+      if(plots != 1){
+        res <- split(res, 1:length(plots))
       }
       
-    })
-    
-  }
+      x[[arg]] <<- res
+      
+    }
+      
+  })
   
   # Arguments per layer
   args <- c("density_fill", "density_fill_alpha", "density_line_type", "density_line_width", "density_line_col",
             "legend_text_font", "legend_text_col", "legend_line_col", "legend_box_fill",
             "point_shape", "point_size", "point_col", "point_alpha")
+  
   lapply(args, function(arg){
 
     if(arg %in% names(x)){
@@ -1534,7 +1542,7 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x,
       res <- rep(x[[arg]], length.out = n)
       
       if(plots != 1){
-        res <- split(res, plots)
+        res <- split(res, rep(1:plots, length.out = n, each = layers))
       }
       
       x[[arg]] <<- res
@@ -1544,42 +1552,46 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x,
   })
   
   # Arguments per gate
-  args <- c("gate_line_type", "gate_line_width", "gate_line_col",
-            "label_text", "label_text_format", "label_text_font", "label_text_size", "label_text_col", "label_box_alpha")
-  
+  args <- c("gate_line_type", "gate_line_width", "gate_line_col")
+
   if(gates != 0){
   
     lapply(args, function(arg){
     
       if(arg %in% names(x)){
       
-        if(arg == "label_text_format" & length(x[[arg]]) == 2){
-      
-          res <- rep(x[[arg]], length.out = gates*plots*2)
-          
-          if(plots != 1){
-            res <- split(res, gates*2)
-          }
-
-          x[[arg]] <<- res
-      
-        }else{
-      
           res <- rep(x[[arg]], length.out = gates*plots)
           
           if(plots != 1){
-            res <- split(res, gate)
+            res <- split(res, rep(1:plots, length.out = gates*plots, each = gates))
           }
-
+          
           x[[arg]] <<- res
-    
-        }
-      
+          
       }
       
     })
     
   }
+  
+  # Arguments per label
+  args <- c("label_text", "label_stat", "label_text_font", "label_text_size", "label_text_col", "label_box_x", "label_box_y", "label_box_alpha")
+  
+  lapply(args, function(arg){
+    
+    if(arg %in% names(x)){
+      
+      res <- rep(x[[arg]], length.out = gates*plots*layers)
+      
+      if(plots != 1){
+        res <- split(res, rep(1:plots, length_out = gates*plots*layers, each = gates*layers))
+      }
+      
+      x[[arg]] <<- res
+      
+    }
+    
+  })
   
   return(x)
   

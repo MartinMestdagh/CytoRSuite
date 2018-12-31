@@ -727,11 +727,31 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 #' @param channel used in the plot.
 #' @param overlay list of flowFrames to overlay.
 #' @param gates gate object(s).
+#' @param trans transform object used by cyto_plot_label to calculate
+#'   statistics.
 #' @param density_stack degree of stacking.
-#' @param ... additional arguments passed to plotLabels.
+#' @param ... additional arguments passed to cyto_plot_label.
 #'
 #' @noRd
-.gateOverlay <- function(x, channel = NULL, overlay = NULL, gates = NULL, density_stack = NULL, alias = NA, col.gate = "red", lwd.gate = 2.5, lty.gate = 1, format.text = NULL, font.text = 2, col.text = "black", cex.text = 0.8, alpha = 0.6, ...) {
+.overlay_gate <- function(x, 
+                         channel = NULL, 
+                         overlay = NULL, 
+                         gates = NULL, 
+                         trans = NULL,
+                         density_stack = NULL, 
+                         label_text = NA, 
+                         label_stat = NULL,
+                         gate_line_col = "red", 
+                         gate_line_width = 2.5, 
+                         gate_line_type = 1, 
+                         label_text_font = 2, 
+                         label_text_col = "black", 
+                         label_text_size = 0.8, 
+                         label_box_alpha = 0.6, ...) {
+  
+  # Changing label position not yet supported...
+  
+  # Check class of x
   if (!inherits(x, "flowFrame")) {
     stop("x should be a flowFrame object.")
   }
@@ -790,17 +810,18 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   })
 
   # Plot gates
-  plotGates(gates, channels = channel, col.gate = col.gate, lwd.gate = lwd.gate, lty.gate = lty.gate)
+  cyto_plot_gate(gates, channels = channel, gate_line_col = gate_line_col, gate_line_width = gate_line_width, gate_line_type = gate_line_type)
 
-  # List of flowFrames for plotLabels
+  # List of flowFrames for cyto_plot_label
   fr.lst <- c(list(x), overlay)
 
   # Plot labels
   lapply(1:length(gates), function(x) {
-    lapply(1:length(fr.lst), function(y) {
-      suppressMessages(plotLabels(x = fr.lst[[y]], channels = channel, gates = gates[[x]], x.text = txt.x[[x]], y.text = txt.y[y], alias = alias, format.text = format.text, font.text = font.text, col.text = col.text, cex.text = cex.text, alpha = alpha))
-    })
+    mapply(function(y, label_text, label_stat, label_text_font, label_text_col, label_text_size, label_box_alpha) {
+      suppressMessages(cyto_plot_label(x = fr.lst[[y]], channels = channel, gates = gates[[x]], trans = trans, text_x = txt.x[[x]], text_y = txt.y[y], text = label_text, stat = label_stat, text_font = label_text_font, text_col = label_text_col, text_size = label_text_size, box_alpha = label_box_alpha))
+    }, 1:length(fr.lst), label_text, label_stat, label_text_font, label_text_col, label_text_size, label_box_alpha)
   })
+  
 }
 
 #' Get kernel density for a list of flowFrames
