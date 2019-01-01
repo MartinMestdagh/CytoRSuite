@@ -19,9 +19,9 @@
 #'
 #' @export
 setGeneric(
-  name = "checkChannels",
+  name = "cyto_channel_check",
   def = function(x, channels, plot) {
-    standardGeneric("checkChannels")
+    standardGeneric("cyto_channel_check")
   }
 )
 
@@ -62,7 +62,9 @@ setGeneric(
 #' }
 #' 
 #' @export
-setMethod(checkChannels, signature = "flowFrame", definition = function(x, channels, plot = TRUE) {
+setMethod(cyto_channel_check, signature = "flowFrame", definition = function(x, 
+                                                                             channels, 
+                                                                             plot = TRUE) {
   
   # Incorrect channels length
   if (plot == TRUE) {
@@ -135,7 +137,9 @@ setMethod(checkChannels, signature = "flowFrame", definition = function(x, chann
 #' }
 #' 
 #' @export
-setMethod(checkChannels, signature = "flowSet", definition = function(x, channels, plot = TRUE) {
+setMethod(cyto_channel_check, signature = "flowSet", definition = function(x, 
+                                                                           channels, 
+                                                                           plot = TRUE) {
   
   # Incorrect channels length
   if (plot == TRUE) {
@@ -216,7 +220,9 @@ setMethod(checkChannels, signature = "flowSet", definition = function(x, channel
 #' }
 #' 
 #' @export
-setMethod(checkChannels, signature = "GatingSet", definition = function(x, channels, plot = TRUE) {
+setMethod(cyto_channel_check, signature = "GatingSet", definition = function(x, 
+                                                                             channels, 
+                                                                             plot = TRUE) {
   
   # Incorrect channels length
   if (plot == TRUE) {
@@ -279,7 +285,8 @@ setMethod(checkChannels, signature = "GatingSet", definition = function(x, chann
 #' }
 #' 
 #' @noRd
-checkGateType <- function(type, alias) {
+.cyto_gate_type_check <- function(type, alias) {
+  
   if (all(type %in% c("q", "Q", "quadrant", "Quadrant")) & length(alias) != 4) {
     stop("Supply the names of 4 poulations to alias for quadrant gates.")
   }
@@ -336,7 +343,7 @@ checkGateType <- function(type, alias) {
 #' }
 #' 
 #' @noRd
-checkAlias <- function(alias = NULL, type) {
+.cyto_alias_check <- function(alias = NULL, type) {
   if (is.null(alias)) {
     stop("The name(s) of the population(s) to be gated must be supplied as the alias argument.")
   }
@@ -369,7 +376,7 @@ checkAlias <- function(alias = NULL, type) {
 #' }
 #'
 #' @export
-checkOSGD <- function() {
+.cyto_plot_window <- function() {
   if (.Platform$OS.type == "windows") {
     grDevices::windows()
   } else if (.Platform$OS.type == "unix") {
@@ -395,7 +402,7 @@ checkOSGD <- function() {
 #' }
 #' 
 #' @noRd
-checkFile <- function(name) {
+.file_wd_check<- function(name) {
   if (length(which(list.files() == name)) != 0) {
 
     # File exists in working directory
@@ -428,7 +435,7 @@ checkFile <- function(name) {
 #' }
 #' 
 #' @export
-checkTemplate <- function(parent, alias, gtfile) {
+cyto_gating_template_check <- function(parent, alias, gtfile) {
   if (checkFile(gtfile)) {
     gt <- read.csv(gtfile, header = TRUE)
 
@@ -481,27 +488,27 @@ checkTemplate <- function(parent, alias, gtfile) {
 #' }
 #'
 #' @export
-checkTransList <- function(transList = NULL, inverse = FALSE) {
-  if (is.null(transList)) {
+cyto_trans_check <- function(trans = NULL, inverse = FALSE) {
+  if (is.null(trans)) {
     return(NULL)
   } else {
-    if (!class(transList)[1] %in% c("transformList", "transformerList")) {
-      stop("Supplied transList should be of class transformList or transformerList.")
+    if (!class(trans)[1] %in% c("transformList", "transformerList")) {
+      stop("Supplied trans should be of class transformList or transformerList.")
     } else {
-      if (is(transList, "transformList")) {
+      if (is(trans, "transformList")) {
         if (inverse) {
-          transList <- inverseLogicleTransform(transList)
-          return(transList)
+          trans <- inverseLogicleTransform(trans)
+          return(trans)
         } else {
-          return(transList)
+          return(trans)
         }
-      } else if (is(transList, "transformerList")) {
+      } else if (is(trans, "transformerList")) {
         if (inverse) {
-          transList <- transformList(names(transList), lapply(transList, `[[`, "inverse"))
-          return(transList)
+          trans <- transformList(names(trans), lapply(trans, `[[`, "inverse"))
+          return(trans)
         } else {
-          transList <- transformList(names(transList), lapply(transList, `[[`, "transform"))
-          return(transList)
+          trans <- transformList(names(trans), lapply(trans, `[[`, "transform"))
+          return(trans)
         }
       }
     }
@@ -523,9 +530,9 @@ checkTransList <- function(transList = NULL, inverse = FALSE) {
 #'
 #' @noRd
 setGeneric(
-  name = "checkOverlay",
+  name = "cyto_overlay_check",
   def = function(x, ...) {
-    standardGeneric("checkOverlay")
+    standardGeneric("cyto_overlay_check")
   }
 )
 
@@ -537,7 +544,7 @@ setGeneric(
 #'
 #' @param x object of class \code{flowFrame}.
 #' @param overlay object to overlay.
-#' @param subSample  numeric indicating the number of events to plot, set to all
+#' @param display  numeric indicating the number of events to plot, set to all
 #'   events by default. Reducing the sample size can significantly increase
 #'   plotting speed on less powerful machines.
 #'
@@ -546,35 +553,37 @@ setGeneric(
 #' @importFrom flowCore sampleFilter
 #'
 #' @noRd
-setMethod(checkOverlay, signature = "flowFrame", definition = function(x, overlay, subSample = NULL) {
+setMethod(cyto_overlay_check, signature = "flowFrame", definition = function(x, 
+                                                                             overlay, 
+                                                                             display = NULL) {
 
   # Assign x to fr
   fr <- x
 
   # Check overlay class
   if (class(overlay) == "flowFrame") {
-    if (!is.null(subSample)) {
-      overlay <- Subset(overlay, sampleFilter(size = subSample))
+    if (!is.null(display)) {
+      overlay <- Subset(overlay, sampleFilter(size = display))
     }
     overlay <- list(overlay)
   } else if (class(overlay) == "flowSet") {
-    if (!is.null(subSample)) {
-      overlay <- Subset(overlay, sampleFilter(size = subSample))
+    if (!is.null(display)) {
+      overlay <- Subset(overlay, sampleFilter(size = display))
     }
 
     overlay <- lapply(seq(1, length(overlay), 1), function(x) overlay[[x]])
   } else if (all(as.vector(sapply(overlay, class)) == "flowFrame")) {
-    if (!is.null(subSample)) {
+    if (!is.null(display)) {
       overlay <- lapply(overlay, function(x) {
-        Subset(x, sampleFilter(size = subSample))
+        Subset(x, sampleFilter(size = display))
       })
     }
 
     overlay <- overlay
   } else if (all(as.vector(sapply(overlay, class)) == "flowSet") & length(overlay) == 1) {
-    if (!is.null(subSample)) {
+    if (!is.null(display)) {
       overlay <- lapply(overlay, function(x) {
-        Subset(x, sampleFilter(size = subSample))
+        Subset(x, sampleFilter(size = display))
       })
     }
 
@@ -597,7 +606,7 @@ setMethod(checkOverlay, signature = "flowFrame", definition = function(x, overla
 #'
 #' @param x object of class \code{flowSet}.
 #' @param overlay object to overlay.
-#' @param subSample  numeric indicating the number of events to plot, set to all
+#' @param display  numeric indicating the number of events to plot, set to all
 #'   events by default. Reducing the sample size can significantly increase
 #'   plotting speed on less powerful machines.
 #'
@@ -606,28 +615,28 @@ setMethod(checkOverlay, signature = "flowFrame", definition = function(x, overla
 #' @importFrom flowCore sampleFilter
 #'
 #' @noRd
-setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay, subSample = NULL) {
+setMethod(cyto_overlay_check, signature = "flowSet", definition = function(x, overlay, display = NULL) {
 
   # Assign x to fs
   fs <- x
 
   # Check overlay class
   if (class(overlay) == "flowFrame") {
-    if (!is.null(subSample)) {
-      overlay <- Subset(overlay, sampleFilter(size = subSample))
+    if (!is.null(display)) {
+      overlay <- Subset(overlay, sampleFilter(size = display))
     }
 
     overlay <- lapply(rep(list(overlay), length(fs)), "list")
   } else if (class(overlay) == "flowSet") {
-    if (!is.null(subSample)) {
-      overlay <- Subset(overlay, sampleFilter(size = subSample))
+    if (!is.null(display)) {
+      overlay <- Subset(overlay, sampleFilter(size = display))
     }
 
     overlay <- lapply(lapply(seq(1, length(overlay), 1), function(x) overlay[[x]]), "list")
   } else if (all(as.vector(sapply(overlay, class)) == "flowFrame")) {
-    if (!is.null(subSample)) {
+    if (!is.null(display)) {
       overlay <- lapply(overlay, function(x) {
-        Subset(x, sampleFilter(size = subSample))
+        Subset(x, sampleFilter(size = display))
       })
     }
 
@@ -644,9 +653,9 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
       stop("Each flowSet in supplied list should be of the same length as the supplied flowSet.")
     }
 
-    if (!is.null(subSample)) {
+    if (!is.null(display)) {
       overlay <- lapply(overlay, function(x) {
-        Subset(x, sampleFilter(size = subSample))
+        Subset(x, sampleFilter(size = display))
       })
     }
 
@@ -664,10 +673,10 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
       stop("Overlay should be a list of flowFrames lists to overlay on each flowFrame in the flowSet.")
     }
 
-    if (!is.null(subSample)) {
+    if (!is.null(display)) {
       overlay <- lapply(overlay, function(x) {
         lapply(x, function(y) {
-          Subset(y, sampleFilter(size = subSample))
+          Subset(y, sampleFilter(size = display))
         })
       })
     }
@@ -687,7 +696,7 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
 #'
 #' @param x object of class \code{GatingHierarchy}.
 #' @param overlay object to overlay.
-#' @param subSample  numeric indicating the number of events to plot, set to all
+#' @param display  numeric indicating the number of events to plot, set to all
 #'   events by default. Reducing the sample size can significantly increase
 #'   plotting speed on less powerful machines.
 #'
@@ -696,7 +705,7 @@ setMethod(checkOverlay, signature = "flowSet", definition = function(x, overlay,
 #' @importFrom flowWorkspace getData
 #'
 #' @noRd
-setMethod(checkOverlay, signature = "GatingHierarchy", definition = function(x, overlay, subSample = NULL) {
+setMethod(cyto_overlay_check, signature = "GatingHierarchy", definition = function(x, overlay, display = NULL) {
 
   # Assign x to gh
   gh <- x
@@ -720,7 +729,7 @@ setMethod(checkOverlay, signature = "GatingHierarchy", definition = function(x, 
   }
 
   # checkOverlay to convert overlay to correct format
-  checkOverlay(fr, overlay = overlay, subSample = subSample)
+  checkOverlay(fr, overlay = overlay, display = display)
 })
 
 #' Check Overlays Supplied to plotCyto
@@ -731,7 +740,7 @@ setMethod(checkOverlay, signature = "GatingHierarchy", definition = function(x, 
 #'
 #' @param x object of class \code{GatingSet}.
 #' @param overlay object to overlay.
-#' @param subSample  numeric indicating the number of events to plot, set to all
+#' @param display  numeric indicating the number of events to plot, set to all
 #'   events by default. Reducing the sample size can significantly increase
 #'   plotting speed on less powerful machines.
 #'
@@ -740,7 +749,7 @@ setMethod(checkOverlay, signature = "GatingHierarchy", definition = function(x, 
 #' @importFrom flowWorkspace getData
 #'
 #' @noRd
-setMethod(checkOverlay, signature = "GatingSet", definition = function(x, overlay, subSample = NULL) {
+setMethod(cyto_overlay_check, signature = "GatingSet", definition = function(x, overlay, display = NULL) {
 
   # Assign x to gh
   gs <- x
@@ -764,7 +773,7 @@ setMethod(checkOverlay, signature = "GatingSet", definition = function(x, overla
   }
 
   # checkOverlay to convert overlay to correct format
-  checkOverlay(fs, overlay = overlay, subSample = subSample)
+  checkOverlay(fs, overlay = overlay, display = display)
 })
 
 #' Check Statistic for ComputeStats
@@ -774,7 +783,7 @@ setMethod(checkOverlay, signature = "GatingSet", definition = function(x, overla
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-checkStat <- function(stat) {
+.cyto_stat_check <- function(stat) {
   if (!stat %in% c("mean", "Mean", "median", "Median", "mode", "Mode", "count", "Count", "freq", "Freq", "geo mean", "Geo mean", "Geo Mean", "CV", "cv", "CVI", "cvi")) {
     stop("Supplied statistic not supported.")
   }

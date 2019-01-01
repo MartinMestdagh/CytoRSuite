@@ -20,7 +20,7 @@
 #' @importFrom utils modifyList
 #'
 #' @noRd
-boxed.labels <- function(x, y = NA, labels,
+.boxed.labels <- function(x, y = NA, labels,
                          bg = ifelse(match(par("bg"), "transparent", 0), "white", par("bg")),
                          border = NA, xpad = 1.2, ypad = 1.2,
                          srt = 0, cex = 1, adj = 0.5, xlog = FALSE, ylog = FALSE, alpha.bg = 0.5, ...) {
@@ -80,11 +80,11 @@ boxed.labels <- function(x, y = NA, labels,
 #'
 #' @return list containing axis labels and breaks.
 #'
-#' @export
+#' @noRd
 setGeneric(
-  name = "axesLabels",
+  name = ".cyto_axes_text",
   def = function(x, ...) {
-    standardGeneric("axesLabels")
+    standardGeneric(".cyto_axes_text")
   }
 )
 
@@ -100,8 +100,8 @@ setGeneric(
 #'
 #' @importFrom flowCore transformList inverseLogicleTransform
 #'
-#' @export
-setMethod(axesLabels, signature = "flowFrame", definition = function(x, channels, transList = NULL) {
+#' @noRd
+setMethod(.cyto_axes_text, signature = "flowFrame", definition = function(x, channels, transList = NULL) {
   
   # Return NULL if transList is missing
   if(is.null(transList)){
@@ -143,11 +143,11 @@ setMethod(axesLabels, signature = "flowFrame", definition = function(x, channels
     trans.func <- transList@transforms[[channel]]@f
     inv.func <- inverseLogicleTransform(transList)@transforms[[channel]]@f
     raw <- inv.func(r)
-    brks <- flowBreaks(raw, n = 5, equal.space = FALSE)
+    brks <- .cyto_axes_breaks(raw, n = 5, equal.space = FALSE)
 
 
     pos <- signif(trans.func(brks))
-    label <- .pretty10exp(brks, drop.1 = TRUE)
+    label <- .cyto_axes_inverse(brks, drop.1 = TRUE)
 
     res <- list(label = label, at = pos)
   
@@ -169,7 +169,7 @@ setMethod(axesLabels, signature = "flowFrame", definition = function(x, channels
 #'   the axis otherwise returns NULL.
 #'
 #' @export
-setMethod(axesLabels, signature = "GatingHierarchy", definition = function(x, channels) {
+setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(x, channels) {
   
   # Assign x to gh
   gh <- x
@@ -200,7 +200,7 @@ setMethod(axesLabels, signature = "GatingHierarchy", definition = function(x, ch
       }
     } else {
       # use the stored axis label if exists
-      res$label <- .pretty10exp(as.numeric(res$label), drop.1 = TRUE)
+      res$label <- .cyto_axes_inverse(as.numeric(res$label), drop.1 = TRUE)
     }
 
     return(res)
@@ -214,17 +214,16 @@ setMethod(axesLabels, signature = "GatingHierarchy", definition = function(x, ch
 
 #' Generate the breaks that makes sense for flow data visualization - flowWorkspace
 #'
-#' It is mainly used as helper function to construct breaks function used by 'trans_new'.
-#'
-#' @return either 10^n intervals or equal-spaced(after transformed) intervals in raw scale.
 #' @param n desired number of breaks (the actual number will be different depending on the data range)
 #' @param x the raw data values
 #' @param equal.space whether breaks at equal-spaced intervals
 #' @param trans.fun the transform function (only needed when equal.space is TRUE)
 #' @param inverse.fun the inverse function (only needed when equal.space is TRUE)
+#' 
+#' @return either 10^n intervals or equal-spaced(after transformed) intervals in raw scale.
 #'
 #' @noRd
-flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
+.cyto_axes_breaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   rng.raw <- range(x, na.rm = TRUE)
   if (equal.space) {
     rng <- trans.fun(rng.raw)
@@ -248,7 +247,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 
 # copy from sfsmisc/flowWorkspace package
 # modified to handle NA values
-.pretty10exp <- function(x, drop.1 = FALSE, digits.fuzz = 7) {
+.cyto_axes_inverse <- function(x, drop.1 = FALSE, digits.fuzz = 7) {
   eT <- floor(log10(abs(x)) + 10^-digits.fuzz)
   mT <- signif(x / 10^eT, digits.fuzz)
   ss <- vector("list", length(x))
@@ -268,7 +267,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   do.call("expression", ss)
 }
 
-#' Get Axes Limits
+#' Get Axes Limits for cyto_plot
 #'
 #' @param x object of class \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 #' @param parent name of the parental node to extract from GatingHierarchy or
@@ -292,7 +291,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 #' @author Dillon Hammill, \email{Dillon.Hammill@anu.edu.au}
 #'
 #' @noRd
-.getAxesLimits <- function(x, parent = "root", channels, overlay = NULL, limits = "machine") {
+.cyto_plot_limits <- function(x, parent = "root", channels, overlay = NULL, limits = "machine") {
 
   # Missing channels
   if (missing(channels)) {
@@ -345,10 +344,21 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
       mlms <- c(0, mlms[2])
     }
 
-    # Add 10% buffer on lower limit
-    rng <- 0.1 * (mlms[2] - mlms[1])
-    mlms <- c(mlms[1] - rng, mlms[2])
-
+    # Add 10% buffer on lower limit - 
+    if(sm[sm$name == channel, "maxRange"] > 6){
+      
+      if(mlms[1] > 0){
+        rng <- 0.1 * (mlms[2] - mlms[1])
+        mlms <- c(mlms[1] - rng, mlms[2])
+      }
+      
+    }else{
+      
+      rng <- 0.1 * (mlms[2] - mlms[1])
+      mlms <- c(mlms[1] - rng, mlms[2])
+      
+    }
+    
     # Machine limits
     if (limits == "machine") {
       lms <- mlms
@@ -465,12 +475,15 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 #' @param x flowSet data to be merged.
 #' @param overlay object generated by checkOverlay flowSet method (list of
 #'   flowFrame lists).
-#' @param mergeBy pData variables of x used to merge the data. To merge all
-#'   samples set mergeBy to "all".
-#' @param subSample numeric indicating the number of events to include.
+#' @param merge pData variables of x used to merge the data. To merge all
+#'   samples set merge to "all".
+#' @param display numeric indicating the number of events to include.
 #'
 #' @noRd
-.mergeOverlay <- function(x, overlay, mergeBy = "all", subSample = NULL) {
+.overlay_merge <- function(x, 
+                           overlay, 
+                           merge = "all", 
+                           display = NULL) {
 
   # x is flowSet prior to merging
   if (!class(x)[1] %in% c("flowSet", "GatingSet") | length(overlay) != length(x)) {
@@ -480,9 +493,9 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   # Extract pData
   pd <- pData(x)
 
-  # Sort pd by mergeBy column names
-  if (mergeBy[1] != "all") {
-    pd <- pd[do.call("order", pd[mergeBy]), ]
+  # Sort pd by merge column names
+  if (merge[1] != "all") {
+    pd <- pd[do.call("order", pd[merge]), ]
   }
 
   # Find new indicies
@@ -492,15 +505,15 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   overlay <- overlay[ind]
 
   # List of group indicies - ind
-  if (length(mergeBy) == 1 & mergeBy[1] == "all") {
+  if (length(merge) == 1 & merge[1] == "all") {
     grps <- list(1:length(x))
   } else {
 
     # Groups
-    if (length(mergeBy) == 1) {
-      pd$mrg <- pd[, mergeBy]
+    if (length(merge) == 1) {
+      pd$mrg <- pd[, merge]
     } else {
-      pd$mrg <- do.call("paste", pd[, mergeBy])
+      pd$mrg <- do.call("paste", pd[, merge])
     }
 
     # Get a list of indices per group
@@ -509,7 +522,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
     })
   }
 
-  # Subset overlay, merge & subSample
+  # Subset overlay, merge & display
   overlay <- lapply(grps, function(x) {
     ov <- overlay[x]
 
@@ -531,8 +544,8 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
         }
       }
 
-      if (!is.null(subSample)) {
-        fr <- Subset(fr, sampleFilter(size = subSample))
+      if (!is.null(display)) {
+        fr <- Subset(fr, sampleFilter(size = display))
       }
 
       return(fr)
@@ -546,32 +559,35 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 #'
 #' @param x flowSet or GatingSet object
 #' @param parent name of the parent population to extract from GatingSet object.
-#' @param mergeBy names of pData variables to use for merging. Set to "all" to
+#' @param merge names of pData variables to use for merging. Set to "all" to
 #'   merge all samples in the flowSet.
-#' @param subSample number of events to include in each group.
+#' @param display number of events to include in each group.
 #'
 #' @return list containing merged flowFrames, named with group.
 #'
 #' @noRd
-.mergeBy <- function(x, parent = "root", mergeBy = "all", subSample = NULL) {
+.cyto_merge <- function(x, 
+                        parent = "root", 
+                        merge = "all", 
+                        display = NULL) {
 
   # check x
   if (inherits(x, "flowFrame") | inherits(x, "GatingHierarchy")) {
     stop("x must be either a flowSet or a GtaingSet object.")
   }
 
-  # check mergeBy
-  if (all(!mergeBy %in% c("all", colnames(pData(x))))) {
-    stop("mergeBy should be the name of pData variables or 'all'.")
+  # check merge
+  if (all(!merge %in% c("all", colnames(pData(x))))) {
+    stop("merge should be the name of pData variables or 'all'.")
   }
 
   # Extract pData information
   pd <- pData(x)
 
-  # Sort pd by mergeBy colnames
-  if (!is.null(mergeBy)) {
-    if (mergeBy[1] != "all") {
-      pd <- pd[do.call("order", pd[mergeBy]), ]
+  # Sort pd by merge colnames
+  if (!is.null(merge)) {
+    if (merge[1] != "all") {
+      pd <- pd[do.call("order", pd[merge]), ]
     }
   }
 
@@ -583,7 +599,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   }
 
   # merge all samples
-  if (length(mergeBy) == 1 & mergeBy[1] == "all") {
+  if (length(merge) == 1 & merge[1] == "all") {
     pd$merge <- rep("all", length(x))
 
     fr <- as(fs, "flowFrame")
@@ -592,15 +608,15 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
       fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
     }
 
-    if (!is.null(subSample)) {
-      fr <- Subset(fr, sampleFilter(size = subSample))
+    if (!is.null(display)) {
+      fr <- Subset(fr, sampleFilter(size = display))
     }
 
     fr.lst <- list(fr)
 
     # merge by one variable
-  } else if (length(mergeBy) == 1) {
-    pd$merge <- pd[, mergeBy]
+  } else if (length(merge) == 1) {
+    pd$merge <- pd[, merge]
 
     fr.lst <- lapply(unique(pd$merge), function(x) {
       fr <- as(fs[pd$name][pd$merge == x], "flowFrame")
@@ -609,8 +625,8 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
         fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
       }
 
-      if (!is.null(subSample)) {
-        fr <- Subset(fr, sampleFilter(size = subSample))
+      if (!is.null(display)) {
+        fr <- Subset(fr, sampleFilter(size = display))
       }
 
       return(fr)
@@ -618,7 +634,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 
     # merge by multiple variables
   } else {
-    pd$merge <- do.call("paste", pd[, mergeBy])
+    pd$merge <- do.call("paste", pd[, merge])
 
     fr.lst <- lapply(unique(pd$merge), function(x) {
       fr <- as(fs[pd$name][pd$merge == x], "flowFrame")
@@ -627,8 +643,8 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
         fr <- suppressWarnings(fr[, -match("Original", BiocGenerics::colnames(fr))])
       }
 
-      if (!is.null(subSample)) {
-        fr <- Subset(fr, sampleFilter(size = subSample))
+      if (!is.null(display)) {
+        fr <- Subset(fr, sampleFilter(size = display))
       }
 
       return(fr)
@@ -650,14 +666,18 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 #' @param title if NULL remove excess space above plot.
 #'
 #' @noRd
-.setPlotMargins <- function(x, overlay = NULL, legend = NULL, legend_text = NULL, title = NULL) {
+.cyto_plot_margins <- function(x, 
+                               overlay = NULL, 
+                               legend = NULL, 
+                               legend_text = NULL, 
+                               title = NA) {
 
   # plot margins
   if (!is.null(overlay) & legend != FALSE) {
     mrgn <- 7 + max(nchar(legend_text)) * 0.32
 
     # Remove excess sapce above if no main
-    if (is.null(title)) {
+    if (is.na(title)) {
       par(mar = c(5, 5, 2, mrgn) + 0.1)
     } else {
       par(mar = c(5, 5, 4, mrgn) + 0.1)
@@ -665,7 +685,7 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   } else {
 
     # Remove excess space above if no main
-    if (is.null(title)) {
+    if (is.na(title)) {
       par(mar = c(5, 5, 2, 2) + 0.1)
     } else {
       par(mar = c(5, 5, 4, 2) + 0.1)
@@ -676,26 +696,30 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 #' Set plot layout
 #'
 #' @param x object to be plotted.
-#' @param mfrow grid dimensions c(nr, nc), NULL or FALSE.
-#' @param stack number of samples to include in a plot.
+#' @param layout grid dimensions c(nr, nc), NULL or FALSE.
+#' @param density_stack degree of offset.
+#' @param denisity_layers number of layers per plot.
 #'
 #' @noRd
-.setPlotLayout <- function(x, mfrow = NULL, stack = c(0, 1)) {
+.cyto_plot_layout <- function(x, 
+                              layout = NULL, 
+                              density_stack = 0, 
+                              density_layers = 1) {
 
   # Number of samples
   smp <- length(x)
 
-  # Stackig
-  if (stack[1] != 0) {
-    if (length(stack) == 1) {
+  # Stacking
+  if (density_stack != 0) {
+    if (density_layers == smp) {
       smp <- ceiling(smp / smp)
     } else {
-      smp <- ceiling(smp / stack[2])
+      smp <- ceiling(smp / density_layers)
     }
   }
 
   # Plot layout
-  if (is.null(mfrow)) {
+  if (is.null(layout)) {
     if (smp > 1) {
       mfrw <- c(grDevices::n2mfrow(smp)[2], grDevices::n2mfrow(smp)[1])
       par(mfrow = mfrw)
@@ -703,21 +727,21 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
       mfrw <- c(1, 1)
       par(mfrow = mfrw)
     }
-  } else if (!is.null(mfrow)) {
-    if (mfrow[1] == FALSE) {
+  } else if (!is.null(layout)) {
+    if (layout[1] == FALSE) {
 
       # Do nothing
     } else {
-      par(mfrow = mfrow)
+      par(mfrow = layout)
     }
   }
 
-  if (is.null(mfrow)) {
+  if (is.null(layout)) {
     return(mfrw)
-  } else if (mfrow[1] == FALSE) {
+  } else if (layout[1] == FALSE) {
     return(FALSE)
   } else {
-    return(mfrow)
+    return(layout)
   }
 }
 
@@ -825,8 +849,20 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
 }
 
 #' Get kernel density for a list of flowFrames
+#'
+#' @param x list of flowFrames.
+#' @param channel channel to calculate kernel density.
+#' @param adjust smoothing parameter passed to \code{density()}.
+#' @param modal logical indicating whether densities should be normalised to
+#'   mode.
+#' @param density_stack degree of density stacking.
+#'
 #' @noRd
-.getDensity <- function(x, channel, adjust = 1.5, modal = TRUE, offset = 0){
+.cyto_density <- function(x, 
+                          channel, 
+                          adjust = 1.5, 
+                          modal = TRUE, 
+                          density_stack = 0){
   
   # x object of incorrect class
   if(!all(as.vector(sapply(x, class)) %in% "flowFrame")){
@@ -836,8 +872,8 @@ flowBreaks <- function(x, n = 6, equal.space = FALSE, trans.fun, inverse.fun) {
   # Number of overlays
   ovn <- length(x) - 1
   
-  # Get vector of offset values
-  ofst <- seq(0, ovn * offset * 100, offset * 100)
+  # Get vector of density_stack values
+  ofst <- seq(0, ovn * density_stack * 100, density_stack * 100)
   
   # Get a list of kernel densities
   frs.dens <- mapply(function(fr, ofst) {
