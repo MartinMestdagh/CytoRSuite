@@ -502,10 +502,35 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
   # No gates - labels
   if(is.null(gate) & !all(is.na(args[["label_text"]])) & args[["label"]]){
     
-    # label # limited to # layers - arg_split
-    mapply(function(label_text, label_stat, label_text_size, label_text_font, label_text_col, label_box_x, label_box_y, label_box_alpha){
-      suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = label_text, stat = label_stat, text_x = label_box_x, text_y = label_box_y, text_size = label_text_size, text_font = label_text_font, text_col = label_text_col, box_alpha = label_box_alpha))
-    }, args[["label_text"]], args[["label_stat"]], args[["label_text_size"]], args[["label_text_font"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]])
+    if(is.null(overlay)){
+    
+      # label # limited to # layers - arg_split
+      mapply(function(label_text, label_stat, label_text_size, label_text_font, label_text_col, label_box_x, label_box_y, label_box_alpha){
+        suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = label_text, stat = label_stat, text_x = label_box_x, text_y = label_box_y, text_size = label_text_size, text_font = label_text_font, text_col = label_text_col, box_alpha = label_box_alpha))
+      }, args[["label_text"]], args[["label_stat"]], args[["label_text_size"]], args[["label_text_font"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]])
+
+    }else if(!is.null(overlay)){
+      
+      fr.lst <- c(list(fr), overlay)
+      
+      # Number of labels must equal number of layers for statistics
+      if(length(args[["label_text"]]) != length(fr.lst) & !all(is.na(args[["label_stat"]]))){
+  
+        message("Statistics are only supported if there is a label for each layer. See cyto_plot_label to manually add labels.")
+        
+        mapply(function(label_text, label_stat, label_text_size, label_text_font, label_text_col, label_box_x, label_box_y, label_box_alpha){
+          suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = label_text, stat = label_stat, text_x = label_box_x, text_y = label_box_y, text_size = label_text_size, text_font = label_text_font, text_col = label_text_col, box_alpha = label_box_alpha))
+        }, args[["label_text"]], rep(NA, length(args[["label_text"]])), args[["label_text_size"]], args[["label_text_font"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]])
+        
+      # Assume one label per layer 
+      }else if(length(args[["label_text"]]) == length(fr.lst)){
+        
+        mapply(function(fr, label_text, label_stat, label_text_size, label_text_font, label_text_col, label_box_x, label_box_y, label_box_alpha){
+          suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = label_text, stat = label_stat, text_x = label_box_x, text_y = label_box_y, text_size = label_text_size, text_font = label_text_font, text_col = label_text_col, box_alpha = label_box_alpha))
+        }, fr.lst, args[["label_text"]], args[["label_stat"]], args[["label_text_size"]], args[["label_text_font"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]])
+      
+      }
+    }
     
   }
   
