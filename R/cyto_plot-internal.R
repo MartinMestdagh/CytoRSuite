@@ -525,6 +525,12 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
       # Assume one label per layer 
       }else if(length(args[["label_text"]]) == length(fr.lst)){
         
+        if(all(is.na(args[["label_box_y"]]))){
+          args[["label_box_y"]] <- sapply(1:length(fr.lst), function(x) {
+            (0.5 * args[["density_stack"]] * 100) + ((x - 1) * args[["density_stack"]] * 100)
+          })
+        }
+        
         mapply(function(fr, label_text, label_stat, label_text_size, label_text_font, label_text_col, label_box_x, label_box_y, label_box_alpha){
           suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = label_text, stat = label_stat, text_x = label_box_x, text_y = label_box_y, text_size = label_text_size, text_font = label_text_font, text_col = label_text_col, box_alpha = label_box_alpha))
         }, fr.lst, args[["label_text"]], args[["label_stat"]], args[["label_text_size"]], args[["label_text_font"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]])
