@@ -19,8 +19,8 @@
   legend_text_col = "black", legend_line_col = NA,
   legend_box_fill = NA, gate_line_type = 1, gate_line_width = 2.5,
   gate_line_col = "red", label = TRUE, label_text = NA,
-  label_text_format = c("alias", "percent"), label_text_font = 2,
-  label_text_size = 1, label_text_col = "black",
+  label_stat = "percent", label_text_font = 2, label_text_size = 1,
+  label_text_col = "black", label_box_x = NA, label_box_y = NA,
   label_box_alpha = 0.6, border_line_type = 1, border_line_width = 1,
   border_line_col = "black", ...)
 }
@@ -70,7 +70,7 @@ and presented as a percentage. Set to \code{TRUE} by default.}
 \item{ylim}{lower and upper limits of x axis (e.g. c(0,5)).}
 
 \item{title}{title to use for the plot, set to the name of the sample by
-default.}
+default. Title can be removed by setting this argument to \code{NA}.}
 
 \item{xlab}{x axis label.}
 
@@ -149,12 +149,13 @@ If the names of the populations are supplied as the text.labels argument,
 the population name and frequency will be included in the labels, otherwise
 only the population frequencies will be included in the labels.}
 
-\item{label_text}{vector of population names to use in labels.}
+\item{label_text}{vector of population names to use in labels. Set to NA to
+exclude population names.}
 
-\item{label_text_format}{indicates the type of text to include in the label,
-can be either \code{"alias"}, \code{"percent"}, \code{"count"},
-\code{c("alias","percent")} or \code{c("alias","count")}. Set to
-\code{c("alias","percent")} by default.}
+\item{label_stat}{indicates the type of statistic to include in the
+label, can be \code{"percent"}, \code{"count"}, \code{"mean"},
+\code{"median"}, \code{"mode"} or \code{"geo mean"}, set to
+\code{"percent"} by default.}
 
 \item{label_text_font}{numeric indicating the font to use for labels, set to
 2 for bold font by default. See \code{\link[graphics:par]{?par}} font for
@@ -165,6 +166,12 @@ default.}
 
 \item{label_text_col}{colour of text used in labels, set to \code{"black"} by
 default.}
+
+\item{label_box_x}{x co-ordinate to manually adjust the position of the label
+on the plot.}
+
+\item{label_box_y}{y co-ordinate(s) to manually adjust the position of the
+label(s) on the plot.}
 
 \item{label_box_alpha}{numeric controlling backgropund fill transparency of
 label boxes, set to 0.6 by default to introduce some transparency.}

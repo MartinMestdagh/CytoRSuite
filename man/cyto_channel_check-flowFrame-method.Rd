@@ -21,7 +21,7 @@ a plot, set to TRUE by default to accept 1 or 2 channels.}
 vector of valid channel names.
 }
 \description{
-\code{checkChannels} will check whether the supplied channels are valid for
+\code{cyto_channel_check} will check whether the supplied channels are valid for
 the supplied \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 }
 \examples{
@@ -37,8 +37,8 @@ markers <- c("Va2", "CD8", "CD4", "CD44", "CD69")
 names(markers) <- chnls
 markernames(fs) <- markers
 
-checkChannels(fs[[1]], channels = c("CD4", "CD8"), plot = TRUE)
-checkChannels(fs[[1]], channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
+cyto_channel_check(fs[[1]], channels = c("CD4", "CD8"), plot = TRUE)
+cyto_channel_check(fs[[1]], channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
 }
 
 }

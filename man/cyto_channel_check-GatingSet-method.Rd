@@ -21,7 +21,7 @@ a plot, set to TRUE by default to accept 1 or 2 channels.}
 vector of valid channel names.
 }
 \description{
-\code{checkChannels} will check whether the supplied channels are valid for
+\code{cyto_channel_check} will check whether the supplied channels are valid for
 the supplied \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 }
 \examples{
@@ -40,8 +40,8 @@ markernames(fs) <- markers
 # fs to GatingSet
 gs <= GatingSet(fs)
 
-checkChannels(gs, channels = c("CD4", "CD8"), plot = TRUE)
-checkChannels(gs, channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
+cyto_channel_check(gs, channels = c("CD4", "CD8"), plot = TRUE)
+cyto_channel_check(gs, channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
 
 }
 

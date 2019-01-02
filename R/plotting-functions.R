@@ -297,7 +297,7 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
   if (missing(channels)) {
     stop("Please supply the names of the channel(s) to calculate axes limits.")
   } else {
-    channels <- checkChannels(x = x, channels = channels, plot = FALSE)
+    channels <- cyto_channel_check(x = x, channels = channels, plot = FALSE)
   }
 
   # Incorrect limits argument
@@ -754,7 +754,17 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
 #' @param trans transform object used by cyto_plot_label to calculate
 #'   statistics.
 #' @param density_stack degree of stacking.
-#' @param ... additional arguments passed to cyto_plot_label.
+#' @param label_text text to use in label.
+#' @param label_stat statistic to use in label.
+#' @param gate_line_col gate(s) colour(s).
+#' @param gate_line_width gate(s) line width(s).
+#' @param gate_line_type gate(s) line type(s).
+#' @param label_text_font font(s) for labels.
+#' @param label_text_size text size(s) for labels.
+#' @param label_text_col text colour(s) for labels.
+#' @param label_box_x x co-ordinate(s) for label(s).
+#' @param label_box_y y co-ordinates for label(s).
+#' @param label_box_alpha transparency for label(s).
 #'
 #' @noRd
 .overlay_gate <- function(x, 
@@ -769,8 +779,10 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
                          gate_line_width = 2.5, 
                          gate_line_type = 1, 
                          label_text_font = 2, 
-                         label_text_col = "black", 
                          label_text_size = 0.8, 
+                         label_text_col = "black", 
+                         label_box_x = NA,
+                         label_box_y = NA,
                          label_box_alpha = 0.6, ...) {
   
   # Changing label position not yet supported...
@@ -784,7 +796,7 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
   smp <- length(overlay) + 1
 
   # checkChannel
-  channel <- checkChannels(x = x, channels = channel, plot = TRUE)
+  channel <- cyto_channel_check(x = x, channels = channel, plot = TRUE)
 
   # list of gates
   if (inherits(gates, "filters")) {
@@ -824,15 +836,19 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
   }
 
   # Find center x co-ord for label position in each gate
-  txt.x <- lapply(gates, function(x) {
-    (unname(x@min) + unname(x@max)) / 2
-  })
+  if(all(is.na(label_box_x))){
+    label_box_x <- sapply(gates, function(x) {
+      (unname(x@min) + unname(x@max)) / 2
+    })
+  }
 
   # Find y co-ord for each sample
-  txt.y <- sapply(1:smp, function(x) {
-    (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
-  })
-
+  if(all(is.na(label_box_y))){
+    label_box_y <- sapply(1:smp, function(x) {
+      (0.5 * density_stack * 100) + ((x - 1) * density_stack * 100)
+    })
+  }
+  
   # Plot gates
   cyto_plot_gate(gates, channels = channel, gate_line_col = gate_line_col, gate_line_width = gate_line_width, gate_line_type = gate_line_type)
 
@@ -841,9 +857,9 @@ setMethod(.cyto_axes_text, signature = "GatingHierarchy", definition = function(
 
   # Plot labels
   lapply(1:length(gates), function(x) {
-    mapply(function(y, label_text, label_stat, label_text_font, label_text_col, label_text_size, label_box_alpha) {
-      suppressMessages(cyto_plot_label(x = fr.lst[[y]], channels = channel, gates = gates[[x]], trans = trans, text_x = txt.x[[x]], text_y = txt.y[y], text = label_text, stat = label_stat, text_font = label_text_font, text_col = label_text_col, text_size = label_text_size, box_alpha = label_box_alpha))
-    }, 1:length(fr.lst), label_text, label_stat, label_text_font, label_text_col, label_text_size, label_box_alpha)
+    mapply(function(y, label_text, label_stat, label_text_font, label_text_col, label_text_size, label_box_x, label_box_y, label_box_alpha) {
+      suppressMessages(cyto_plot_label(x = fr.lst[[y]], channels = channel, gates = gates[[x]], trans = trans, text_x = label_box_x[x], text_y = label_box_y[x], text = label_text, stat = label_stat, text_font = label_text_font, text_col = label_text_col, text_size = label_text_size, box_alpha = label_box_alpha))
+    }, 1:length(fr.lst), label_text, label_stat, label_text_font, label_text_col, label_text_size, label_box_x, label_box_y, label_box_alpha)
   })
   
 }

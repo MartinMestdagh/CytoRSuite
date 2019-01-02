@@ -1,9 +1,9 @@
 #' Check Supplied Channels
 #'
-#' \code{checkChannels} will check whether the supplied channels are valid for
+#' \code{cyto_channel_check} will check whether the supplied channels are valid for
 #' the \code{\link[flowCore:flowFrame-class]{flowFrame}},
 #' \code{\link[flowCore:flowSet-class]{flowset}} or
-#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} . \code{checkChannels}
+#' \code{\link[flowWorkspace:GatingSet-class]{GatingSet}} . \code{cyto_channel_check}
 #' will also return the channels if the marker names are supplied.
 #'
 #' @param x an object of class
@@ -27,7 +27,7 @@ setGeneric(
 
 #' Check Supplied Channels - flowFrame Method
 #'
-#' \code{checkChannels} will check whether the supplied channels are valid for
+#' \code{cyto_channel_check} will check whether the supplied channels are valid for
 #' the supplied \code{\link[flowCore:flowFrame-class]{flowFrame}}.
 #'
 #' @param x an object of class
@@ -57,8 +57,8 @@ setGeneric(
 #' names(markers) <- chnls
 #' markernames(fs) <- markers
 #' 
-#' checkChannels(fs[[1]], channels = c("CD4", "CD8"), plot = TRUE)
-#' checkChannels(fs[[1]], channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
+#' cyto_channel_check(fs[[1]], channels = c("CD4", "CD8"), plot = TRUE)
+#' cyto_channel_check(fs[[1]], channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
 #' }
 #' 
 #' @export
@@ -103,7 +103,7 @@ setMethod(cyto_channel_check, signature = "flowFrame", definition = function(x,
 
 #' Check Supplied Channels - flowSet Method
 #'
-#' \code{checkChannels} will check whether the supplied channels are valid for
+#' \code{cyto_channel_check} will check whether the supplied channels are valid for
 #' the supplied \code{\link[flowCore:flowSet-class]{flowSet}}.
 #'
 #' @param x an object of class \code{\link[flowCore:flowSet-class]{flowSet}}.
@@ -132,8 +132,8 @@ setMethod(cyto_channel_check, signature = "flowFrame", definition = function(x,
 #' names(markers) <- chnls
 #' markernames(fs) <- markers
 #' 
-#' checkChannels(fs, channels = c("CD4", "CD8"), plot = TRUE)
-#' checkChannels(fs, channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
+#' cyto_channel_check(fs, channels = c("CD4", "CD8"), plot = TRUE)
+#' cyto_channel_check(fs, channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
 #' }
 #' 
 #' @export
@@ -181,7 +181,7 @@ setMethod(cyto_channel_check, signature = "flowSet", definition = function(x,
 
 #' Check Supplied Channels - GatingSet Method
 #'
-#' \code{checkChannels} will check whether the supplied channels are valid for
+#' \code{cyto_channel_check} will check whether the supplied channels are valid for
 #' the supplied \code{\link[flowWorkspace:GatingSet-class]{GatingSet}}.
 #'
 #' @param x an object of class
@@ -214,8 +214,8 @@ setMethod(cyto_channel_check, signature = "flowSet", definition = function(x,
 #' # fs to GatingSet
 #' gs <= GatingSet(fs)
 #' 
-#' checkChannels(gs, channels = c("CD4", "CD8"), plot = TRUE)
-#' checkChannels(gs, channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
+#' cyto_channel_check(gs, channels = c("CD4", "CD8"), plot = TRUE)
+#' cyto_channel_check(gs, channels = c("CD4", "CD8", "CD44", "CD69"), plot = FALSE)
 #' 
 #' }
 #' 

@@ -60,7 +60,7 @@ setGeneric(
 #' @param xlim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param ylim lower and upper limits of x axis (e.g. c(0,5)).
 #' @param title title to use for the plot, set to the name of the sample by
-#'   default.
+#'   default. Title can be removed by setting this argument to \code{NA}.
 #' @param xlab x axis label.
 #' @param ylab y axis label.
 #' @param density_stack numeric [0,1] indicating the degree of offset for
@@ -220,17 +220,17 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
   fr.channels <- BiocGenerics::colnames(fr)
 
   # Return channel name if marker supplied
-  channel <- checkChannels(fr, channels = channel, plot = TRUE)
+  channel <- cyto_channel_check(fr, channels = channel, plot = TRUE)
 
   # Get X Axis Breaks and Labels from transList if supplied
-  xlabels <- axesLabels(x = fr, channels = channel, transList = axes_trans)[[1]]
+  xtext <- .cyto_axes_text(x = fr, channels = channel, transList = axes_trans)[[1]]
   
   # Check overlay return list of fowFrames
   if (!is.null(overlay)) {
-    overlay <- checkOverlay(x = fr, overlay = overlay)
+    overlay <- cyto_overlay_check(x = fr, overlay = overlay)
     
     if(missing(title)){
-      title <- NULL
+      title <- NA
     }
     
     if(!modal){
@@ -260,15 +260,15 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
   fr.channels <- BiocGenerics::colnames(fr)
 
   # Extract data from frs and calculate kernel density
-  frs.dens <- .getDensity(x = frs, channel = channel, adjust = adjust, modal = modal, offset = density_stack)
+  frs.dens <- .cyto_density(x = frs, channel = channel, adjust = adjust, modal = modal, density_stack = density_stack)
 
   # Y axis labels
   if (ovn == 0) {
-    ylabels <- TRUE
+    ytext <- TRUE
   } else if (ovn != 0 & density_stack == 0) {
-    ylabels <- TRUE
+    ytext <- TRUE
   } else if (ovn != 0 & density_stack != 0) {
-    ylabels <- FALSE
+    ytext <- FALSE
   }
 
   # Get y axis values for horizontal lines
@@ -326,7 +326,7 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
   
   # X Axis limits
   if (is.null(xlim)) {
-    xlim <- suppressWarnings(.getAxesLimits(x = fr, channels = channel, overlay = overlay, limits = limits)[[1]])
+    xlim <- suppressWarnings(.cyto_plot_limits(x = fr, channels = channel, overlay = overlay, limits = limits)[[1]])
   }
   
   # Overlay colours
@@ -371,37 +371,53 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
   }
 
   # Plot margins
-  .setPlotMargins(x = fr, overlay = overlay, legend = legend, legend_text = legend_text, title = title)
+  .cyto_plot_margins(x = fr, overlay = overlay, legend = legend, legend_text = legend_text, title = title)
 
   # Set up empty plot
-  if (is.null(xlabels) & ylabels == FALSE) {
+  if (is.null(xtext) & ytext == FALSE) {
     graphics::plot(1, type = "n", yaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, font.axis = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]], ann = FALSE, bty = "n", ...)
     box(which = "plot", lty = args[["border_line_type"]], lwd = args[["border_line_width"]], col = args[["border_line_col"]])
     abline(h = ofst, col = args[["density_line_col"]], lwd = args[["density_line_width"]])
-    title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    
+    if(!is.na(args[["title"]])){
+      title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    }
+      
     title(xlab = xlab, font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
     title(ylab = ylab, mgp = c(2, 0, 0), font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
-  } else if (is.null(xlabels) & ylabels == TRUE) {
+  } else if (is.null(xtext) & ytext == TRUE) {
     graphics::plot(1, type = "n", xlim = xlim, ylim = ylim, axes = TRUE, font.axis = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]], ann = FALSE, las = 1, bty = "n", ...)
     box(which = "plot", lty = args[["border_line_type"]], lwd = args[["border_line_width"]], col = args[["border_line_col"]])
     abline(h = ofst, col = args[["density_line_col"]], lwd = args[["density_line_width"]])
-    title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    
+    if(!is.na(args[["title"]])){
+      title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    }
+    
     title(xlab = xlab, font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
     title(ylab = ylab, mgp = c(3, 0, 0), font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
-  } else if (!is.null(xlabels) & ylabels == FALSE) {
+  } else if (!is.null(xtext) & ytext == FALSE) {
     graphics::plot(1, type = "n", yaxt = "n", xaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]], ann = FALSE, bty = "n", ...)
-    axis(1, at = xlabels$at, labels = xlabels$label, font = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]])
+    axis(1, at = xtext$at, labels = xtext$label, font = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]])
     box(which = "plot", lty = args[["border_line_type"]], lwd = args[["border_line_width"]], col = args[["border_line_col"]])
     abline(h = ofst, col = args[["density_line_col"]], lwd = args[["density_line_width"]])
-    title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    
+    if(!is.na(args[["title"]])){
+      title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    }
+    
     title(xlab = xlab, font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
     title(ylab = ylab, mgp = c(2, 0, 0), font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
-  } else if (!is.null(xlabels) & ylabels == TRUE) {
+  } else if (!is.null(xtext) & ytext == TRUE) {
     graphics::plot(1, type = "n", xaxt = "n", xlim = xlim, ylim = ylim, axes = TRUE, xlab = xlab, ylab = ylab, cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]], ann = FALSE, las = 1, bty = "n", ...)
-    axis(1, at = xlabels$at, labels = xlabels$label, font = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]])
+    axis(1, at = xtext$at, labels = xtext$label, font = args[["axes_text_font"]], cex.axis = args[["axes_text_size"]], col.axis = args[["axes_text_col"]])
     box(which = "plot", lty = args[["border_line_type"]], lwd = args[["border_line_width"]], col = args[["border_line_col"]])
     abline(h = ofst, col = args[["density_line_col"]], lwd = args[["density_line_width"]])
-    title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    
+    if(!is.na(args[["title"]])){
+      title(main = args[["title"]], cex.main = args[["title_text_size"]], col.main = args[["title_text_col"]], font.main = args[["title_text_font"]])
+    }
+    
     title(xlab = xlab, font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
     title(ylab = ylab, mgp = c(3, 0, 0), font.lab = args[["axes_label_font"]], col.lab = args[["axes_label_col"]], cex.lab = args[["axes_label_size"]])
   }
@@ -478,7 +494,7 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
     }
     
   } else if (!is.null(overlay) & args[["density_stack"]] != 0 & !is.null(gate)) {
-    .overlay_gate(x = fr, channel = channel, trans = axes_trans, overlay = overlay, gates = gate, density_stack = args[["density_stack"]], label_text = args[["label_text"]], label_stat = args[["label_stat"]], label_text_size = args[["label_text_size"]], label_text_font = args[["label_text_font"]], col.text = args[["label_text_col"]], label_box_alpha = args[["label_box_alpha"]], gate_line_col = args[["gate_line_col"]], gate_line_width = args[["gate_line_width"]], gate_line_type = args[["gate_line_type"]])
+    .overlay_gate(x = fr, channel = channel, trans = axes_trans, overlay = overlay, gates = gate, density_stack = args[["density_stack"]], label_text = args[["label_text"]], label_stat = args[["label_stat"]], label_text_size = args[["label_text_size"]], label_text_font = args[["label_text_font"]], label_text_col = args[["label_text_col"]], label_box_x = args[["label_box_x"]], label_box_y = args[["label_box_y"]], label_box_alpha = args[["label_box_alpha"]], gate_line_col = args[["gate_line_col"]], gate_line_width = args[["gate_line_width"]], gate_line_type = args[["gate_line_type"]])
   } else if (!is.null(overlay) & args[["density_stack"]] == 0 & !is.null(gate)) {
     message("Plotting gates with overlays and no stacking is not supported. Modify density_stack to plot gates.")
   }
@@ -1517,7 +1533,7 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x,
   lapply(args, function(arg){
     
     if(arg %in% names(x)){
-      
+
       res <- rep(x[[arg]], length.out = plots)
       
       if(plots != 1){
