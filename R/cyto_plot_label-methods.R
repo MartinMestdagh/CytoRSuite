@@ -173,7 +173,7 @@ setMethod(cyto_plot_label,
   if(is.na(text_y)){
     text_y <- c(ymin + ymax)/2
   }
-            
+          
   # Add labels
   if(!is.na(text) & !is.na(stat)){
     .boxed.labels(x = text_x, y = text_y, labels = paste(text, st, sep = "\n"), border = FALSE, font = text_font, col = text_col, alpha.bg = box_alpha, cex = text_size)

@@ -498,7 +498,17 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
   } else if (!is.null(overlay) & args[["density_stack"]] == 0 & !is.null(gate)) {
     message("Plotting gates with overlays and no stacking is not supported. Modify density_stack to plot gates.")
   }
-
+  
+  # No gates - labels
+  if(is.null(gate) & !all(is.na(args[["label_text"]])) & args[["label"]]){
+    
+    # label # limited to # layers - arg_split
+    mapply(function(label_text, label_stat, label_text_size, label_text_font, label_text_col, label_box_x, label_box_y, label_box_alpha){
+      suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = label_text, stat = label_stat, text_x = label_box_x, text_y = label_box_y, text_size = label_text_size, text_font = label_text_font, text_col = label_text_col, box_alpha = label_box_alpha))
+    }, unique(args[["label_text"]]), unique(args[["label_stat"]]), unique(args[["label_text_size"]]), unique(args[["label_text_font"]]), unique(args[["label_text_col"]]), unique(args[["label_box_x"]]), unique(args[["label_box_y"]]), unique(args[["label_box_alpha"]]))
+    
+  }
+  
   # Return options to default
   options(scipen = 0)
 
@@ -1597,13 +1607,29 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x,
     
     if(arg %in% names(x)){
       
-      res <- rep(x[[arg]], length.out = gates*plots*layers)
+      if(gates != 0){
+        
+        res <- rep(x[[arg]], length.out = gates*plots*layers)
       
-      if(plots != 1){
-        res <- split(res, rep(1:plots, length_out = gates*plots*layers, each = gates*layers))
+        if(plots != 1){
+          res <- split(res, rep(1:plots, length_out = gates*plots*layers, each = gates*layers))
+        }
+      
+        x[[arg]] <<- res
+      
+      # labels without gates
+      }else{
+        
+        res <- rep(x[[arg]], length.out = length(x[["label_text"]]))
+        
+        if(plots != 1){
+          res <- split(res, rep(1:plots, length_out = length(x[["label_text"]])*plots, each = length(x[["label_text"]])))
+        }
+        
+        x[[arg]] <<- res
+        
+        
       }
-      
-      x[[arg]] <<- res
       
     }
     
