@@ -126,35 +126,39 @@ setMethod(cyto_plot_label,
   }
          
   # Calculate statistics
-  if(stat == "count"){
+  if(!is.na(stat)){
     
-    st <- BiocGenerics::nrow(fr)
+    if(stat == "count"){
     
-  }else if(stat == "median"){
+      st <- BiocGenerics::nrow(fr)
     
-    fr <- .getRawData(x = fr, transList = trans)
-    st <- median(flowCore::exprs(fr)[,channels])
-    st <- round(st, 2)
+    }else if(stat == "median"){
     
-  }else if(stat == "mean"){
+      fr <- .getRawData(x = fr, transList = trans)
+      st <- median(flowCore::exprs(fr)[,channels])
+      st <- round(st, 2)
     
-    fr <- .getRawData(x = fr, transList = trans)
-    st <- mean(flowCore::exprs(fr)[,channels])
-    st <- round(st, 2)
+    }else if(stat == "mean"){
     
-  }else if(stat == "mode"){
+      fr <- .getRawData(x = fr, transList = trans)
+      st <- mean(flowCore::exprs(fr)[,channels])
+      st <- round(st, 2)
     
-    fr <- .getRawData(x = fr, transList = trans)
-    d <- density(flowCore::exprs(fr)[,channels], adjust = adjust)
-    st <- d$x[d$y == max(d$y)]
-    st <- round(st, 2)
+    }else if(stat == "mode"){
     
-  }else if(stat == "geo mean"){
+      fr <- .getRawData(x = fr, transList = trans)
+      d <- density(flowCore::exprs(fr)[,channels], adjust = adjust)
+      st <- d$x[d$y == max(d$y)]
+      st <- round(st, 2)
     
-    st <- mean(flowCore::exprs(fr)[,channels])
-    inv <- cyto_trans_check(trans, inverse = TRUE)
-    st <- inv@transforms[[channels]]@f(st)
-    st <- round(st, 2)
+    }else if(stat == "geo mean"){
+    
+      st <- mean(flowCore::exprs(fr)[,channels])
+      inv <- cyto_trans_check(trans, inverse = TRUE)
+      st <- inv@transforms[[channels]]@f(st)
+      st <- round(st, 2)
+    
+    }
     
   }
       

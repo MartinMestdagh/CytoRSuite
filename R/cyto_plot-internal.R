@@ -505,7 +505,7 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
     # label # limited to # layers - arg_split
     mapply(function(label_text, label_stat, label_text_size, label_text_font, label_text_col, label_box_x, label_box_y, label_box_alpha){
       suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = label_text, stat = label_stat, text_x = label_box_x, text_y = label_box_y, text_size = label_text_size, text_font = label_text_font, text_col = label_text_col, box_alpha = label_box_alpha))
-    }, unique(args[["label_text"]]), unique(args[["label_stat"]]), unique(args[["label_text_size"]]), unique(args[["label_text_font"]]), unique(args[["label_text_col"]]), unique(args[["label_box_x"]]), unique(args[["label_box_y"]]), unique(args[["label_box_alpha"]]))
+    }, args[["label_text"]], args[["label_stat"]], args[["label_text_size"]], args[["label_text_font"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]])
     
   }
   
