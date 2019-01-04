@@ -811,9 +811,9 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
     if (is.null(overlay) & all(density_stack == 0)) {
       
       # title
-      if (missing(title) & !merge == "all") {
+      if (missing(title) & !all(merge == "all")) {
         title <- names(fr.lst)
-      } else if (missing(title) & merge == "all") {
+      } else if (missing(title) & all(merge == "all")) {
         title <- "Combined Events"
       }
       
