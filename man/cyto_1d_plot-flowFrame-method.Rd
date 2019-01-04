@@ -9,7 +9,7 @@
   axes_trans = NULL, overlay = NULL, gate = NULL,
   limits = "machine", popup = FALSE, modal = TRUE, adjust = 1.5,
   xlim = NULL, ylim, title, xlab, ylab, density_stack = 0.5,
-  density_fill = NULL, density_fill_alpha = 1, density_line_type = 1,
+  density_fill, density_fill_alpha = 1, density_line_type = 1,
   density_line_width = 1, density_line_col = "black",
   axes_text_font = 1, axes_text_size = 1, axes_text_col = "black",
   axes_label_font = 1, axes_label_size = 1.1,
