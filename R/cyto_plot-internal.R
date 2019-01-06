@@ -525,17 +525,10 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
       
       fr.lst <- c(list(fr), overlay)
       
-      # Number of labels must equal number of layers for statistics
-      if(length(args[["label_text"]]) != length(fr.lst) & !all(is.na(args[["label_stat"]]))){
+      # Number of labels must equal number of layers
+      if(length(args[["label_text"]]) != length(fr.lst)){
   
-        message("Statistics are only supported if there is a label for each layer. See cyto_plot_label to manually add labels.")
-        
-        mapply(function(label_text, label_stat, label_text_size, label_text_font, label_text_col, label_box_x, label_box_y, label_box_alpha){
-          suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = label_text, stat = label_stat, text_x = label_box_x, text_y = label_box_y, text_size = label_text_size, text_font = label_text_font, text_col = label_text_col, box_alpha = label_box_alpha))
-        }, args[["label_text"]], rep(NA, length(args[["label_text"]])), args[["label_text_size"]], args[["label_text_font"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]])
-        
-      # Assume one label per layer 
-      }else if(length(args[["label_text"]]) == length(fr.lst)){
+        message("cyto_plot expects one label per layer. Use cyto_plot_label to manually add labels to plots.")
         
         if(all(is.na(args[["label_box_y"]]))){
           args[["label_box_y"]] <- sapply(1:length(fr.lst), function(x) {
@@ -546,8 +539,9 @@ setMethod(cyto_1d_plot, signature = "flowFrame", definition = function(x,
         mapply(function(fr, label_text, label_stat, label_text_size, label_text_font, label_text_col, label_box_x, label_box_y, label_box_alpha){
           suppressMessages(cyto_plot_label(x = fr, channels = channel, gates = gate, trans = axes_trans, text = label_text, stat = label_stat, text_x = label_box_x, text_y = label_box_y, text_size = label_text_size, text_font = label_text_font, text_col = label_text_col, box_alpha = label_box_alpha))
         }, fr.lst, args[["label_text"]], args[["label_stat"]], args[["label_text_size"]], args[["label_text_font"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]])
-      
+
       }
+    
     }
     
   }
@@ -807,7 +801,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       
     }
     
-    # Plot(s)
+    # No overlay or stacking - each in separate panel
     if (is.null(overlay) & all(density_stack == 0)) {
       
       # title
@@ -870,7 +864,8 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       args[["legend_text_col"]], args[["legend_line_col"]], args[["legend_box_fill"]], args[["gate_line_type"]], args[["gate_line_width"]], args[["gate_line_col"]], args[["label"]], args[["label_text"]], args[["label_stat"]], args[["label_text_font"]],
       args[["label_text_size"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]], args[["border_line_type"]], args[["border_line_width"]], args[["border_line_col"]], ...)
       
-    } else if (!is.null(overlay) & all(density_stack == 0)) {
+    # Overlay +/- stacking - separate panels with overlay  
+    } else if (!is.null(overlay)) {
 
       # title
       if (missing(title)) {
@@ -878,7 +873,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       }
 
       # Plot layout - separate panel with overlay
-      layout <- .cyto_plot_layout(x = fr.lst, layout = layout, density_stack = density_stack, density_layers = density_layers)
+      layout <- .cyto_plot_layout(x = fr.lst, layout = layout, density_stack = density_stack, density_layers = 1)
 
       # Legend text
       if (missing(legend_text)) {
@@ -887,11 +882,11 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
 
       # Density fill
       if (all(is.na(density_fill))) {
-        density_fill <- cols(expt)
-      } else if (length(density_fill) < expt) {
-        density_fill <- c(density_fill, cols((expt - length(density_fill))))
-      } else if (length(density_fill) > expt) {
-        density_fill <- density_fill[expt]
+        density_fill <- cols(lenth(fr.lst))
+      } else if (length(density_fill) < length(fr.lst)) {
+        density_fill <- c(density_fill, cols((length(fr.lst) - length(density_fill))))
+      } else if (length(density_fill) > length(fr.lst)) {
+        density_fill <- density_fill[length(fr.lst)]
       }
       
       # Split arguments
@@ -918,7 +913,7 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
                       axes_label_col, legend, legend_text, legend_text_font, legend_text_size, legend_text_col, legend_line_col, legend_box_fill, gate_line_type, gate_line_width, gate_line_col, label, label_text, label_stat, label_text_font, label_text_size,
                       label_text_col, label_box_x, label_box_y, label_box_alpha, border_line_type, border_line_width, border_line_col, ...) {
         
-        cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, overlay = overlay, gate = gate, density_stack = 0, xlim = xlim, title = title, title_text_font = title_text_font, title_text_size = title_text_size, title_text_col = title_text_col, density_fill = density_fill,
+        cyto_1d_plot(x = fr, channel = channel, axes_trans = axes_trans, overlay = overlay, gate = gate, density_stack = density_stack, xlim = xlim, title = title, title_text_font = title_text_font, title_text_size = title_text_size, title_text_col = title_text_col, density_fill = density_fill,
                      density_fill_alpha = density_fill_alpha, density_line_type = density_line_type, density_line_width = density_line_width, density_line_col = density_line_col, axes_text_font = axes_text_font, axes_text_size = axes_text_size, axes_text_col = axes_text_col,
                      axes_label_font = axes_label_font, axes_label_size = axes_label_size, axes_label_col = axes_label_col, legend = legend, legend_text = legend_text, legend_text_font = legend_text_font, legend_text_size = legend_text_size, legend_text_col = legend_text_col,
                      legend_line_col = legend_line_col, legend_box_fill = legend_box_fill, gate_line_type = gate_line_type, gate_line_width = gate_line_width, gate_line_col = gate_line_col, label = label, label_text = label_text, label_stat = label_stat, 
@@ -929,7 +924,8 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       args[["axes_text_font"]], args[["axes_text_size"]], args[["axes_text_col"]], args[["axes_label_font"]], args[["axes_label_size"]], args[["axes_label_col"]], args[["legend"]], args[["legend_text"]], args[["legend_text_font"]], args[["legend_text_size"]], 
       args[["legend_text_col"]], args[["legend_line_col"]], args[["legend_box_fill"]], args[["gate_line_type"]], args[["gate_line_width"]], args[["gate_line_col"]], args[["label"]], args[["label_text"]], args[["label_stat"]], args[["label_text_font"]],
       args[["label_text_size"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]], args[["border_line_type"]], args[["border_line_width"]], args[["border_line_col"]], ...)
-      
+     
+    # No overlay & stacking - one panel   
     } else if (is.null(overlay) & all(density_stack != 0)) {
 
       # title
@@ -985,8 +981,6 @@ setMethod(cyto_1d_plot, signature = "flowSet", definition = function(x,
       args[["legend_text_col"]], args[["legend_line_col"]], args[["legend_box_fill"]], args[["gate_line_type"]], args[["gate_line_width"]], args[["gate_line_col"]], args[["label"]], args[["label_text"]], args[["label_stat"]], args[["label_text_font"]],
       args[["label_text_size"]], args[["label_text_col"]], args[["label_box_x"]], args[["label_box_y"]], args[["label_box_alpha"]], args[["border_line_type"]], args[["border_line_width"]], args[["border_line_col"]], ...)
       
-    } else if (!is.null(overlay) & all(density_stack != 0)) {
-      stop("Overlays and stacking are not currently supported. Please set density_stack to 0.")
     }
   
   } else if (is.null(merge)) {
@@ -2014,12 +2008,12 @@ setMethod(cyto_2d_plot, signature = "flowSet", definition = function(x,
       # labels without gates
       }else{
         
-        res <- rep(x[[arg]], length.out = n*plots)
+        res <- rep(x[[arg]], length.out = n)
 
         if(plots == 1){
           res <- list(res)
         }else{
-          res <- split(res, rep(1:plots, length_out = n*plots, each = n))
+          res <- split(res, rep(1:plots, length_out = n, each = layers))
         }
 
         x[[arg]] <<- res
